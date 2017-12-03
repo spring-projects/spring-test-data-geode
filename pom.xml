@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.springframework.data.build</groupId>
+		<artifactId>spring-data-parent</artifactId>
+		<version>2.0.3.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.springframework.data</groupId>
+	<artifactId>spring-data-tests-4-gemfire</artifactId>
+	<version>0.1.0.BUILD-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>Spring Data Test Context Framework for Spring Data GemFire/Geode</name>
+	<description>
+		This project is a new Spring Data module building on Spring's TestContext Framework for writing Unit
+		and Integration Tests for both Spring Data for Pivotal GemFire as well as Spring Data for Apache Geode.
+	</description>
+	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<comments>
+				Copyright 2017 the original author or authors.
+
+				Licensed under the Apache License, Version 2.0 (the "License");
+				you may not use this file except in compliance with the License.
+				You may obtain a copy of the License at
+
+				http://www.apache.org/licenses/LICENSE-2.0
+
+				Unless required by applicable law or agreed to in writing, software
+				distributed under the License is distributed on an "AS IS" BASIS,
+				WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+				implied.
+				See the License for the specific language governing permissions and
+				limitations under the License.
+			</comments>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Pivotal Software, Inc.</name>
+		<url>http://www.pivotal.io</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>jblum</id>
+			<name>John Blum</name>
+			<email>jblum at pivotal dot io</email>
+			<organization>Pivotal Software, Inc.</organization>
+			<organizationUrl>http://www.spring.io</organizationUrl>
+			<roles>
+				<role>Spring Data Team</role>
+				<role>Spring Data Cassandra Project Lead (Committer)</role>
+				<role>Spring Data GemFire Project Lead (Committer)</role>
+				<role>Spring Data Geode Project Lead (Committer)</role>
+				<role>Spring Session Data GemFire Project Lead (Committer)</role>
+				<role>Spring Session Data Geode Project Lead (Committer)</role>
+				<role>Spring Boot Data GemFire Project Lead (Committer)</role>
+				<role>Spring Boot Data Geode Project Lead (Committer)</role>
+				<role>Apache Geode Committer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<assertj.version>3.8.0</assertj.version>
+		<junit.version>4.12</junit.version>
+		<mockito.version>2.12.0</mockito.version>
+		<multithreadedtc.version>1.01</multithreadedtc.version>
+		<spring-data-gemfire.version>${project.parent.version}</spring-data-gemfire.version>
+		<spring-data-geode.version>${project.parent.version}</spring-data-geode.version>
+		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>spring-libs-snapshot</id>
+			<url>https://repo.spring.io/libs-snapshot</url>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok}</version>
+			</dependency>
+			<dependency>
+				<groupId>edu.umd.cs.mtc</groupId>
+				<artifactId>multithreadedtc</artifactId>
+				<version>${multithreadedtc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-gemfire</artifactId>
+				<version>${spring-data-gemfire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-geode</artifactId>
+				<version>${spring-data-geode.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>edu.umd.cs.mtc</groupId>
+			<artifactId>multithreadedtc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-geode</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.shell</groupId>
+			<artifactId>spring-shell</artifactId>
+			<version>${spring-shell.version}</version>
+			<optional>true</optional>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<compilerArgs>
+						<arg>-Xlint:unchecked</arg>
+						<!-- <classpath>${java.home}/lib/tools.jar</classpath> -->
+					</compilerArgs>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<argLine>
+						-Dgemfire.log-level=warning
+					</argLine>
+					<includes>
+						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
+					</includes>
+					<reuseForks>false</reuseForks>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
