@@ -92,6 +92,8 @@ import org.apache.geode.cache.control.ResourceManager;
 import org.apache.geode.cache.execute.RegionFunctionContext;
 import org.apache.geode.cache.query.CqAttributes;
 import org.apache.geode.cache.query.CqQuery;
+import org.apache.geode.cache.query.Index;
+import org.apache.geode.cache.query.IndexStatistics;
 import org.apache.geode.cache.query.Query;
 import org.apache.geode.cache.query.QueryService;
 import org.apache.geode.cache.query.QueryStatistics;
@@ -104,6 +106,7 @@ import org.apache.geode.internal.concurrent.ConcurrentHashSet;
 import org.apache.geode.pdx.PdxSerializer;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
+import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
@@ -1150,6 +1153,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		QueryService mockQueryService = mock(QueryService.class);
 
 		Set<CqQuery> cqQueries = new ConcurrentHashSet<>();
+		Set<Index> indexes = new ConcurrentHashSet<>();
 
 		try {
 			when(mockQueryService.getCqs()).thenAnswer(invocation -> cqQueries.toArray(new CqQuery[cqQueries.size()]));
@@ -1181,6 +1185,47 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 				return cqQueriesByRegion.toArray(new CqQuery[cqQueriesByRegion.size()]);
 			});
 
+			when(mockQueryService.getIndexes()).thenReturn(indexes);
+
+			when(mockQueryService.getIndexes(any(Region.class))).thenAnswer(invocation -> {
+
+				Region<?, ?> region = invocation.getArgument(0);
+
+				return indexes.stream()
+					.filter(index -> index.getRegion().equals(region))
+					.collect(Collectors.toList());
+
+			});
+
+			when(mockQueryService.getIndex(any(Region.class), anyString())).thenAnswer(invocation -> {
+
+				Region<?, ?> region = invocation.getArgument(0);
+
+				String indexName = invocation.getArgument(1);
+
+				Collection<Index> indexesForRegion = mockQueryService.getIndexes(region);
+
+				return indexesForRegion.stream()
+					.filter(index -> index.getName().equals(indexName))
+					.findFirst().orElse(null);
+
+			});
+
+			when(mockQueryService.createIndex(anyString(), anyString(), anyString()))
+				.thenAnswer(createIndexAnswer(indexes, IndexType.FUNCTIONAL));
+
+			when(mockQueryService.createIndex(anyString(), anyString(), anyString(), anyString()))
+				.thenAnswer(createIndexAnswer(indexes, IndexType.FUNCTIONAL));
+
+			when(mockQueryService.createHashIndex(anyString(), anyString(), anyString()))
+				.thenAnswer(createIndexAnswer(indexes, IndexType.HASH));
+
+			when(mockQueryService.createHashIndex(anyString(), anyString(), anyString(), anyString()))
+				.thenAnswer(createIndexAnswer(indexes, IndexType.HASH));
+
+			when(mockQueryService.createKeyIndex(anyString(), anyString(), anyString()))
+				.thenAnswer(createIndexAnswer(indexes, IndexType.KEY));
+
 			when(mockQueryService.newCq(anyString(), any(CqAttributes.class))).thenAnswer(invocation ->
 				add(cqQueries, mockCqQuery(null, invocation.getArgument(0), invocation.getArgument(1),
 					false)));
@@ -1209,6 +1254,25 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		cqQueries.add(cqQuery);
 
 		return cqQuery;
+	}
+
+	private static Index add(Collection<Index> indexes, Index index) {
+
+		indexes.add(index);
+
+		return index;
+	}
+
+	private static Answer<Index> createIndexAnswer(Collection<Index> indexes, IndexType indexType) {
+
+		return invocation -> {
+
+			String indexName = invocation.getArgument(0);
+			String indexedExpression = invocation.getArgument(1);
+			String regionPath = invocation.getArgument(2);
+
+			return add(indexes, mockIndex(indexName, indexedExpression, regionPath, indexType));
+		};
 	}
 
 	private static CqQuery mockCqQuery(String name, String queryString, CqAttributes cqAttributes, boolean durable) {
@@ -1296,6 +1360,30 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		when(mockQueryStatistics.getTotalExecutionTime()).thenReturn(0L);
 
 		return mockQueryStatistics;
+	}
+
+	public static Index mockIndex(String name, String expression, String fromClause, IndexType indexType) {
+
+		Index mockIndex = mock(Index.class, name);
+
+		IndexStatistics mockIndexStaticts = mockIndexStatistics(name);
+
+		when(mockIndex.getName()).thenReturn(name);
+		when(mockIndex.getCanonicalizedFromClause()).thenReturn(fromClause);
+		when(mockIndex.getCanonicalizedIndexedExpression()).thenReturn(expression);
+		when(mockIndex.getCanonicalizedProjectionAttributes()).thenReturn(expression);
+		when(mockIndex.getFromClause()).thenReturn(fromClause);
+		when(mockIndex.getIndexedExpression()).thenReturn(expression);
+		when(mockIndex.getProjectionAttributes()).thenReturn(expression);
+		when(mockIndex.getRegion()).thenAnswer(invocation -> regions.get(fromClause));
+		when(mockIndex.getStatistics()).thenReturn(mockIndexStaticts);
+		when(mockIndex.getType()).thenReturn(indexType.getGemfireIndexType());
+
+		return mockIndex;
+	}
+
+	private static IndexStatistics mockIndexStatistics(String name) {
+		return mock(IndexStatistics.class, mockObjectIdentifier(name));
 	}
 
 	@SuppressWarnings("unchecked")
