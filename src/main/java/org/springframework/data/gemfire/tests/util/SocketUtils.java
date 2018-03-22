@@ -25,17 +25,17 @@ import java.util.logging.Logger;
  * {@link SocketUtils} is a utility class for managing {@link Socket} and {@link ServerSocket} objects.
  *
  * @author John Blum
- * @see ServerSocket
- * @see Socket
- * @since 1.9.0
+ * @see java.net.ServerSocket
+ * @see java.net.Socket
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class SocketUtils {
 
 	private static final Logger log = Logger.getLogger(SocketUtils.class.getName());
 
-	/* (non-Javadoc) */
 	public static boolean close(Socket socket) {
+
 		try {
 			if (socket != null) {
 				socket.close();
@@ -50,8 +50,8 @@ public abstract class SocketUtils {
 		return false;
 	}
 
-	/* (non-Javadoc) */
 	public static boolean close(ServerSocket serverSocket) {
+
 		try {
 			if (serverSocket != null) {
 				serverSocket.close();

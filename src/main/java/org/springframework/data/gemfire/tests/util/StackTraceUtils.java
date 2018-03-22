@@ -17,12 +17,13 @@
 package org.springframework.data.gemfire.tests.util;
 
 /**
- * The StackTraceUtils class is a utility class for working with stack trace frames (elements) of the current Thread.
+ * The {@link StackTraceUtils} class is a utility class for working with stack trace frames (elements)
+ * of the current {@link Thread}.
  *
  * @author John Blum
  * @see StackTraceElement
  * @see Thread
- * @see org.springframework.data.gemfire.test.support.ThreadUtils
+ * @see org.springframework.data.gemfire.tests.util.ThreadUtils
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
@@ -49,6 +50,7 @@ public abstract class StackTraceUtils extends ThreadUtils {
 	}
 
 	public static StackTraceElement getTestCaller(final Thread thread) {
+
 		for (StackTraceElement stackTraceElement : thread.getStackTrace()) {
 			if (isTestSuiteClass(stackTraceElement) && isTestCaseMethod(stackTraceElement)) {
 				return stackTraceElement;
@@ -59,6 +61,7 @@ public abstract class StackTraceUtils extends ThreadUtils {
 	}
 
 	private static boolean isTestCaseMethod(final StackTraceElement element) {
+
 		boolean result = element.getMethodName().toLowerCase().startsWith("test");
 
 		try {
@@ -71,9 +74,11 @@ public abstract class StackTraceUtils extends ThreadUtils {
 	}
 
 	private static boolean isTestSuiteClass(final StackTraceElement element) {
+
 		boolean result = element.getClass().getSimpleName().toLowerCase().endsWith("test");
+
 		result |= element.getClass().isAssignableFrom(junit.framework.TestCase.class);
+
 		return result;
 	}
-
 }

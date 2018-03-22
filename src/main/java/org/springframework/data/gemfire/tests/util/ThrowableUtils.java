@@ -20,21 +20,24 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * The ThrowableUtils class is a utility class for working with Throwable, Exception and Error objects.
+ * The {@link ThrowableUtils} class is a utility class for working with {@link Throwable},
+ * {@link Exception} and {@link Error} objects.
  *
  * @author John Blum
- * @see Error
- * @see Exception
- * @see Throwable
+ * @see java.lang.Error
+ * @see java.lang.Exception
+ * @see java.lang.Throwable
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ThrowableUtils {
 
-	public static String toString(final Throwable t) {
+	public static String toString(Throwable throwable) {
+
 		StringWriter writer = new StringWriter();
-		t.printStackTrace(new PrintWriter(writer));
+
+		throwable.printStackTrace(new PrintWriter(writer));
+
 		return writer.toString();
 	}
-
 }

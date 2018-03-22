@@ -30,28 +30,32 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * The ZipUtils class is an abstract utility class for working with JAR and ZIP archives.
+ * The {@link ZipUtils} class is an abstract utility class for working with JAR and ZIP archives.
  *
  * @author John Blum
- * @see File
- * @see ZipFile
+ * @see java.io.File
+ * @see java.util.zip.ZipFile
  * @since 0.0.1
  */
+@SuppressWarnings("unused")
 public abstract class ZipUtils {
 
 	public static void unzip(final Resource zipResource, final File directory) throws IOException {
-		Assert.notNull(zipResource, "The ZIP Resource must not be null!");
 
-		Assert.isTrue(directory != null && directory.isDirectory(), String.format(
-			"The file system pathname (%1$s) is not a valid directory!", directory));
+		Assert.notNull(zipResource, "ZIP Resource is required");
+
+		Assert.isTrue(directory != null && directory.isDirectory(),
+			String.format("The file system pathname (%1$s) is not a valid directory!", directory));
 
 		ZipFile zipFile = new ZipFile(zipResource.getFile(), ZipFile.OPEN_READ);
 
 		for (ZipEntry entry : CollectionUtils.iterable(zipFile.entries())) {
+
 			if (entry.isDirectory()) {
 				new File(directory, entry.getName()).mkdirs();
 			}
 			else {
+
 				DataInputStream entryInputStream = new DataInputStream(zipFile.getInputStream(entry));
 
 				DataOutputStream entryOutputStream = new DataOutputStream(new FileOutputStream(

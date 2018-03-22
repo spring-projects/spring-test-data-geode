@@ -22,14 +22,14 @@ import java.util.concurrent.TimeUnit;
  * {@link ThreadUtils} is an abstract utility class for managing Java {@link Thread Threads}.
  *
  * @author John Blum
- * @see Thread
+ * @see java.lang.Thread
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ThreadUtils {
 
-	/* (non-Javadoc) */
 	public static boolean sleep(long milliseconds) {
+
 		try {
 			Thread.sleep(milliseconds);
 			return true;
@@ -45,16 +45,13 @@ public abstract class ThreadUtils {
 	}
 
 	public static boolean timedWait(long duration, long interval) {
-		return timedWait(duration, interval, new WaitCondition() {
-			@Override public boolean waiting() {
-				return true;
-			}
-		});
+		return timedWait(duration, interval, () -> true);
 	}
 
 	@SuppressWarnings("all")
 	public static boolean timedWait(long duration, long interval, WaitCondition waitCondition) {
-		final long timeout = (System.currentTimeMillis() + duration);
+
+		final long timeout = System.currentTimeMillis() + duration;
 
 		interval = Math.min(interval, duration);
 

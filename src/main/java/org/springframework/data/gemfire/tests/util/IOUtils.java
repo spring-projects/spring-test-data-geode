@@ -30,7 +30,8 @@ import java.util.logging.Logger;
  * The {@link IOUtils} class is an abstract utility class for working with IO operations.
  *
  * @author John Blum
- * @see Closeable
+ * @see java.io.Closeable
+ * @see java.io.Serializable
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
@@ -38,7 +39,6 @@ public abstract class IOUtils {
 
 	protected static final Logger log = Logger.getLogger(IOUtils.class.getName());
 
-	/* (non-Javadoc) */
 	public static boolean close(Closeable closeable) {
 
 		if (closeable != null) {
@@ -47,6 +47,7 @@ public abstract class IOUtils {
 				return true;
 			}
 			catch (IOException cause) {
+
 				if (log.isLoggable(Level.FINE)) {
 					log.fine(String.format("Failed to close the Closeable object (%1$s) due to an I/O error:%n%2$s",
 						closeable, ThrowableUtils.toString(cause)));
@@ -57,7 +58,6 @@ public abstract class IOUtils {
 		return false;
 	}
 
-	/* (non-Javadoc) */
 	@SuppressWarnings("unchecked")
 	public static <T> T deserializeObject(byte[] objectBytes) throws IOException, ClassNotFoundException {
 
@@ -75,7 +75,6 @@ public abstract class IOUtils {
 		}
 	}
 
-	/* (non-Javadoc) */
 	public static byte[] serializeObject(Serializable obj) throws IOException {
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
