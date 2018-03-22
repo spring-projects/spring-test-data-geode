@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.data.build</groupId>
 		<artifactId>spring-data-parent</artifactId>
-		<version>2.0.3.BUILD-SNAPSHOT</version>
+		<version>2.0.5.RELEASE</version>
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
@@ -16,10 +16,10 @@
 	<version>0.1.0.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Spring Data Test Context Framework for Spring Data GemFire/Geode</name>
+	<name>Spring Data Test Framework for Spring Data GemFire and Spring Data Geode</name>
 	<description>
-		This project is a new Spring Data module building on Spring's TestContext Framework for writing Unit
-		and Integration Tests for both Spring Data for Pivotal GemFire as well as Spring Data for Apache Geode.
+		This project introduces a new Spring Data module building on Spring's TestContext Framework and is used to write
+		both Unit and Integration Tests for Spring Data for Pivotal GemFire as well as Spring Data for Apache Geode.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 
@@ -28,7 +28,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-				Copyright 2017 the original author or authors.
+				Copyright 2017-present the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
 				you may not use this file except in compliance with the License.
@@ -77,13 +77,12 @@
 		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<assertj.version>3.8.0</assertj.version>
+		<assertj.version>3.9.1</assertj.version>
 		<junit.version>4.12</junit.version>
-		<lombok.version>1.16.18</lombok.version>
-		<mockito.version>2.12.0</mockito.version>
+		<lombok.version>1.16.20</lombok.version>
+		<mockito.version>2.15.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<spring-data-gemfire.version>${project.parent.version}</spring-data-gemfire.version>
-		<spring-data-geode.version>${project.parent.version}</spring-data-geode.version>
+		<spring-data-release-train.version>Kay-SR5</spring-data-release-train.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
@@ -123,13 +122,10 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-gemfire</artifactId>
-				<version>${spring-data-gemfire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-geode</artifactId>
-				<version>${spring-data-geode.version}</version>
+				<artifactId>spring-data-releasetrain</artifactId>
+				<version>${spring-data-release-train.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
