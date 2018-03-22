@@ -13,7 +13,7 @@
 
 	<groupId>org.springframework.data</groupId>
 	<artifactId>spring-data-tests-4-gemfire</artifactId>
-	<version>0.1.0.BUILD-SNAPSHOT</version>
+	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Spring Data Test Framework for Spring Data GemFire and Spring Data Geode</name>
