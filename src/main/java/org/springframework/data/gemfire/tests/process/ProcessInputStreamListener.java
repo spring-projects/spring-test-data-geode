@@ -23,8 +23,8 @@ import java.util.EventListener;
  * {@link Process process's} standard output steam or standard error stream.
  *
  * @author John Blum
- * @see EventListener
- * @since 1.5.0
+ * @see java.util.EventListener
+ * @since 0.0.1
  */
 public interface ProcessInputStreamListener extends EventListener {
 
@@ -33,8 +33,8 @@ public interface ProcessInputStreamListener extends EventListener {
 	 * or standard error streams.
 	 *
 	 * @param input {@link String} containing output from the {@link Process} that this listener is listening to.
-	 * @see Process#getErrorStream()
-	 * @see Process#getInputStream()
+	 * @see java.lang.Process#getErrorStream()
+	 * @see java.lang.Process#getInputStream()
 	 */
 	void onInput(String input);
 

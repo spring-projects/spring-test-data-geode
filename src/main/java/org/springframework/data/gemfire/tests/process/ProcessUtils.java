@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author John Blum
  * @see File
  * @see Process
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ProcessUtils {
@@ -53,12 +53,15 @@ public abstract class ProcessUtils {
 
 	/* (non-Javadoc) */
 	public static int currentPid() {
+
 		RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+
 		String runtimeMXBeanName = runtimeMXBean.getName();
 
 		Exception cause = null;
 
 		if (StringUtils.hasText(runtimeMXBeanName)) {
+
 			int atSignIndex = runtimeMXBeanName.indexOf('@');
 
 			if (atSignIndex > 0) {
@@ -71,32 +74,20 @@ public abstract class ProcessUtils {
 			}
 		}
 
-		throw new PidUnavailableException(String.format("Process ID (PID) not available [%s]", runtimeMXBeanName),
-			cause);
+		throw new PidNotFoundException(String.format("Process ID (PID) not available [%s]",
+			runtimeMXBeanName), cause);
 	}
 
-	/* (non-Javadoc) */
 	public static boolean isAlive(Process process) {
-		return (process != null && process.isAlive());
+		return process != null && process.isAlive();
 	}
 
-	/* (non-Javadoc) */
 	public static boolean isRunning(int processId) {
-		/*
-		for (VirtualMachineDescriptor vmDescriptor : VirtualMachine.list()) {
-			if (String.valueOf(processId).equals(vmDescriptor.id())) {
-				return true;
-			}
-		}
-
-		return false;
-		*/
-
-		throw new UnsupportedOperationException("operation not supported");
+		throw new UnsupportedOperationException("Operation not supported");
 	}
 
-	/* (non-Javadoc) */
 	public static boolean isRunning(Process process) {
+
 		try {
 			process.exitValue();
 			return false;
@@ -106,40 +97,24 @@ public abstract class ProcessUtils {
 		}
 	}
 
-	/* (non-Javadoc) */
-	public static void signalStop(Process process) throws IOException {
-		if (isRunning(process)) {
-			OutputStream processOutputStream = process.getOutputStream();
-			processOutputStream.write(TERM_TOKEN.concat("\n").getBytes());
-			processOutputStream.flush();
-		}
-	}
-
-	/* (non-Javadoc) */
-	@SuppressWarnings("all")
-	public static void waitForStopSignal() {
-		Scanner in = new Scanner(System.in);
-		while (!TERM_TOKEN.equals(in.next()));
-	}
-
-	/* (non-Javadoc) */
 	public static int findAndReadPid(File workingDirectory) {
+
 		File pidFile = findPidFile(workingDirectory);
 
 		if (pidFile == null) {
-			throw new PidUnavailableException(String.format(
-				"No PID file was found in working directory [%s] or any of it's sub-directories",
+			throw new PidNotFoundException(
+				String.format("No PID file was found in working directory [%s] or any of it's sub-directories",
 					workingDirectory));
 		}
 
 		return readPid(pidFile);
 	}
 
-	/* (non-Javadoc) */
 	@SuppressWarnings("all")
 	protected static File findPidFile(File workingDirectory) {
-		Assert.isTrue(FileSystemUtils.isDirectory(workingDirectory), String.format(
-			"File [%s] is not a valid directory", workingDirectory));
+
+		Assert.isTrue(FileSystemUtils.isDirectory(workingDirectory),
+			String.format("File [%s] is not a valid directory", workingDirectory));
 
 		for (File file : workingDirectory.listFiles(DirectoryPidFileFilter.INSTANCE)) {
 			if (file.isDirectory()) {
@@ -154,45 +129,48 @@ public abstract class ProcessUtils {
 		return null;
 	}
 
-	/* (non-Javadoc) */
 	@SuppressWarnings("all")
 	public static int readPid(File pidFile) {
-		Assert.isTrue(pidFile != null && pidFile.isFile(), String.format(
-			"File [%s] is not a valid file", pidFile));
+
+		Assert.isTrue(pidFile != null && pidFile.isFile(),
+			String.format("File [%s] is not a valid file", pidFile));
 
 		BufferedReader fileReader = null;
+
 		String pidValue = null;
 
 		try {
+
 			fileReader = new BufferedReader(new FileReader(pidFile));
 			pidValue = String.valueOf(fileReader.readLine()).trim();
 
 			return Integer.parseInt(pidValue);
 		}
-		catch (FileNotFoundException e) {
-			throw new PidUnavailableException(String.format("PID file [%s] not found", pidFile), e);
+		catch (FileNotFoundException cause) {
+			throw new PidNotFoundException(String.format("PID file [%s] not found", pidFile), cause);
 		}
-		catch (IOException e) {
-			throw new PidUnavailableException(String.format("failed to read PID from file [%s]", pidFile), e);
+		catch (IOException cause) {
+			throw new PidNotFoundException(String.format("Failed to read PID from file [%s]", pidFile), cause);
 		}
-		catch (NumberFormatException e) {
-			throw new PidUnavailableException(String.format(
-				"value [%1$s] from PID file [%2$s] was not a valid numerical PID", pidValue, pidFile), e);
+		catch (NumberFormatException cause) {
+			throw new PidNotFoundException(String.format("Value [%1$s] from PID file [%2$s] was not a valid numerical PID",
+				pidValue, pidFile), cause);
 		}
 		finally {
 			IOUtils.close(fileReader);
 		}
 	}
 
-	/* (non-Javadoc) */
 	@SuppressWarnings("all")
 	public static void writePid(File pidFile, int pid) throws IOException {
-		Assert.isTrue(pidFile != null && (pidFile.isFile() || pidFile.createNewFile()), String.format(
-			"File [%s] is not a valid file", pidFile));
+
+		Assert.isTrue(pidFile != null && (pidFile.isFile() || pidFile.createNewFile()),
+			String.format("File [%s] is not a valid file", pidFile));
 
 		Assert.isTrue(pid > 0, String.format("PID [%d] must greater than 0", pid));
 
-		PrintWriter fileWriter = new PrintWriter(new BufferedWriter(new FileWriter(pidFile, false), 16), true);
+		PrintWriter fileWriter = new PrintWriter(new BufferedWriter(
+			new FileWriter(pidFile, false), 16), true);
 
 		try {
 			fileWriter.println(pid);
@@ -203,28 +181,37 @@ public abstract class ProcessUtils {
 		}
 	}
 
-	/* (non-Javadoc) */
+	public static void signalStop(Process process) throws IOException {
+
+		if (isRunning(process)) {
+			OutputStream processOutputStream = process.getOutputStream();
+			processOutputStream.write(TERM_TOKEN.concat("\n").getBytes());
+			processOutputStream.flush();
+		}
+	}
+
+	@SuppressWarnings("all")
+	public static void waitForStopSignal() {
+
+		Scanner in = new Scanner(System.in);
+
+		while (!TERM_TOKEN.equals(in.next()));
+	}
+
 	protected static class DirectoryPidFileFilter extends PidFileFilter {
 
 		protected static final DirectoryPidFileFilter INSTANCE = new DirectoryPidFileFilter();
 
-		/**
-		 * @inheritDoc
-		 */
 		@Override
 		public boolean accept(File path) {
 			return (path != null && (path.isDirectory() || super.accept(path)));
 		}
 	}
 
-	/* (non-Javadoc) */
 	protected static class PidFileFilter implements FileFilter {
 
 		protected static final PidFileFilter INSTANCE = new PidFileFilter();
 
-		/**
-		 * @inheritDoc
-		 */
 		@Override
 		public boolean accept(File path) {
 			return (path != null && path.isFile() && path.getName().toLowerCase().endsWith(".pid"));

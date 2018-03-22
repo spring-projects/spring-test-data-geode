@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * @author John Blum
  * @see Process
  * @see ProcessBuilder
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public class ProcessWrapper {
@@ -63,15 +63,16 @@ public class ProcessWrapper {
 	protected final Logger log = Logger.getLogger(getClass().getName());
 
 	private final Process process;
+
 	private final ProcessConfiguration processConfiguration;
 
-	/* (non-Javadoc) */
 	public ProcessWrapper(Process process, ProcessConfiguration processConfiguration) {
-		Assert.notNull(process, "Process must not be null");
+
+		Assert.notNull(process, "Process is required");
 
 		Assert.notNull(processConfiguration, "The context and configuration meta-data providing details"
 			+ " about the environment in which the process is running and how the process was configured and executed"
-			+ " must not be null");
+			+ " is required");
 
 		this.process = process;
 		this.processConfiguration = processConfiguration;
@@ -79,8 +80,8 @@ public class ProcessWrapper {
 		init();
 	}
 
-	/* (non-Javadoc) */
 	private void init() {
+
 		newThread("Process OUT Stream Reader Thread",
 			newProcessInputStreamReaderRunnable(process.getInputStream())).start();
 
@@ -90,15 +91,17 @@ public class ProcessWrapper {
 		}
 	}
 
-	/* (non-Javadoc) */
-	protected Runnable newProcessInputStreamReaderRunnable(InputStream in) {
+	private Runnable newProcessInputStreamReaderRunnable(InputStream in) {
+
 		return () -> {
+
 			if (isRunning()) {
+
 				BufferedReader inputReader = new BufferedReader(new InputStreamReader(in));
 
 				try {
 					for (String input = inputReader.readLine(); input != null; input = inputReader.readLine()) {
-						for (ProcessInputStreamListener listener : listeners) {
+						for (ProcessInputStreamListener listener : this.listeners) {
 							listener.onInput(input);
 						}
 					}
@@ -114,10 +117,10 @@ public class ProcessWrapper {
 		};
 	}
 
-	/* (non-Javadoc) */
-	protected Thread newThread(String name, Runnable task) {
-		Assert.hasText(name, "Thread name must be specified");
-		Assert.notNull(task, "Thread task must not be null");
+	private Thread newThread(String name, Runnable task) {
+
+		Assert.hasText(name, "Thread name is required");
+		Assert.notNull(task, "Thread task is required");
 
 		Thread thread = new Thread(task, name);
 
@@ -127,73 +130,62 @@ public class ProcessWrapper {
 		return thread;
 	}
 
-	/* (non-Javadoc) */
 	public boolean isAlive() {
 		return ProcessUtils.isAlive(process);
 	}
 
-	/* (non-Javadoc) */
 	public boolean isNotAlive() {
 		return !isAlive();
 	}
 
-	/* (non-Javadoc) */
 	public List<String> getCommand() {
-		return processConfiguration.getCommand();
+		return this.processConfiguration.getCommand();
 	}
 
-	/* (non-Javadoc) */
 	public String getCommandString() {
-		return processConfiguration.getCommandString();
+		return this.processConfiguration.getCommandString();
 	}
 
-	/* (non-Javadoc) */
 	public Map<String, String> getEnvironment() {
-		return processConfiguration.getEnvironment();
+		return this.processConfiguration.getEnvironment();
 	}
 
-	/* (non-Javadoc) */
 	public int getPid() {
 		return ProcessUtils.findAndReadPid(getWorkingDirectory());
 	}
 
-	/* (non-Javadoc) */
 	public int safeGetPid() {
+
 		try {
 			return getPid();
 		}
-		catch (PidUnavailableException ignore) {
+		catch (PidNotFoundException ignore) {
 			return -1;
 		}
 	}
 
-	/* (non-Javadoc) */
 	public boolean isRedirectingErrorStream() {
-		return processConfiguration.isRedirectingErrorStream();
+		return this.processConfiguration.isRedirectingErrorStream();
 	}
 
-	/* (non-Javadoc) */
 	public boolean isNotRunning() {
 		return !isRunning();
 	}
 
-	/* (non-Javadoc) */
 	public boolean isRunning() {
-		return ProcessUtils.isRunning(process);
+		return ProcessUtils.isRunning(this.process);
 	}
 
-	/* (non-Javadoc) */
 	public File getWorkingDirectory() {
-		return processConfiguration.getWorkingDirectory();
+		return this.processConfiguration.getWorkingDirectory();
 	}
 
-	/* (non-Javadoc) */
 	public int exitValue() {
-		return process.exitValue();
+		return this.process.exitValue();
 	}
 
-	/* (non-Javadoc) */
 	public int safeExitValue() {
+
 		try {
 			return exitValue();
 		}
@@ -202,74 +194,75 @@ public class ProcessWrapper {
 		}
 	}
 
-	/* (non-Javadoc) */
 	public String readLogFile() throws IOException {
+
 		File[] logFiles = FileSystemUtils.listFiles(getWorkingDirectory(),
-			(path) -> (path != null && (path.isDirectory() || path.getAbsolutePath().endsWith(".log"))));
+			path -> (path != null && (path.isDirectory() || path.getAbsolutePath().endsWith(".log"))));
 
 		if (logFiles.length > 0) {
 			return readLogFile(logFiles[0]);
 		}
 		else {
-			throw new FileNotFoundException(String.format(
-				"No log files found in process's [%d] working directory [%s]",
-					safeGetPid(), getWorkingDirectory()));
+			throw new FileNotFoundException(String.format("No log files found in process's [%d] working directory [%s]",
+				safeGetPid(), getWorkingDirectory()));
 		}
 	}
 
-	/* (non-Javadoc) */
 	public String readLogFile(File log) throws IOException {
 		return FileUtils.read(log);
 	}
 
-	/* (non-Javadoc) */
 	public boolean register(ProcessInputStreamListener listener) {
-		return (listener != null && listeners.add(listener));
+		return listener != null && listeners.add(listener);
 	}
 
-	/* (non-Javadoc) */
 	public void registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 	}
 
-	/* (non-Javadoc) */
 	public void signal() {
+
 		try {
-			OutputStream outputStream = process.getOutputStream();
+
+			OutputStream outputStream = this.process.getOutputStream();
+
 			outputStream.write("\n".getBytes());
 			outputStream.flush();
 		}
-		catch (IOException e) {
-			log.warning("Failed to signal process");
+		catch (IOException cause) {
 
-			if (log.isLoggable(Level.FINE)) {
-				log.fine(ThrowableUtils.toString(e));
+			this.log.warning("Failed to signal process");
+
+			if (this.log.isLoggable(Level.FINE)) {
+				this.log.fine(ThrowableUtils.toString(cause));
 			}
 		}
 	}
 
 	/* (non-Javadoc) */
 	public void signalStop() {
-		try {
-			ProcessUtils.signalStop(process);
-		}
-		catch (IOException e) {
-			log.warning("Failed to signal the process to stop");
 
-			if (log.isLoggable(Level.FINE)) {
-				log.fine(ThrowableUtils.toString(e));
+		try {
+			ProcessUtils.signalStop(this.process);
+		}
+		catch (IOException cause) {
+
+			this.log.warning("Failed to signal the process to stop");
+
+			if (this.log.isLoggable(Level.FINE)) {
+				this.log.fine(ThrowableUtils.toString(cause));
 			}
 		}
 	}
 
-	/* (non-Javadoc) */
 	public int stop() {
 		return stop(DEFAULT_WAIT_TIME_MILLISECONDS);
 	}
 
-	/* (non-Javadoc) */
 	public int stop(long milliseconds) {
+
 		if (isRunning()) {
+
 			boolean interrupted = false;
 			int exitValue = -1;
 			int pid = safeGetPid();
@@ -279,9 +272,10 @@ public class ProcessWrapper {
 			ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 			try {
+
 				Future<Integer> futureExitValue = executorService.submit(() -> {
-					process.destroy();
-					int localExitValue = process.waitFor();
+					this.process.destroy();
+					int localExitValue = this.process.waitFor();
 					exited.set(true);
 					return localExitValue;
 				});
@@ -289,16 +283,18 @@ public class ProcessWrapper {
 				while (!exited.get() && System.currentTimeMillis() < timeout) {
 					try {
 						exitValue = futureExitValue.get(milliseconds, TimeUnit.MILLISECONDS);
-						log.info(String.format("Process [%s] has stopped%n", pid));
+						this.log.info(String.format("Process [%s] has stopped%n", pid));
 					}
 					catch (InterruptedException ignore) {
 						interrupted = true;
 					}
 				}
 			}
-			catch (TimeoutException e) {
+			catch (TimeoutException cause) {
+
 				exitValue = -1;
-				log.warning(String.format("Process [%1$d] did not stop within the allotted timeout of %2$d seconds%n",
+
+				this.log.warning(String.format("Process [%1$d] did not stop within the allotted timeout of %2$d seconds%n",
 					pid, TimeUnit.MILLISECONDS.toSeconds(milliseconds)));
 			}
 			catch (Exception ignore) {
@@ -319,10 +315,10 @@ public class ProcessWrapper {
 		}
 	}
 
-	/* (non-Javadoc) */
 	public int shutdown() {
+
 		if (isRunning()) {
-			log.info(String.format("Stopping process [%d]...%n", safeGetPid()));
+			this.log.info(String.format("Stopping process [%d]...%n", safeGetPid()));
 			signalStop();
 			waitFor();
 		}
@@ -330,17 +326,14 @@ public class ProcessWrapper {
 		return stop();
 	}
 
-	/* (non-Javadoc) */
 	public boolean unregister(ProcessInputStreamListener listener) {
-		return listeners.remove(listener);
+		return this.listeners.remove(listener);
 	}
 
-	/* (non-Javadoc) */
 	public void waitFor() {
 		waitFor(DEFAULT_WAIT_TIME_MILLISECONDS);
 	}
 
-	/* (non-Javadoc) */
 	public void waitFor(long milliseconds) {
 		ThreadUtils.timedWait(milliseconds, 500, this::isRunning);
 	}

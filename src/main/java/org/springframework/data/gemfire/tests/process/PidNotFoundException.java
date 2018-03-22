@@ -17,29 +17,28 @@
 package org.springframework.data.gemfire.tests.process;
 
 /**
- * The PidUnavailableException class is a RuntimeException indicating that the process ID (PID) is unobtainable for
- * the current process.
+ * The {@link PidNotFoundException} class is a {@link RuntimeException} indicating that the process ID (PID)
+ * is unobtainable for the current {@link Process}.
  *
  * @author John Blum
- * @see RuntimeException
- * @since 1.5.0
+ * @see java.lang.RuntimeException
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
-public class PidUnavailableException extends RuntimeException {
+public class PidNotFoundException extends RuntimeException {
 
-	public PidUnavailableException() {
+	public PidNotFoundException() {
 	}
 
-	public PidUnavailableException(final String message) {
+	public PidNotFoundException(final String message) {
 		super(message);
 	}
 
-	public PidUnavailableException(final Throwable cause) {
+	public PidNotFoundException(final Throwable cause) {
 		super(cause);
 	}
 
-	public PidUnavailableException(final String message, final Throwable cause) {
+	public PidNotFoundException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
-
 }

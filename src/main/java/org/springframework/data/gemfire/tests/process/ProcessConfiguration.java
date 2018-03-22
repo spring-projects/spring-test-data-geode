@@ -32,9 +32,10 @@ import org.springframework.util.StringUtils;
  * for a running process.
  *
  * @author John Blum
- * @see ProcessBuilder
- * @see org.springframework.data.gemfire.process.ProcessExecutor
- * @since 1.5.0
+ * @see java.lang.Process
+ * @see java.lang.ProcessBuilder
+ * @see org.springframework.data.gemfire.tests.process.ProcessExecutor
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public class ProcessConfiguration {
@@ -48,7 +49,9 @@ public class ProcessConfiguration {
 	private final Map<String, String> environment;
 
 	public static ProcessConfiguration create(ProcessBuilder processBuilder) {
-		Assert.notNull(processBuilder, "The ProcessBuilder used to configure and start the Process must not be null");
+
+		Assert.notNull(processBuilder,
+			"The ProcessBuilder used to configure and start the Process must not be null");
 
 		return new ProcessConfiguration(processBuilder.command(), processBuilder.directory(),
 			processBuilder.environment(), processBuilder.redirectErrorStream());
@@ -57,22 +60,22 @@ public class ProcessConfiguration {
 	public ProcessConfiguration(List<String> command, File workingDirectory, Map<String, String> environment,
 			boolean redirectErrorStream) {
 
-		Assert.notEmpty(command, "Process command must be specified");
+		Assert.notEmpty(command, "Process command is required");
 
-		Assert.isTrue(FileSystemUtils.isDirectory(workingDirectory), String.format(
-			"Process working directory [%s] is not valid", workingDirectory));
+		Assert.isTrue(FileSystemUtils.isDirectory(workingDirectory),
+			String.format("Process working directory [%s] is not valid", workingDirectory));
 
-		this.command = new ArrayList<String>(command);
+		this.command = Collections.unmodifiableList(new ArrayList<>(command));
 		this.workingDirectory = workingDirectory;
 		this.redirectingErrorStream = redirectErrorStream;
 
-		this.environment = (environment != null
-			? Collections.unmodifiableMap(new HashMap<String, String>(environment))
-			: Collections.<String, String>emptyMap());
+		this.environment = environment != null
+			? Collections.unmodifiableMap(new HashMap<>(environment))
+			: Collections.emptyMap();
 	}
 
 	public List<String> getCommand() {
-		return Collections.unmodifiableList(command);
+		return this.command;
 	}
 
 	public String getCommandString() {
@@ -80,19 +83,20 @@ public class ProcessConfiguration {
 	}
 
 	public Map<String, String> getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 	public boolean isRedirectingErrorStream() {
-		return redirectingErrorStream;
+		return this.redirectingErrorStream;
 	}
 
 	public File getWorkingDirectory() {
-		return workingDirectory;
+		return this.workingDirectory;
 	}
 
 	@Override
 	public String toString() {
+
 		return "{ command = ".concat(getCommandString())
 			.concat(", workingDirectory = ".concat(getWorkingDirectory().getAbsolutePath()))
 			.concat(", environment = ".concat(String.valueOf(getEnvironment())))

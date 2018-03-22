@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @see java.lang.System
  * @see org.springframework.data.gemfire.tests.process.ProcessConfiguration
  * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ProcessExecutor {
@@ -48,8 +48,8 @@ public abstract class ProcessExecutor {
 
 	public static final String JAVA_CLASSPATH = System.getProperty("java.class.path");
 
-	protected static final String SPRING_GEMFIRE_SYSTEM_PROPERTY_PREFIX = "spring.gemfire.";
 	protected static final String SPRING_DATA_GEMFIRE_SYSTEM_PROPERTY_PREFIX = "spring.data.gemfire.";
+	protected static final String SPRING_GEMFIRE_SYSTEM_PROPERTY_PREFIX = "spring.gemfire.";
 
 	public static ProcessWrapper launch(Class<?> type, String... args) throws IOException {
 		return launch(FileSystemUtils.WORKING_DIRECTORY, type, args);
@@ -77,6 +77,7 @@ public abstract class ProcessExecutor {
 	}
 
 	protected static String[] buildCommand(String classpath, Class<?> type, String... args) {
+
 		Assert.notNull(type, "The main Java class to launch must not be null");
 
 		List<String> command = new ArrayList<>();
@@ -93,7 +94,7 @@ public abstract class ProcessExecutor {
 			if (isJvmOption(arg)) {
 				command.add(arg);
 			}
-			else if (!StringUtils.isEmpty(arg)) {
+			else if (isValidArgument(arg)) {
 				programArguments.add(arg);
 			}
 		}
@@ -105,6 +106,7 @@ public abstract class ProcessExecutor {
 	}
 
 	protected static Collection<? extends String> getSpringGemFireSystemProperties() {
+
 		return System.getProperties().stringPropertyNames().stream()
 			.filter(property -> property.startsWith(SPRING_DATA_GEMFIRE_SYSTEM_PROPERTY_PREFIX)
 				|| property.startsWith(SPRING_GEMFIRE_SYSTEM_PROPERTY_PREFIX))
@@ -116,7 +118,12 @@ public abstract class ProcessExecutor {
 		return (StringUtils.hasText(option) && (option.startsWith("-D") || option.startsWith("-X")));
 	}
 
+	protected static boolean isValidArgument(String argument) {
+		return StringUtils.hasText(argument);
+	}
+
 	protected static File validateDirectory(File workingDirectory) {
+
 		Assert.isTrue(workingDirectory != null && (workingDirectory.isDirectory() || workingDirectory.mkdirs()),
 			String.format("Failed to create working directory [%s]", workingDirectory));
 
