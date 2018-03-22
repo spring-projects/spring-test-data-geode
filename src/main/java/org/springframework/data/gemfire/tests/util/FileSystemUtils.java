@@ -32,11 +32,11 @@ import org.springframework.util.Assert;
  * file system directories and files collectively.
  *
  * @author John Blum
- * @see File
- * @see FileFilter
- * @see org.springframework.data.gemfire.test.support.FileUtils
- * @see org.springframework.data.gemfire.test.support.IOUtils
- * @since 1.5.0
+ * @see java.io.File
+ * @see java.io.FileFilter
+ * @see org.springframework.data.gemfire.tests.util.FileUtils
+ * @see org.springframework.data.gemfire.tests.util.IOUtils
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class FileSystemUtils extends FileUtils {
@@ -49,13 +49,12 @@ public abstract class FileSystemUtils extends FileUtils {
 
 	public static final File[] NO_FILES = new File[0];
 
-	/* (non-Javadoc) */
 	public static boolean deleteRecursive(File path) {
 		return deleteRecursive(path, AllFilesFilter.INSTANCE);
 	}
 
-	/* (non-Javadoc) */
 	public static boolean deleteRecursive(File path, FileFilter fileFilter) {
+
 		boolean success = true;
 
 		if (isDirectory(path)) {
@@ -68,11 +67,12 @@ public abstract class FileSystemUtils extends FileUtils {
 	}
 
 	public static boolean exists(File path) {
-		return (path != null && path.exists());
+		return path != null && path.exists();
 	}
 
 	// returns sub-directory just below working directory
 	public static File getRootRelativeToWorkingDirectoryOrPath(File path) {
+
 		File localPath = path;
 
 		if (isDirectory(localPath)) {
@@ -84,10 +84,10 @@ public abstract class FileSystemUtils extends FileUtils {
 		return (localPath != null ? localPath : path);
 	}
 
-	/* (non-Javadoc) */
 	public static File[] listFiles(File directory, FileFilter fileFilter) {
-		Assert.isTrue(isDirectory(directory), String.format(
-			"File [%s] does not refer to a valid directory", directory));
+
+		Assert.isTrue(isDirectory(directory),
+			String.format("File [%s] does not refer to a valid directory", directory));
 
 		List<File> results = new ArrayList<File>();
 
@@ -103,12 +103,10 @@ public abstract class FileSystemUtils extends FileUtils {
 		return results.toArray(new File[results.size()]);
 	}
 
-	/* (non-Javadoc) */
 	public static File[] safeListFiles(File directory) {
 		return safeListFiles(directory, AllFilesFilter.INSTANCE);
 	}
 
-	/* (non-Javadoc) */
 	public static File[] safeListFiles(File directory, FileFilter fileFilter) {
 		FileFilter resolvedFileFilter = (fileFilter != null ? fileFilter : AllFilesFilter.INSTANCE);
 		File[] files = (isDirectory(directory) ? directory.listFiles(resolvedFileFilter) : null);

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author John Blum
  * @see Thread
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ThreadUtils {

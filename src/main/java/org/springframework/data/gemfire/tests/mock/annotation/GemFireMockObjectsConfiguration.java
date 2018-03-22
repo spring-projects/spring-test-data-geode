@@ -42,7 +42,7 @@ import org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBean
  * @see org.springframework.core.annotation.AnnotationAttributes
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.test.mock.config.MockGemFireObjectsBeanPostProcessor
- * @since 2.0.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 @Configuration

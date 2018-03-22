@@ -28,7 +28,7 @@ import org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBean
  * @see org.springframework.context.ApplicationContextInitializer
  * @see org.springframework.context.ConfigurableApplicationContext
  * @see org.springframework.data.gemfire.test.mock.config.MockGemFireObjectsBeanPostProcessor
- * @since 2.0.0
+ * @since 0.0.1
  */
 public class MockGemFireObjectsApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {

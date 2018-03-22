@@ -26,7 +26,7 @@ import java.io.StringWriter;
  * @see Error
  * @see Exception
  * @see Throwable
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class ThrowableUtils {

@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Import;
  * @see Target
  * @see org.apache.geode.cache.GemFireCache
  * @see org.springframework.context.annotation.Import
- * @since 2.0.0
+ * @since 0.0.1
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

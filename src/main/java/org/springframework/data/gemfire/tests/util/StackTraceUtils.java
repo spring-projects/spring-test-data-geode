@@ -23,7 +23,7 @@ package org.springframework.data.gemfire.tests.util;
  * @see StackTraceElement
  * @see Thread
  * @see org.springframework.data.gemfire.test.support.ThreadUtils
- * @since 1.5.3
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class StackTraceUtils extends ThreadUtils {

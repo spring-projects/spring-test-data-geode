@@ -140,7 +140,7 @@ import org.springframework.data.gemfire.tests.util.FileSystemUtils;
  * @see org.apache.geode.distributed.DistributedSystem
  * @see org.mockito.Mockito
  * @see org.springframework.data.gemfire.tests.mock.MockObjectsSupport
- * @since 2.0.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {

@@ -47,7 +47,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.data.gemfire.client.ClientCacheFactoryBean
  * @see org.springframework.data.gemfire.client.PoolFactoryBean
  * @see org.springframework.data.gemfire.tests.mock.MockGemFireObjectsSupport
- * @since 2.0.0
+ * @since 0.0.1
  */
 public class MockGemFireObjectsBeanPostProcessor implements BeanPostProcessor {
 

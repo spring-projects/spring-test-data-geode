@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author John Blum
  * @see Closeable
- * @since 1.5.0
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class IOUtils {

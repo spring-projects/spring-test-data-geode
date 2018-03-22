@@ -19,12 +19,12 @@ package org.springframework.data.gemfire.tests.support;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * The IdentifierSequence class is an Identifier (ID) generator generating unique IDs in sequence.
+ * The {@link IdentifierSequence} class is an Identifier (ID) generator generating unique IDs in sequence.
  *
  * @author John Blum
- * @see System#currentTimeMillis()
- * @see AtomicLong
- * @since 1.5.3
+ * @see java.lang.System#currentTimeMillis()
+ * @see java.util.concurrent.atomic.AtomicLong
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class IdentifierSequence {
@@ -34,5 +34,4 @@ public abstract class IdentifierSequence {
 	public static long nextId() {
 		return ID_SEQUENCE.incrementAndGet();
 	}
-
 }

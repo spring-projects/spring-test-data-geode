@@ -25,12 +25,13 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
- * The DataSourceAdapter class is an implementation of the DataSource interface with unsupported operations by default.
+ * The {@link DataSourceAdapter} class is an implementation of the {@link DataSource} interface
+ * with unsupported operations by default.
  *
  * @author John Blum
- * @see Connection
- * @see DataSource
- * @since 1.3.4
+ * @see java.sql.Connection
+ * @see javax.sql.DataSource
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public abstract class DataSourceAdapter implements DataSource {

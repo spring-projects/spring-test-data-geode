@@ -23,8 +23,8 @@ import java.lang.reflect.Method;
  * problems with {@link Method method} invocations on {@link Object Mock Objects}.
  *
  * @author John Blum
- * @see org.springframework.data.gemfire.test.mock.support.MockObjectsException
- * @since 2.0.1
+ * @see org.springframework.data.gemfire.tests.mock.support.MockObjectsException
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public class MockObjectInvocationException extends MockObjectsException {

@@ -22,7 +22,7 @@ package org.springframework.data.gemfire.tests.mock.support;
  *
  * @author John Blum
  * @see RuntimeException
- * @since 2.0.1
+ * @since 0.0.1
  */
 @SuppressWarnings("unused")
 public class MockObjectsException extends RuntimeException {
