@@ -714,7 +714,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 			.map(RegionAttributes::getEntryTimeToLive).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<EvictionAttributes> evictionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getEvictionAttributes).orElseGet(() -> EvictionAttributes.createLRUEntryAttributes()));
+			.map(RegionAttributes::getEvictionAttributes).orElseGet(EvictionAttributes::createLRUEntryAttributes));
 
 		AtomicReference<Class<K>> keyConstraint = new AtomicReference<>(optionalRegionAttributes
 			.map(RegionAttributes::getKeyConstraint).orElse(null));
@@ -1544,7 +1544,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 			.map(RegionAttributes::getEntryTimeToLive).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<EvictionAttributes> evictionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getEvictionAttributes).orElseGet(() -> EvictionAttributes.createLRUEntryAttributes()));
+			.map(RegionAttributes::getEvictionAttributes).orElseGet(EvictionAttributes::createLRUEntryAttributes));
 
 		AtomicReference<Class<K>> keyConstraint = new AtomicReference<>(optionalRegionAttributes
 			.map(RegionAttributes::getKeyConstraint).orElse(null));
@@ -1568,7 +1568,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 			.map(RegionAttributes::getScope).orElse(Scope.DISTRIBUTED_NO_ACK));
 
 		AtomicReference<SubscriptionAttributes> subscriptionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getSubscriptionAttributes).orElseGet(() -> new SubscriptionAttributes()));
+			.map(RegionAttributes::getSubscriptionAttributes).orElseGet(SubscriptionAttributes::new));
 
 		AtomicReference<Class<V>> valueConstraint = new AtomicReference<>(optionalRegionAttributes
 			.map(RegionAttributes::getValueConstraint).orElse(null));
@@ -1743,14 +1743,12 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		AtomicReference<Float> criticalHeapPercentage =
 			new AtomicReference<>(ResourceManager.DEFAULT_CRITICAL_PERCENTAGE);
 
-		AtomicReference<Float> criticalOffHeapPercentage =
-			new AtomicReference<>(ResourceManager.DEFAULT_CRITICAL_PERCENTAGE);
+		AtomicReference<Float> criticalOffHeapPercentage = new AtomicReference<>(0.0f);
 
 		AtomicReference<Float> evictionHeapPercentage =
 			new AtomicReference<>(ResourceManager.DEFAULT_EVICTION_PERCENTAGE);
 
-		AtomicReference<Float> evictionOffHeapPercentage =
-			new AtomicReference<>(ResourceManager.DEFAULT_EVICTION_PERCENTAGE);
+		AtomicReference<Float> evictionOffHeapPercentage = new AtomicReference<>(0.0f);
 
 		doAnswer(newSetter(criticalHeapPercentage, null))
 			.when(mockResourceManager).setCriticalHeapPercentage(anyFloat());
