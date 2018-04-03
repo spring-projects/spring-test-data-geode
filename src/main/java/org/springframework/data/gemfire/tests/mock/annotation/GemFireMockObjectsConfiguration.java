@@ -17,6 +17,7 @@
 package org.springframework.data.gemfire.tests.mock.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -54,12 +55,11 @@ public class GemFireMockObjectsConfiguration implements ImportAware {
 	@Override
 	public void setImportMetadata(AnnotationMetadata importingClassMetadata) {
 
-		if (isAnnotationPresent(importingClassMetadata)) {
-
-			AnnotationAttributes enableGemFireMockingAttributes = getAnnotationAttributes(importingClassMetadata);
-
-			this.useSingletonCache = enableGemFireMockingAttributes.getBoolean("useSingletonCache");
-		}
+		Optional.of(importingClassMetadata)
+			.filter(this::isAnnotationPresent)
+			.map(this::getAnnotationAttributes)
+			.ifPresent(enableGemFireMockObjectsAttributes ->
+				this.useSingletonCache = enableGemFireMockObjectsAttributes.getBoolean("useSingletonCache"));
 	}
 
 	private Class<? extends Annotation> getAnnotationType() {

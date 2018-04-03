@@ -50,6 +50,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 0.0.1
  */
+@SuppressWarnings("all")
 public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 
 	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
@@ -76,7 +77,7 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	@Nullable @Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-		return (isGemFireProperties(bean, beanName) ?  set((Properties) bean)
+		return (isGemFireProperties(bean, beanName) ? set((Properties) bean)
 			: (bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, this.useSingletonCache)
 			: (bean instanceof PoolFactoryBean ? mockThePoolFactoryBean((PoolFactoryBean) bean)
 			: bean)));
@@ -96,7 +97,7 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	private boolean isGemFireProperties(Object bean, String beanName) {
-		return (bean instanceof Properties && GEMFIRE_PROPERTIES_BEAN_NAME.equals(beanName));
+		return bean instanceof Properties && GEMFIRE_PROPERTIES_BEAN_NAME.equals(beanName);
 	}
 
 	private Object set(Properties gemfireProperties) {
@@ -106,9 +107,9 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 
 	private Object spyOnCacheFactoryBean(CacheFactoryBean bean, boolean useSingletonCache) {
 
-		return (bean instanceof ClientCacheFactoryBean
+		return bean instanceof ClientCacheFactoryBean
 			? SpyingClientCacheFactoryInitializer.spyOn((ClientCacheFactoryBean) bean, useSingletonCache)
-			: SpyingCacheFactoryInitializer.spyOn(bean, useSingletonCache));
+			: SpyingCacheFactoryInitializer.spyOn(bean, useSingletonCache);
 	}
 
 	private Object mockThePoolFactoryBean(PoolFactoryBean bean) {
@@ -118,7 +119,7 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	protected static class SpyingCacheFactoryInitializer
 			implements CacheFactoryBean.CacheFactoryInitializer<CacheFactory> {
 
-		public static CacheFactoryBean spyOn(CacheFactoryBean cacheFactoryBean, boolean useSingletonCache) {
+		protected static CacheFactoryBean spyOn(CacheFactoryBean cacheFactoryBean, boolean useSingletonCache) {
 			cacheFactoryBean.setCacheFactoryInitializer(new SpyingCacheFactoryInitializer(useSingletonCache));
 			return cacheFactoryBean;
 		}
@@ -129,16 +130,20 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 			this.useSingletonCache = useSingletonCache;
 		}
 
+		protected boolean isUsingSingletonCache() {
+			return this.useSingletonCache;
+		}
+
 		@Override
 		public CacheFactory initialize(CacheFactory cacheFactory) {
-			return GemFireMockObjectsSupport.spyOn(cacheFactory, useSingletonCache);
+			return GemFireMockObjectsSupport.spyOn(cacheFactory, isUsingSingletonCache());
 		}
 	}
 
 	protected static class SpyingClientCacheFactoryInitializer
 			implements CacheFactoryBean.CacheFactoryInitializer<ClientCacheFactory> {
 
-		public static ClientCacheFactoryBean spyOn(ClientCacheFactoryBean clientCacheFactoryBean,
+		protected static ClientCacheFactoryBean spyOn(ClientCacheFactoryBean clientCacheFactoryBean,
 				boolean useSingletonCache) {
 
 			clientCacheFactoryBean.setCacheFactoryInitializer(
@@ -153,15 +158,19 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 			this.useSingletonCache = useSingletonCache;
 		}
 
+		protected boolean isUsingSingletonCache() {
+			return this.useSingletonCache;
+		}
+
 		@Override
 		public ClientCacheFactory initialize(ClientCacheFactory clientCacheFactory) {
-			return GemFireMockObjectsSupport.spyOn(clientCacheFactory, this.useSingletonCache);
+			return GemFireMockObjectsSupport.spyOn(clientCacheFactory, isUsingSingletonCache());
 		}
 	}
 
 	protected static class MockingPoolFactoryInitializer implements PoolFactoryBean.PoolFactoryInitializer {
 
-		public static PoolFactoryBean mock(PoolFactoryBean poolFactoryBean) {
+		protected static PoolFactoryBean mock(PoolFactoryBean poolFactoryBean) {
 			poolFactoryBean.setPoolFactoryInitializer(new MockingPoolFactoryInitializer());
 			return poolFactoryBean;
 		}

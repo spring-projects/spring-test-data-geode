@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @see org.mockito.stubbing.Answer
  * @since 0.0.1
  */
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 public abstract class MockObjectsSupport {
 
 	private static final AtomicLong mockObjectIdentifier = new AtomicLong(0L);
@@ -52,46 +52,42 @@ public abstract class MockObjectsSupport {
 	}
 
 	public static String mockObjectIdentifier(String mockObjectName) {
-		return String.format("%s%d", Optional.ofNullable(mockObjectName).filter(StringUtils::hasText)
-			.orElse(DEFAULT_MOCK_OBJECT_NAME), mockObjectIdentifier.incrementAndGet());
+
+		String resolvedMockObjectName = Optional.ofNullable(mockObjectName)
+			.filter(StringUtils::hasText)
+			.orElse(DEFAULT_MOCK_OBJECT_NAME);
+
+		return String.format("%s%d", resolvedMockObjectName, mockObjectIdentifier.incrementAndGet());
 	}
 
-	/* (non-Javadoc) */
 	protected static Answer<Boolean> newGetter(AtomicBoolean returnValue) {
 		return invocation -> returnValue.get();
 	}
 
-	/* (non-Javadoc) */
 	protected static Answer<Integer> newGetter(AtomicInteger returnValue) {
 		return invocation -> returnValue.get();
 	}
 
-	/* (non-Javadoc) */
 	protected static Answer<Long> newGetter(AtomicLong returnValue) {
 		return invocation -> returnValue.get();
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newGetter(AtomicReference<R> returnValue) {
 		return invocation -> returnValue.get();
 	}
 
-	/* (non-Javadoc) */
 	protected static <R, S> Answer<S> newGetter(AtomicReference<R> returnValue, Function<R, S> converter) {
 		return invocation -> converter.apply(returnValue.get());
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newGetter(Supplier<R> returnValue) {
 		return invocation -> returnValue.get();
 	}
 
-	/* (non-Javadoc) */
 	protected static <R, S> Answer<S> newGetter(Supplier<R> returnValue, Function<R, S> converter) {
 		return invocation -> converter.apply(returnValue.get());
 	}
 
-	/* (non-Javadoc) */
 	protected static <E, C extends Collection<E>, R> Answer<R> newAdder(C collection, R returnValue) {
 		return invocation -> {
 			collection.add(invocation.getArgument(0));
@@ -99,7 +95,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicBoolean argument, R returnValue) {
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
@@ -107,7 +102,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicBoolean argument, Boolean value, R returnValue) {
 		return invocation -> {
 			argument.set(value);
@@ -115,7 +109,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicInteger argument, R returnValue) {
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
@@ -123,7 +116,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicInteger argument, Integer value, R returnValue) {
 		return invocation -> {
 			argument.set(value);
@@ -131,7 +123,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicLong argument, R returnValue) {
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
@@ -139,7 +130,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <R> Answer<R> newSetter(AtomicLong argument, Long value, R returnValue) {
 		return invocation -> {
 			argument.set(value);
@@ -147,7 +137,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, R returnValue) {
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
@@ -155,7 +144,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, T value, R returnValue) {
 		return invocation -> {
 			argument.set(value);
@@ -163,7 +151,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, Function<?, T> converter, R returnValue) {
 		return invocation -> {
 			argument.set(converter.apply(invocation.getArgument(0)));
@@ -171,7 +158,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <K, V, R> Answer<R> newSetter(Map<K, V> argument, R returnValue) {
 		return invocation -> {
 			argument.put(invocation.getArgument(0), invocation.getArgument(1));
@@ -179,7 +165,6 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	/* (non-Javadoc) */
 	protected static <T> Answer<Void> newVoidAnswer(Consumer<InvocationOnMock> methodInvocation) {
 		return invocation -> {
 			methodInvocation.accept(invocation);

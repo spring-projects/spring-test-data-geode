@@ -47,11 +47,12 @@ import org.springframework.context.annotation.Import;
 public @interface EnableGemFireMockObjects {
 
 	/**
-	 * Determines whether the mock {@link GemFireCache} created for Unit Tests is a Singleton.
+	 * Configures whether the mock {@link GemFireCache} created for Unit Testing is a Singleton.
 	 *
 	 * Defaults to {@literal false}.
 	 *
-	 * @return a boolean value indicating whether the mock {@link GemFireCache} created for Unit Tests is a Singleton.
+	 * @return a boolean value indicating whether the mock {@link GemFireCache} created for Unit Testing
+	 * is a Singleton.
 	 */
 	boolean useSingletonCache() default false;
 
