@@ -26,26 +26,27 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.data.gemfire.tests.mock.MockGemFireObjectsSupport;
-import org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBeanPostProcessor;
+import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
+import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor;
 
 /**
  * The {@link GemFireMockObjectsConfiguration} class is a Spring {@link Configuration @Configuration} class
  * containing bean definitions to configure GemFire Object mocking.
  *
  * @author John Blum
- * @see Annotation
+ * @see java.lang.annotation.Annotation
  * @see org.springframework.beans.factory.config.BeanPostProcessor
  * @see org.springframework.context.annotation.Bean
  * @see org.springframework.context.annotation.Configuration
  * @see org.springframework.context.annotation.ImportAware
  * @see org.springframework.core.annotation.AnnotationAttributes
  * @see org.springframework.core.type.AnnotationMetadata
- * @see org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
+ * @see org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor
  * @since 0.0.1
  */
-@SuppressWarnings("unused")
 @Configuration
+@SuppressWarnings("unused")
 public class GemFireMockObjectsConfiguration implements ImportAware {
 
 	private boolean useSingletonCache = false;
@@ -86,12 +87,12 @@ public class GemFireMockObjectsConfiguration implements ImportAware {
 	}
 
 	@Bean
-	public BeanPostProcessor mockGemFireObjectsBeanPostProcessor() {
-		return MockGemFireObjectsBeanPostProcessor.newInstance(this.useSingletonCache);
+	public BeanPostProcessor gemfireMockObjectsBeanPostProcessor() {
+		return GemFireMockObjectsBeanPostProcessor.newInstance(this.useSingletonCache);
 	}
 
 	@EventListener
 	public void releaseMockResources(ContextClosedEvent event) {
-		MockGemFireObjectsSupport.destroy();
+		GemFireMockObjectsSupport.destroy();
 	}
 }

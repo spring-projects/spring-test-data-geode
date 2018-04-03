@@ -123,27 +123,42 @@ import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationE
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 
 /**
- * The {@link MockGemFireObjectsSupport} class is an abstract base class encapsulating factory methods for creating
+ * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
  * Mock GemFire Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
  *
  * @author John Blum
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.CacheFactory
  * @see org.apache.geode.cache.DiskStore
+ * @see org.apache.geode.cache.DiskStoreFactory
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.Region
+ * @see org.apache.geode.cache.RegionFactory
+ * @see org.apache.geode.cache.RegionService
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.apache.geode.cache.client.ClientCacheFactory
+ * @see org.apache.geode.cache.client.Pool
+ * @see org.apache.geode.cache.client.PoolFactory
  * @see org.apache.geode.cache.control.ResourceManager
+ * @see org.apache.geode.cache.query.CqQuery
+ * @see org.apache.geode.cache.query.Query
+ * @see org.apache.geode.cache.query.QueryService
  * @see org.apache.geode.cache.server.CacheServer
  * @see org.apache.geode.cache.server.ClientSubscriptionConfig
+ * @see org.apache.geode.cache.wan.GatewayReceiver
+ * @see org.apache.geode.cache.wan.GatewayReceiverFactory
+ * @see org.apache.geode.cache.wan.GatewaySender
+ * @see org.apache.geode.cache.wan.GatewaySenderFactory
+ * @see org.apache.geode.distributed.DistributedMember
  * @see org.apache.geode.distributed.DistributedSystem
  * @see org.mockito.Mockito
  * @see org.springframework.data.gemfire.tests.mock.MockObjectsSupport
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
-public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
+public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
 
@@ -431,7 +446,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		return Optional.ofNullable(regionPath)
 			.map(String::trim)
 			.map(it -> it.startsWith(Region.SEPARATOR) ? it : String.format("%1$s%2$s", Region.SEPARATOR, it))
-			.map(MockGemFireObjectsSupport::normalizeRegionPath)
+			.map(GemFireMockObjectsSupport::normalizeRegionPath)
 			.filter(it -> !it.isEmpty())
 			.orElseThrow(() -> newIllegalArgumentException("Region path [%s] is required", regionPath));
 	}
@@ -491,7 +506,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 			String resolvedRegionPath = Optional.ofNullable(regionPath)
 				.map(String::trim)
 				.filter(it -> !it.isEmpty())
-				.map(MockGemFireObjectsSupport::toRegionPath)
+				.map(GemFireMockObjectsSupport::toRegionPath)
 				.orElseThrow(() -> newIllegalArgumentException("Region path [%s] is not valid", regionPath));
 
 			return regions.get(resolvedRegionPath);
@@ -504,7 +519,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 			.thenThrow(newUnsupportedOperationException(NOT_SUPPORTED));
 
 		when(mockRegionService.rootRegions()).thenAnswer(invocation ->
-			regions.values().stream().filter(MockGemFireObjectsSupport::isRootRegion).collect(Collectors.toSet()));
+			regions.values().stream().filter(GemFireMockObjectsSupport::isRootRegion).collect(Collectors.toSet()));
 
 		return mockRegionService;
 	}
@@ -2161,7 +2176,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 
 		CacheFactory cacheFactorySpy = spy(cacheFactory);
 
-		Cache resolvedMockCache = MockGemFireObjectsSupport.<Cache>resolveMockedGemFireCache(useSingletonCache)
+		Cache resolvedMockCache = GemFireMockObjectsSupport.<Cache>resolveMockedGemFireCache(useSingletonCache)
 			.orElseGet(() -> {
 
 				Cache mockCache = mockPeerCache();
@@ -2211,7 +2226,7 @@ public abstract class MockGemFireObjectsSupport extends MockObjectsSupport {
 		ClientCacheFactory clientCacheFactorySpy = spy(clientCacheFactory);
 
 		ClientCache resolvedMockedClientCache =
-			MockGemFireObjectsSupport.<ClientCache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
+			GemFireMockObjectsSupport.<ClientCache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
 
 				ClientCache mockClientCache = mockClientCache();
 
