@@ -1,0 +1,32 @@
+buildscript {
+  dependencies {
+    classpath 'io.spring.gradle:spring-build-conventions:0.0.13.RELEASE'
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+  }
+  repositories {
+    maven { url 'https://repo.spring.io/plugins-release' }
+  }
+}
+
+ext.IDE_GRADLE = "$rootDir/gradle/ide.gradle"
+
+apply plugin: 'io.spring.convention.root'
+apply plugin: 'io.spring.convention.spring-module'
+apply from: IDE_GRADLE
+
+group = 'org.springframework.data'
+description = 'Spring Data Test Framework for Pivotal GemFire and Apache Geode'
+
+ext.releaseBuild = version.endsWith('RELEASE')
+ext.snapshotBuild = version.endsWith('SNAPSHOT')
+ext.milestoneBuild = !(releaseBuild || snapshotBuild)
+
+dependencies {
+
+  compile "org.springframework.data:spring-data-geode"
+
+  compile("org.springframework.boot:spring-boot-starter-test") {
+    exclude group: "org.springframework.boot", module: "spring-boot-starter-logging";
+  }
+
+}
