@@ -1,4 +1,4 @@
-## Spring Data Tests Context Framework for Spring Data GemFire/Geode
+## Spring Data Test Framework for Spring Data GemFire and Spring Data for Apache Geode
 
 This project is a new _Spring Data_ module building on _Spring's_
 `TestContext` Framework for writing _Unit_ and _Integration_ Tests
@@ -9,8 +9,8 @@ This project was born from [_Spring Data GemFire's_](http://projects.spring.io/s
 ([GitHub project](https://github.com/spring-projects/spring-data-gemfire))
 [test framework](https://github.com/spring-projects/spring-data-gemfire/tree/2.0.2.RELEASE/src/test/java/org/springframework/data/gemfire/test).
 This _test framework_ is used in SDG's test suite to test the proper
-function when using either Pivotal GemFire or Apache Geode
-in a _Spring_ context.
+function of Pivotal GemFire or Apache Geode when used in
+a _Spring_ context.
 
 For many years, users have asked for a way to test their Pivotal GemFire
 or Apache Geode-based, _Spring_ applications, whether writing _Unit_
