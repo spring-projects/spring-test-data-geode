@@ -27,7 +27,7 @@ import org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBean
  * @author John Blum
  * @see org.springframework.context.ApplicationContextInitializer
  * @see org.springframework.context.ConfigurableApplicationContext
- * @see org.springframework.data.gemfire.test.mock.config.MockGemFireObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.config.MockGemFireObjectsBeanPostProcessor
  * @since 0.0.1
  */
 public class MockGemFireObjectsApplicationContextInitializer

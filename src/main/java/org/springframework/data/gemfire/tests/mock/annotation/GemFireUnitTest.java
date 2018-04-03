@@ -36,12 +36,12 @@ import org.springframework.test.context.junit4.SpringRunner;
  * using JUnit's {@link RunWith} annotation.
  *
  * @author John Blum
- * @see Documented
- * @see Inherited
- * @see Retention
- * @see Target
+ * @see java.lang.annotation.Documented
+ * @see java.lang.annotation.Inherited
+ * @see java.lang.annotation.Retention
+ * @see java.lang.annotation.Target
  * @see org.junit.runner.RunWith
- * @see org.springframework.data.gemfire.test.mock.context.MockGemFireObjectsApplicationContextInitializer
+ * @see org.springframework.data.gemfire.tests.mock.context.MockGemFireObjectsApplicationContextInitializer
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.junit4.SpringRunner
  * @since 0.0.1
