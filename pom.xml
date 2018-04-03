@@ -12,7 +12,7 @@
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
-	<artifactId>spring-data-tests-4-gemfire</artifactId>
+	<artifactId>spring-data-test-geode</artifactId>
 	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
