@@ -26,23 +26,6 @@ try {
 				}
 			}
 		}
-	},
-	springio: {
-		stage('Spring IO') {
-			node {
-				checkout scm
-				try {
-					sh "./gradlew clean springIoCheck -PplatformVersion=Cairo-BUILD-SNAPSHOT -PexcludeProjects='**/samples/**' --refresh-dependencies --no-daemon --stacktrace"
-				}
-				catch (Exception cause) {
-					currentBuild.result = 'FAILED: springio'
-					throw cause
-				}
-				finally {
-					junit '**/build/spring-io*-results/*.xml'
-				}
-			}
-		}
 	}
 
 	if (currentBuild.result == 'SUCCESS') {
