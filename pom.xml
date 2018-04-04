@@ -16,10 +16,11 @@
 	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Spring Data Test Framework for Spring Data GemFire and Spring Data Geode</name>
+	<name>Spring-based Test Framework for Spring Data GemFire and Spring Data Geode</name>
 	<description>
-		This project introduces a new Spring Data module building on Spring's TestContext Framework and is used to write
-		both Unit and Integration Tests for Spring Data for Pivotal GemFire as well as Spring Data for Apache Geode.
+		This project introduces a new Spring Data module building on the core Spring Framework's TestContext
+		and is used to write both Unit and Integration Tests for Spring Data for Pivotal GemFire
+		as well as Spring Data for Apache Geode.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 
