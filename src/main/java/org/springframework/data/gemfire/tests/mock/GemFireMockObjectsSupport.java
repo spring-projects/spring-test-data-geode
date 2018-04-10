@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
+import static org.springframework.data.gemfire.util.CollectionUtils.asSet;
 import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeSet;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.NOT_SUPPORTED;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalArgumentException;
@@ -61,6 +62,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.CacheListener;
@@ -71,6 +73,7 @@ import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.DiskStore;
 import org.apache.geode.cache.DiskStoreFactory;
 import org.apache.geode.cache.EvictionAttributes;
+import org.apache.geode.cache.EvictionAttributesMutator;
 import org.apache.geode.cache.ExpirationAction;
 import org.apache.geode.cache.ExpirationAttributes;
 import org.apache.geode.cache.GemFireCache;
@@ -121,6 +124,7 @@ import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
+import org.springframework.util.Assert;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
@@ -157,7 +161,7 @@ import org.springframework.data.gemfire.tests.util.FileSystemUtils;
  * @see org.springframework.data.gemfire.tests.mock.MockObjectsSupport
  * @since 0.0.1
  */
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
@@ -1793,7 +1797,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		Set<Region<?, ?>> subRegions = new CopyOnWriteArraySet<>();
 
-		when(mockRegion.getAttributes()).thenReturn(regionAttributes);
+		when(mockRegion.getAttributes()).thenAnswer(invocation -> mockRegionAttributes(mockRegion, regionAttributes));
 		when(mockRegion.getFullPath()).thenReturn(toRegionPath(name));
 		when(mockRegion.getName()).thenReturn(toRegionName(name));
 		when(mockRegion.getRegionService()).thenReturn(regionService);
@@ -1830,6 +1834,185 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		});
 
 		return rememberMockedRegion(mockRegion);
+	}
+
+	@SuppressWarnings("all")
+	private static <K, V> RegionAttributes<K, V> mockRegionAttributes(Region<K, V> mockRegion,
+			RegionAttributes<K, V> baseRegionAttributes) {
+
+		AttributesMutator<K, V> mockAttributesMutator = mock(AttributesMutator.class);
+
+		EvictionAttributesMutator mockEvictionAttributesMutator = mock(EvictionAttributesMutator.class);
+
+		RegionAttributes<K, V> mockRegionAttributes = mock(RegionAttributes.class);
+
+		when(mockRegion.getAttributesMutator()).thenReturn(mockAttributesMutator);
+		when(mockAttributesMutator.getEvictionAttributesMutator()).thenReturn(mockEvictionAttributesMutator);
+		when(mockAttributesMutator.getRegion()).thenReturn(mockRegion);
+
+		AtomicInteger evictionMaximum =
+			new AtomicInteger(Optional.ofNullable(baseRegionAttributes.getEvictionAttributes())
+				.map(EvictionAttributes::getMaximum)
+				.orElse(EvictionAttributes.DEFAULT_ENTRIES_MAXIMUM));
+
+		AtomicReference<Boolean> cloningEnabled = new AtomicReference<>(null);
+
+		AtomicReference<CacheLoader<K, V>> cacheLoader = new AtomicReference<>(baseRegionAttributes.getCacheLoader());
+
+		AtomicReference<CacheWriter<K, V>> cacheWriter = new AtomicReference<>(baseRegionAttributes.getCacheWriter());
+
+		AtomicReference<CustomExpiry<K, V>> customEntryIdleTimeout =
+			new AtomicReference<>(baseRegionAttributes.getCustomEntryIdleTimeout());
+
+		AtomicReference<CustomExpiry<K, V>> customEntryTimeToLive =
+			new AtomicReference<>(baseRegionAttributes.getCustomEntryTimeToLive());
+
+		AtomicReference<ExpirationAttributes> entryIdleTimeout =
+			new AtomicReference<>(baseRegionAttributes.getEntryIdleTimeout());
+
+		AtomicReference<ExpirationAttributes> entryTimeToLive =
+			new AtomicReference<>(baseRegionAttributes.getEntryTimeToLive());
+
+		AtomicReference<ExpirationAttributes> regionIdleTimeout =
+			new AtomicReference<>(baseRegionAttributes.getRegionIdleTimeout());
+
+		AtomicReference<ExpirationAttributes> regionTimeToLive =
+			new AtomicReference<>(baseRegionAttributes.getRegionTimeToLive());
+
+		List<String> asyncEventQueueIds =
+			new CopyOnWriteArrayList<>(nullSafeSet(baseRegionAttributes.getAsyncEventQueueIds()));
+
+		List<CacheListener<K, V>> cacheListeners =
+			new CopyOnWriteArrayList<>(nullSafeArray(baseRegionAttributes.getCacheListeners(), CacheListener.class));
+
+		List<String> gatewaySenderIds =
+			new CopyOnWriteArrayList<>(nullSafeSet(baseRegionAttributes.getGatewaySenderIds()));
+
+		// Mock AttributesMutator
+		doAnswer(newAdder(asyncEventQueueIds, null))
+			.when(mockAttributesMutator).addAsyncEventQueueId(anyString());
+
+		doAnswer(newAdder(cacheListeners, null))
+			.when(mockAttributesMutator).addCacheListener(any(CacheListener.class));
+
+		doAnswer(newAdder(gatewaySenderIds, null)).
+			when(mockAttributesMutator).addGatewaySenderId(anyString());
+
+		when(mockAttributesMutator.getCloningEnabled()).thenAnswer(newGetter(() ->
+			Optional.ofNullable(cloningEnabled.get()).orElseGet(baseRegionAttributes::getCloningEnabled)));
+
+		doAnswer(invocation -> {
+
+			CacheListener<K, V>[] cacheListenersArgument =
+				nullSafeArray(invocation.getArgument(0), CacheListener.class);
+
+			Arrays.stream(cacheListenersArgument).forEach(it ->
+				Assert.notNull(it, "The CacheListener[] must not contain null elements"));
+
+			cacheListeners.forEach(CacheListener::close);
+			cacheListeners.addAll(Arrays.asList(cacheListenersArgument));
+
+			return null;
+
+		}).when(mockAttributesMutator).initCacheListeners(any(CacheListener[].class));
+
+
+		doAnswer(invocation -> asyncEventQueueIds.remove(invocation.getArgument(0)))
+			.when(mockAttributesMutator).removeAsyncEventQueueId(anyString());
+
+		doAnswer(invocation -> cacheListeners.remove(invocation.getArgument(0)))
+			.when(mockAttributesMutator).removeCacheListener(any(CacheListener.class));
+
+		doAnswer(invocation -> gatewaySenderIds.remove(invocation.getArgument(0)))
+			.when(mockAttributesMutator).removeGatewaySenderId(anyString());
+
+		doAnswer(newSetter(cacheLoader, baseRegionAttributes.getCacheLoader()))
+			.when(mockAttributesMutator).setCacheLoader(any(CacheLoader.class));
+
+		doAnswer(newSetter(cacheWriter, baseRegionAttributes.getCacheWriter()))
+			.when(mockAttributesMutator).setCacheWriter(any(CacheWriter.class));
+
+		doAnswer(newSetter(cloningEnabled, null))
+			.when(mockAttributesMutator).setCloningEnabled(anyBoolean());
+
+		doAnswer(newSetter(customEntryIdleTimeout, baseRegionAttributes.getCustomEntryIdleTimeout()))
+			.when(mockAttributesMutator).setCustomEntryIdleTimeout(any(CustomExpiry.class));
+
+		doAnswer(newSetter(customEntryTimeToLive, baseRegionAttributes.getCustomEntryTimeToLive()))
+			.when(mockAttributesMutator).setCustomEntryTimeToLive(any(CustomExpiry.class));
+
+		doAnswer(newSetter(entryIdleTimeout, baseRegionAttributes.getEntryIdleTimeout()))
+			.when(mockAttributesMutator).setEntryIdleTimeout(any(ExpirationAttributes.class));
+
+		doAnswer(newSetter(entryTimeToLive, baseRegionAttributes.getEntryTimeToLive()))
+			.when(mockAttributesMutator).setEntryTimeToLive(any(ExpirationAttributes.class));
+
+		doAnswer(newSetter(regionIdleTimeout, baseRegionAttributes.getRegionIdleTimeout()))
+			.when(mockAttributesMutator).setRegionIdleTimeout(any(ExpirationAttributes.class));
+
+		doAnswer(newSetter(regionTimeToLive, baseRegionAttributes.getRegionTimeToLive()))
+			.when(mockAttributesMutator).setRegionTimeToLive(any(ExpirationAttributes.class));
+
+		// Mock EvictionAttributesMutator
+		doAnswer(newSetter(evictionMaximum, null)).when(mockEvictionAttributesMutator).setMaximum(anyInt());
+
+		// Mock RegionAttributes
+		when(mockRegionAttributes.getAsyncEventQueueIds())
+			.thenAnswer(invocation -> asSet(asyncEventQueueIds.toArray(new String[asyncEventQueueIds.size()])));
+
+		when(mockRegionAttributes.getCacheListeners())
+			.thenAnswer(invocation -> cacheListeners.toArray(new CacheListener[cacheListeners.size()]));
+
+		when(mockRegionAttributes.getCacheLoader()).thenAnswer(newGetter(cacheLoader::get));
+		when(mockRegionAttributes.getCacheWriter()).thenAnswer(newGetter(cacheWriter::get));
+		when(mockRegionAttributes.getCloningEnabled()).thenAnswer(newGetter(cloningEnabled::get));
+		when(mockRegionAttributes.getCompressor()).thenAnswer(newGetter(baseRegionAttributes::getCompressor));
+		when(mockRegionAttributes.getConcurrencyChecksEnabled()).thenAnswer(newGetter(baseRegionAttributes::getConcurrencyChecksEnabled));
+		when(mockRegionAttributes.getConcurrencyLevel()).thenAnswer(newGetter(baseRegionAttributes::getConcurrencyLevel));
+		when(mockRegionAttributes.getCustomEntryIdleTimeout()).thenAnswer(newGetter(customEntryIdleTimeout::get));
+		when(mockRegionAttributes.getCustomEntryTimeToLive()).thenAnswer(newGetter(customEntryTimeToLive::get));
+		when(mockRegionAttributes.getDataPolicy()).thenAnswer(newGetter(baseRegionAttributes::getDataPolicy));
+		when(mockRegionAttributes.getDiskStoreName()).thenAnswer(newGetter(baseRegionAttributes::getDiskStoreName));
+		when(mockRegionAttributes.getEnableAsyncConflation()).thenAnswer(newGetter(baseRegionAttributes::getEnableAsyncConflation));
+		when(mockRegionAttributes.getEnableSubscriptionConflation()).thenAnswer(newGetter(baseRegionAttributes::getEnableSubscriptionConflation));
+		when(mockRegionAttributes.getEntryIdleTimeout()).thenAnswer(newGetter(entryIdleTimeout::get));
+		when(mockRegionAttributes.getEntryTimeToLive()).thenAnswer(newGetter(entryTimeToLive::get));
+
+		when(mockRegionAttributes.getEvictionAttributes()).thenAnswer(invocation -> {
+
+			EvictionAttributes mockEvictionAttibutes = mock(EvictionAttributes.class);
+			EvictionAttributes regionEvictionAttributes = baseRegionAttributes.getEvictionAttributes();
+
+			when(mockEvictionAttibutes.getAction()).thenAnswer(newGetter(regionEvictionAttributes::getAction));
+			when(mockEvictionAttibutes.getAlgorithm()).thenAnswer(newGetter(regionEvictionAttributes::getAlgorithm));
+			when(mockEvictionAttibutes.getMaximum()).thenAnswer(newGetter(evictionMaximum));
+			when(mockEvictionAttibutes.getObjectSizer()).thenAnswer(newGetter(regionEvictionAttributes::getObjectSizer));
+
+			return mockEvictionAttibutes;
+		});
+
+		when(mockRegionAttributes.getGatewaySenderIds())
+			.thenAnswer(invocation -> asSet(gatewaySenderIds.toArray(new String[gatewaySenderIds.size()])));
+
+		when(mockRegionAttributes.getIgnoreJTA()).thenAnswer(newGetter(baseRegionAttributes::getIgnoreJTA));
+		when(mockRegionAttributes.getIndexMaintenanceSynchronous()).thenAnswer(newGetter(baseRegionAttributes::getIndexMaintenanceSynchronous));
+		when(mockRegionAttributes.getInitialCapacity()).thenAnswer(newGetter(baseRegionAttributes::getInitialCapacity));
+		when(mockRegionAttributes.getKeyConstraint()).thenAnswer(newGetter(baseRegionAttributes::getKeyConstraint));
+		when(mockRegionAttributes.getLoadFactor()).thenAnswer(newGetter(baseRegionAttributes::getLoadFactor));
+		when(mockRegionAttributes.getMulticastEnabled()).thenAnswer(newGetter(baseRegionAttributes::getMulticastEnabled));
+		when(mockRegionAttributes.getOffHeap()).thenAnswer(newGetter(baseRegionAttributes::getOffHeap));
+		when(mockRegionAttributes.getPartitionAttributes()).thenAnswer(newGetter(baseRegionAttributes::getPartitionAttributes));
+		when(mockRegionAttributes.getPoolName()).thenAnswer(newGetter(baseRegionAttributes::getPoolName));
+		when(mockRegionAttributes.getRegionIdleTimeout()).thenAnswer(newGetter(regionIdleTimeout::get));
+		when(mockRegionAttributes.getRegionTimeToLive()).thenAnswer(newGetter(regionTimeToLive::get));
+		when(mockRegionAttributes.getScope()).thenAnswer(newGetter(baseRegionAttributes::getScope));
+		when(mockRegionAttributes.getStatisticsEnabled()).thenAnswer(newGetter(baseRegionAttributes::getStatisticsEnabled));
+		when(mockRegionAttributes.getSubscriptionAttributes()).thenAnswer(newGetter(baseRegionAttributes::getSubscriptionAttributes));
+		when(mockRegionAttributes.getValueConstraint()).thenAnswer(newGetter(baseRegionAttributes::getValueConstraint));
+		when(mockRegionAttributes.isDiskSynchronous()).thenAnswer(newGetter(baseRegionAttributes::isDiskSynchronous));
+		when(mockRegionAttributes.isLockGrantor()).thenAnswer(newGetter(baseRegionAttributes::isLockGrantor));
+
+		return mockRegionAttributes;
 	}
 
 	public static <K, V> Region<K, V> mockSubRegion(Region<K, V> parent, String name,

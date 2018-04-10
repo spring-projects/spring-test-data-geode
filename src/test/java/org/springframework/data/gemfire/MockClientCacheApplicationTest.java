@@ -64,6 +64,5 @@ public class MockClientCacheApplicationTest {
 
       return exampleRegion;
     }
-
   }
 }
