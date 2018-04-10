@@ -1836,7 +1836,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return rememberMockedRegion(mockRegion);
 	}
 
-	@SuppressWarnings("all")
+	@SuppressWarnings("unchecked")
 	private static <K, V> RegionAttributes<K, V> mockRegionAttributes(Region<K, V> mockRegion,
 			RegionAttributes<K, V> baseRegionAttributes) {
 
