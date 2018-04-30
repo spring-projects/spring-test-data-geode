@@ -83,7 +83,7 @@
 		<lombok.version>1.16.20</lombok.version>
 		<mockito.version>2.15.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<spring-data-release-train.version>Kay-SR5</spring-data-release-train.version>
+		<spring-data-release-train.version>Lovelace-M2</spring-data-release-train.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
