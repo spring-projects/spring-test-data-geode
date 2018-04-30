@@ -7,7 +7,7 @@ properties(projectProperties)
 
 def SUCCESS = hudson.model.Result.SUCCESS.toString()
 
-currentBuild.result = SUCCESS
+currentBuild.result = 'UNKNOWN'
 
 try {
 	parallel check: {
@@ -16,6 +16,7 @@ try {
 				checkout scm
 				try {
 					sh "./gradlew clean check --refresh-dependencies --no-daemon"
+					currentBuild.result = SUCCESS
 				}
 				catch (Exception cause) {
 					currentBuild.result = 'FAILED: check'
@@ -28,7 +29,7 @@ try {
 		}
 	}
 
-	if (currentBuild.result == 'SUCCESS') {
+	if (currentBuild.result.equals(SUCCESS)) {
 		parallel artifacts: {
 			stage('Deploy Artifacts') {
 				node {
