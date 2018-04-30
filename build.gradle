@@ -21,6 +21,12 @@ ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
 ext.milestoneBuild = !(releaseBuild || snapshotBuild)
 
+ext['apache-geode.version'] = '1.4.0'
+
+repositories {
+  maven { url = "https://repo.spring.io/libs-snapshot" }
+}
+
 dependencies {
 
   compile "org.springframework.data:spring-data-geode"
