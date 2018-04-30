@@ -58,6 +58,26 @@ public abstract class IOUtils {
 		return false;
 	}
 
+	/**
+	 * Executes the given {@link IoExceptionThrowingOperation}, handling any {@link IOException IOExceptions} thrown
+	 * during normal IO processing.
+	 *
+	 * @param operation {@link IoExceptionThrowingOperation} to execute.
+	 * @return a boolean indicating whether the IO operation was successful, or {@literal false} if the IO operation
+	 * threw an {@link IOException}.
+	 * @see IOException
+	 */
+	public static boolean doSafeIo(IoExceptionThrowingOperation operation) {
+
+		try {
+			operation.doIo();
+			return true;
+		}
+		catch (IOException cause) {
+			return false;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> T deserializeObject(byte[] objectBytes) throws IOException, ClassNotFoundException {
 
@@ -91,5 +111,9 @@ public abstract class IOUtils {
 		finally {
 			IOUtils.close(objectOutputStream);
 		}
+	}
+
+	public interface IoExceptionThrowingOperation {
+		void doIo() throws IOException;
 	}
 }
