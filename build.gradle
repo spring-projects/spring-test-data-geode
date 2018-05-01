@@ -15,7 +15,7 @@ apply plugin: 'io.spring.convention.spring-module'
 apply from: IDE_GRADLE
 
 group = 'org.springframework.data'
-description = 'Spring Data Test Framework for Pivotal GemFire and Apache Geode'
+description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data'
 
 ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
