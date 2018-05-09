@@ -56,7 +56,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
@@ -1566,8 +1565,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		QueryService mockQueryService = mock(QueryService.class);
 
-		Set<CqQuery> cqQueries = new ConcurrentSkipListSet<>();
-		Set<Index> indexes = new ConcurrentSkipListSet<>();
+		Set<CqQuery> cqQueries = Collections.synchronizedSet(new HashSet<>());
+		Set<Index> indexes = Collections.synchronizedSet(new HashSet<>());
 
 		try {
 			when(mockQueryService.getCqs()).thenAnswer(invocation -> cqQueries.toArray(new CqQuery[cqQueries.size()]));
@@ -1835,10 +1834,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		when(mockLuceneIndexFactory.setFields(ArgumentMatchers.<String[]>any())).thenAnswer(invocation -> {
 
-			String[] fieldsArgument = invocation.getArgument(0);
+			Object[] fieldsArgument = invocation.getArguments();
 
 			fields.clear();
-			fields.addAll(Arrays.asList(nullSafeArray(fieldsArgument, String.class)));
+
+			Arrays.stream(nullSafeArray(fieldsArgument, Object.class))
+				.filter(field -> field instanceof String)
+				.map(String::valueOf)
+				.forEach(fields::add);
 
 			return mockLuceneIndexFactory;
 		});
