@@ -1,6 +1,6 @@
 image:https://api.travis-ci.org/spring-projects/spring-boot-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-boot-data-geode"]
 
-== Spring Test Framework for Apache Geode & Pivotal GemFire using Spring Data
+== Spring Test Framework for Apache Geode & Pivotal GemFire 
 
 This project is a _Spring Data_ module building on the core _Spring Framework's_ `TestContext` used to
 write _Unit_ and _Integration Tests_ for both _Spring Data_ for https://pivotal.io/pivotal-gemfire[Pivotal GemFire]
