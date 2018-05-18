@@ -7,7 +7,7 @@ properties(projectProperties)
 
 def SUCCESS = hudson.model.Result.SUCCESS.toString()
 
-currentBuild.result = 'UNKNOWN'
+currentBuild.result = SUCCESS
 
 try {
 	parallel check: {
@@ -16,7 +16,6 @@ try {
 				checkout scm
 				try {
 					sh "./gradlew clean check --refresh-dependencies --no-daemon"
-					currentBuild.result = SUCCESS
 				}
 				catch (Exception cause) {
 					currentBuild.result = 'FAILED: check'
