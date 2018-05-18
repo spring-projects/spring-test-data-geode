@@ -8,11 +8,7 @@ buildscript {
   }
 }
 
-ext.IDE_GRADLE = "$rootDir/gradle/ide.gradle"
-
 apply plugin: 'io.spring.convention.root'
-apply plugin: 'io.spring.convention.spring-module'
-apply from: IDE_GRADLE
 
 group = 'org.springframework.data'
 description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data'
@@ -21,18 +17,7 @@ ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
 ext.milestoneBuild = !(releaseBuild || snapshotBuild)
 
+ext.IDE_GRADLE = "$rootDir/gradle/ide.gradle"
+
 ext['apache-geode.version'] = '1.6.0'
 
-repositories {
-  maven { url = "https://repo.spring.io/libs-snapshot" }
-}
-
-dependencies {
-
-  compile "org.springframework.data:spring-data-geode"
-
-  compile("org.springframework.boot:spring-boot-starter-test") {
-    exclude group: "org.springframework.boot", module: "spring-boot-starter-logging";
-  }
-
-}

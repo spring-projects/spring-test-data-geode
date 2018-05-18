@@ -8,19 +8,24 @@
 	<parent>
 		<groupId>org.springframework.data.build</groupId>
 		<artifactId>spring-data-parent</artifactId>
-		<version>2.0.7.RELEASE</version>
+		<version>2.1.0.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
-	<artifactId>spring-test-data-geode</artifactId>
+	<artifactId>spring-test-data-geode-build</artifactId>
 	<version>0.0.1.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
-	<name>Spring-based Test Framework for Spring Data GemFire and Spring Data Geode</name>
+	<modules>
+		<module>spring-test-data-geode</module>
+		<module>spring-test-data-gemfire</module>
+	</modules>
+
+	<name>Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data</name>
 	<description>
-		This project introduces a new Spring Data module building on the core Spring Framework's TestContext
-		and is used to write both Unit and Integration Tests for Spring Data for Pivotal GemFire
-		as well as Spring Data for Apache Geode.
+		This project introduces a Spring Data module building on the Spring Framework's TestContext,
+		used to write both Unit and Integration Tests for Spring Data for Pivotal GemFire
+		as well as Spring Data for Apache Geode applications.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 
