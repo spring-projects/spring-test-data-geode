@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 
 /**
@@ -41,6 +42,11 @@ public abstract class IntegrationTestsSupport {
 	protected static final String GEMFIRE_LOG_LEVEL = "warning";
 	protected static final String GEMFIRE_LOG_LEVEL_PROPERTY = "spring.data.gemfire.log.level";
 	protected static final String TEST_GEMFIRE_LOG_LEVEL = "warning";
+
+	@BeforeClass
+	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
+		closeGemFireCacheWaitOnCloseEvent();
+	}
 
 	public static void closeGemFireCacheWaitOnCloseEvent() {
 		closeGemFireCacheWaitOnCloseEvent(DEFAULT_WAIT_DURATION);
