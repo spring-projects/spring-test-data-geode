@@ -45,9 +45,21 @@ import org.springframework.data.gemfire.tests.integration.ClientServerIntegratio
 import org.springframework.util.Assert;
 
 /**
- * The SubscriptionEnabledClientServerIntegrationTestConfiguration class...
+ * The {@link SubscriptionEnabledClientServerIntegrationTestConfiguration} class is a base Spring {@link Configuration}
+ * class supporting Apache Geode or Pivotal GemFire client/server integration tests when subscriptions are enabled.
+ *
+ * Subscriptions must be enabled when {@literal Registering Interests} or {@literal Continuous Queries (CQ)}.
  *
  * @author John Blum
+ * @see org.apache.geode.cache.Region
+ * @see org.apache.geode.cache.client.ClientCache
+ * @see org.apache.geode.cache.client.Pool
+ * @see org.apache.geode.cache.client.PoolManager
+ * @see org.apache.geode.management.membership.ClientMembership
+ * @see org.apache.geode.management.membership.ClientMembershipListenerAdapter
+ * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer
+ * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
  * @since 1.0.0
  */
 @Configuration
