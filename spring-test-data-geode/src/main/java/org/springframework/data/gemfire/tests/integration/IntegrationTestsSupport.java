@@ -39,9 +39,9 @@ public abstract class IntegrationTestsSupport {
 
 	protected static final String GEMFIRE_LOG_FILE = "gemfire-server.log";
 	protected static final String GEMFIRE_LOG_FILE_PROPERTY = "spring.data.gemfire.log.file";
-	protected static final String GEMFIRE_LOG_LEVEL = "warning";
+	protected static final String GEMFIRE_LOG_LEVEL = "error";
 	protected static final String GEMFIRE_LOG_LEVEL_PROPERTY = "spring.data.gemfire.log.level";
-	protected static final String TEST_GEMFIRE_LOG_LEVEL = "warning";
+	protected static final String TEST_GEMFIRE_LOG_LEVEL = "error";
 
 	@BeforeClass
 	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
@@ -73,8 +73,12 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	private static GemFireCache close(GemFireCache cache) {
-		cache.close();
-		return cache;
+
+		return Optional.ofNullable(cache)
+			.map(it -> {
+				cache.close();
+				return cache;
+			}).orElse(cache);
 	}
 
 	protected static boolean waitOn(Condition condition) {

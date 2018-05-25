@@ -58,11 +58,12 @@ import org.springframework.data.gemfire.util.CollectionUtils;
 @SuppressWarnings("unused")
 public abstract class ClientServerIntegrationTestsSupport extends IntegrationTestsSupport {
 
+	public static final String DEFAULT_HOSTNAME = "localhost";
+	public static final String GEMFIRE_CACHE_SERVER_PORT_PROPERTY = "spring.data.gemfire.cache.server.port";
+
 	protected static final String DEBUG_ENDPOINT = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005";
 	protected static final String DEBUGGING_ENABLED_PROPERTY = "spring.data.gemfire.debugging.enabled";
-	protected static final String DEFAULT_HOSTNAME = "localhost";
 	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.directory.delete-on-exit";
-	protected static final String GEMFIRE_CACHE_SERVER_PORT_PROPERTY = "spring.data.gemfire.cache.server.port";
 	protected static final String PROCESS_RUN_MANUAL_PROPERTY = "spring.data.gemfire.process.run-manual";
 	protected static final String SYSTEM_PROPERTIES_LOG_FILE = "system-properties.log";
 
