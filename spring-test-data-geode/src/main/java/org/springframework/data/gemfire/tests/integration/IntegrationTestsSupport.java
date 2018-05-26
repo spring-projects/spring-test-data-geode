@@ -26,7 +26,7 @@ import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 
 /**
- * The {@linm IntegrationTestsSupport} class is an abstract base class supporting integration tests
+ * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
  * with either Apache Geode or Pivotal GemFire in a Spring context.
  *
  * @author John Blum
