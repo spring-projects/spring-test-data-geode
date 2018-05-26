@@ -17,17 +17,21 @@
 package org.springframework.data.gemfire.tests.integration.config;
 
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
+import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeSet;
 
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.geode.cache.Region;
-import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
 import org.apache.geode.cache.client.internal.PoolImpl;
@@ -39,10 +43,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
+import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
 import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
 import org.springframework.data.gemfire.config.xml.GemfireConstants;
 import org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * The {@link SubscriptionEnabledClientServerIntegrationTestConfiguration} class is a base Spring {@link Configuration}
@@ -58,6 +66,9 @@ import org.springframework.util.Assert;
  * @see org.apache.geode.management.membership.ClientMembership
  * @see org.apache.geode.management.membership.ClientMembershipListenerAdapter
  * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.context.annotation.Bean
+ * @see org.springframework.context.annotation.Configuration
+ * @see org.springframework.data.gemfire.client.ClientRegionFactoryBean
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
  * @since 1.0.0
@@ -73,9 +84,14 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 	private static final String GEMFIRE_CACHE_SERVER_PORT_PROPERTY =
 		ClientServerIntegrationTestsSupport.GEMFIRE_CACHE_SERVER_PORT_PROPERTY;
 
+	private static final String SPRING_DATA_GEODE_POOL_NAME = GemfireConstants.DEFAULT_GEMFIRE_POOL_NAME;
 	private static final String GEMFIRE_DEFAULT_POOL_NAME = "DEFAULT";
 
 	private static final String LOCALHOST = ClientServerIntegrationTestsSupport.DEFAULT_HOSTNAME;
+
+	protected Set<String> getTargetRegionBeans() {
+		return Collections.emptySet();
+	}
 
 	@Bean
 	BeanPostProcessor clientServerReadyBeanPostProcessor(
@@ -83,17 +99,17 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 
 		return new BeanPostProcessor() {
 
-			private final AtomicBoolean checkGemFireServerIsRunning = new AtomicBoolean(true);
+			private final AtomicBoolean verifyGemFireServerIsRunning = new AtomicBoolean(true);
 
-			private final AtomicReference<Pool> defaultPool = new AtomicReference<>(null);
+			private final AtomicReference<String> poolName = new AtomicReference<>(null);
 
 			@SuppressWarnings("all")
 			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-				if (shouldCheckWhetherGemFireServerIsRunning(bean, beanName)) {
+				if (shouldVerifyGemFireServerIsRunning(bean, beanName)) {
 					try {
-						validateClientCacheNotified();
-						validateClientCacheSubscriptionQueueConnectionEstablished();
+						verifyClientCacheNotified();
+						verifyClientCacheSubscriptionQueueConnectionEstablished();
 					}
 					catch (InterruptedException cause) {
 						Thread.currentThread().interrupt();
@@ -103,41 +119,83 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 				return bean;
 			}
 
-			private boolean shouldCheckWhetherGemFireServerIsRunning(Object bean, String beanName) {
+			private boolean shouldVerifyGemFireServerIsRunning(Object bean, String beanName) {
 
-				return isGemFireRegion(bean, beanName)
-					? checkGemFireServerIsRunning.compareAndSet(true, false)
-					: whenGemFireCache(bean, beanName);
+				return isRegion(bean, beanName)
+					&& verifyGemFireServerIsRunning.compareAndSet(true, false);
 			}
 
-			private boolean isGemFireRegion(Object bean, String beanName) {
-				return bean instanceof Region;
+			private boolean isRegion(Object bean, String beanName) {
+				return isTargetRegionBean(beanName) || isProxyClientRegion(bean, beanName);
 			}
 
-			private boolean whenGemFireCache(Object bean, String beanName) {
+			private boolean isTargetRegionBean(String beanName) {
+				return nullSafeSet(getTargetRegionBeans()).contains(beanName);
+			}
 
-				if (bean instanceof ClientCache) {
-					defaultPool.compareAndSet(null, ((ClientCache) bean).getDefaultPool());
+			private boolean isProxyClientRegion(Object bean, String beanName) {
+
+				if (bean instanceof ClientRegionFactoryBean) {
+
+					ClientRegionFactoryBean<?, ?> clientRegionFactoryBean = (ClientRegionFactoryBean<?, ?>) bean;
+
+					Optional<String> poolName = clientRegionFactoryBean.getPoolName()
+						.filter(this::isNotDefaultPool);
+
+					if (poolName.isPresent()) {
+						this.poolName.set(poolName.get());
+						return true;
+					}
+
+					Optional<ClientRegionShortcut> clientRegionShortcut =
+						resolveClientRegionShortcut(clientRegionFactoryBean)
+							.filter(this::isProxyClientRegion);
+
+					if (clientRegionShortcut.isPresent()) {
+						return true;
+					}
 				}
 
 				return false;
 			}
 
-			private void validateClientCacheNotified() throws InterruptedException {
+			private boolean isProxyClientRegion(ClientRegionShortcut clientRegionShortcut) {
+				return ClientRegionShortcutWrapper.valueOf(clientRegionShortcut).isProxy();
+			}
 
-				boolean didNotTimeout = LATCH.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
+			private boolean isNotDefaultPool(String poolName) {
+				return !GEMFIRE_DEFAULT_POOL_NAME.equals(poolName);
+			}
 
-				Assert.state(didNotTimeout, String.format(
-					"Apache Geode CacheServer failed to start on host [%s] and port [%d]", LOCALHOST, port));
+			@SuppressWarnings("unchecked")
+			private Optional<ClientRegionShortcut> resolveClientRegionShortcut(
+					ClientRegionFactoryBean<?, ?> clientRegionFactoryBean) {
+
+				try {
+
+					Method resolveClientRegionShortcut = ClientRegionFactoryBean.class
+						.getDeclaredMethod("resolveClientRegionShortcut");
+
+					return Optional.ofNullable((ClientRegionShortcut)
+						ReflectionUtils.invokeMethod(resolveClientRegionShortcut, clientRegionFactoryBean));
+				}
+				catch (Throwable ignore) {
+					return Optional.empty();
+				}
+			}
+
+			private void verifyClientCacheNotified() throws InterruptedException {
+
+				Assert.state(LATCH.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS),
+					String.format("CacheServer failed to start on host [%s] and port [%d]", LOCALHOST, port));
 			}
 
 			@SuppressWarnings("all")
-			private void validateClientCacheSubscriptionQueueConnectionEstablished() throws InterruptedException {
+			private void verifyClientCacheSubscriptionQueueConnectionEstablished() throws InterruptedException {
 
 				boolean clientCacheSubscriptionQueueConnectionEstablished = false;
 
-				Pool pool = resolvePool(this.defaultPool.get(),
-					GemfireConstants.DEFAULT_GEMFIRE_POOL_NAME, GEMFIRE_DEFAULT_POOL_NAME);
+				Pool pool = resolvePool(this.poolName.get(), SPRING_DATA_GEODE_POOL_NAME, GEMFIRE_DEFAULT_POOL_NAME);
 
 				if (pool instanceof PoolImpl) {
 
@@ -150,24 +208,31 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 
 					}
 
-					clientCacheSubscriptionQueueConnectionEstablished |= ((PoolImpl) pool).isPrimaryUpdaterAlive();
+					clientCacheSubscriptionQueueConnectionEstablished = ((PoolImpl) pool).isPrimaryUpdaterAlive();
 				}
 
 				Assert.state(clientCacheSubscriptionQueueConnectionEstablished,
 					String.format("ClientCache subscription queue connection not established;"
-							+ " Apache Geode Pool was [%s];"
-							+ " Apache Geode Pool configuration was [locators = %s, servers = %s]",
-						pool, pool.getLocators(), pool.getServers()));
+							+ " Pool [%s] has configuration [locators = %s, servers = %s]",
+						pool, resolvePoolLocators(pool), resolvePoolServers(pool)));
 			}
 
-			private Pool resolvePool(Pool pool, String... poolNames) {
+			private Pool resolvePool(String... poolNames) {
 
-				return Optional.ofNullable(pool)
-					.orElseGet(() -> Arrays.stream(nullSafeArray(poolNames, String.class))
-						.map(PoolManager::find)
-						.filter(Objects::nonNull)
-						.findFirst()
-						.orElse(null));
+				return Arrays.stream(nullSafeArray(poolNames, String.class))
+					.filter(StringUtils::hasText)
+					.map(PoolManager::find)
+					.filter(Objects::nonNull)
+					.findFirst()
+					.orElse(null);
+			}
+
+			private Iterable<InetSocketAddress> resolvePoolLocators(Pool pool) {
+				return pool != null ? pool.getLocators() : Collections.emptyList();
+			}
+
+			private Iterable<InetSocketAddress> resolvePoolServers(Pool pool) {
+				return pool != null ? pool.getServers() : Collections.emptyList();
 			}
 		};
 	}
