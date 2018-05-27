@@ -63,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.apache.geode.cache.client.Pool
  * @see org.apache.geode.cache.client.PoolManager
+ * @see org.apache.geode.cache.client.internal.PoolImpl
  * @see org.apache.geode.management.membership.ClientMembership
  * @see org.apache.geode.management.membership.ClientMembershipListenerAdapter
  * @see org.springframework.beans.factory.ListableBeanFactory
@@ -75,11 +76,13 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer
  * @see org.springframework.data.gemfire.listener.ContinuousQueryListenerContainer
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
+ * @see org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration
  * @since 1.0.0
  */
 @Configuration
 @SuppressWarnings("unused")
-public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
+public class SubscriptionEnabledClientServerIntegrationTestConfiguration
+		extends ClientServerIntegrationTestsConfiguration {
 
 	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(15);
 
