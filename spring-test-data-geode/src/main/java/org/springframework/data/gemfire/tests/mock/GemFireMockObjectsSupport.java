@@ -30,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.tests.util.IOUtils.doSafeIo;
-import static org.springframework.data.gemfire.tests.util.ObjectUtils.doSafeOperation;
 import static org.springframework.data.gemfire.tests.util.ObjectUtils.rethrowAsRuntimeException;
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 import static org.springframework.data.gemfire.util.CollectionUtils.asSet;
@@ -135,6 +134,7 @@ import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
+import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -1928,16 +1928,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockLuceneQuery.getLimit()).thenReturn(limit);
 		when(mockLuceneQuery.getPageSize()).thenReturn(pageSize);
 
-		doSafeOperation(() -> when(mockLuceneQuery.findKeys())
+		ObjectUtils.doOperationSafely(() -> when(mockLuceneQuery.findKeys())
 			.thenReturn(Collections.emptySet()), Collections.emptySet());
 
 		rethrowAsRuntimeException(() -> when(mockLuceneQuery.findPages())
 			.thenThrow(newUnsupportedOperationException("Operation Not Supported!")));
 
-		doSafeOperation(() -> when(mockLuceneQuery.findResults())
+		ObjectUtils.doOperationSafely(() -> when(mockLuceneQuery.findResults())
 			.thenReturn(Collections.emptyList()), Collections.emptyList());
 
-		doSafeOperation(() -> when(mockLuceneQuery.findValues())
+		ObjectUtils.doOperationSafely(() -> when(mockLuceneQuery.findValues())
 			.thenReturn(Collections.emptyList()), Collections.emptyList());
 
 		return mockLuceneQuery;
@@ -1990,7 +1990,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return luceneIndexes.get(LuceneIndexKey.of(indexName, regionPath));
 		});
 
-		doSafeOperation(() ->
+		ObjectUtils.doOperationSafely(() ->
 			when(mockLuceneService.waitUntilFlushed(anyString(), anyString(), anyLong(), any(TimeUnit.class)))
 				.thenReturn(true));
 

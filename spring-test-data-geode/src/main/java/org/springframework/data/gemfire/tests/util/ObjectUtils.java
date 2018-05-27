@@ -17,7 +17,7 @@
 package org.springframework.data.gemfire.tests.util;
 
 /**
- * {@link ObjectUtils} is a utility class for working with {@link Object objects}.
+ * {@link ObjectUtils} is a utility class for performing different opeations on {@link Object objects}.
  *
  * @author John Blum
  * @see java.lang.Object
@@ -26,11 +26,11 @@ package org.springframework.data.gemfire.tests.util;
 @SuppressWarnings("all")
 public abstract class ObjectUtils {
 
-	public static <T> T doSafeOperation(ExceptionThrowingOperation<T> operation) {
-		return doSafeOperation(operation, null);
+	public static <T> T doOperationSafely(ExceptionThrowingOperation<T> operation) {
+		return doOperationSafely(operation, null);
 	}
 
-	public static <T> T doSafeOperation(ExceptionThrowingOperation<T> operation, T defaultValue) {
+	public static <T> T doOperationSafely(ExceptionThrowingOperation<T> operation, T defaultValue) {
 
 		try {
 			return operation.doExceptionThrowingOperation();
@@ -48,11 +48,12 @@ public abstract class ObjectUtils {
 		catch (RuntimeException cause) {
 			throw cause;
 		}
-		catch (Exception cause) {
+		catch (Throwable cause) {
 			throw new RuntimeException(cause);
 		}
 	}
 
+	@FunctionalInterface
 	public interface ExceptionThrowingOperation<T> {
 		T doExceptionThrowingOperation() throws Exception;
 	}
