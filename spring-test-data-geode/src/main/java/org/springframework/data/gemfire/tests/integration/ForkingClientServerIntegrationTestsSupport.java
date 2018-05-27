@@ -16,7 +16,12 @@
 
 package org.springframework.data.gemfire.tests.integration;
 
+import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.AfterClass;
@@ -43,12 +48,18 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	private static ProcessWrapper gemfireServer;
 
-	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass) throws IOException {
+	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
+			throws IOException {
 
 		int availablePort = setAndGetCacheServerPortProperty();
 
+		List<String> argumentList = new ArrayList<>();
+
+		argumentList.addAll(Arrays.asList(nullSafeArray(arguments, String.class)));
+		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
+
 		setGemFireServerProcess(run(gemfireServerConfigurationClass,
-			String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort)));
+			argumentList.toArray(new String[argumentList.size()])));
 
 		waitForServerToStart("localhost", availablePort);
 	}
