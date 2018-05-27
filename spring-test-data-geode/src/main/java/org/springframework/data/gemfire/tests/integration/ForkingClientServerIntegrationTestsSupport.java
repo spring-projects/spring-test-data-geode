@@ -75,7 +75,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	@AfterClass
 	public static void stopGemFireServer() {
-		stop(gemfireServer);
+		getGemFireServerProcess().ifPresent(ForkingClientServerIntegrationTestsSupport::stop);
 		setGemFireServerProcess(null);
 	}
 
