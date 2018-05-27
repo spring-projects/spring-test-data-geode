@@ -17,19 +17,14 @@
 package org.springframework.data.gemfire.tests.integration;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.gemfire.config.annotation.CacheServerApplication;
-import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
+import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.config.annotation.EnablePdx;
-import org.springframework.data.gemfire.support.ConnectionEndpoint;
+import org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 
 /**
@@ -42,56 +37,62 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-// TODO: this is a WIP; I need to figure out client/server logistics when launching a CacheServer;
-// this class will be replaced by a JUnit Rule anyhow
+// TODO: this class is a WIP; I need to figure out client/server configuration and logistics
+// when launching a CacheServer; this class will be replaced by a JUnit Rule anyhow
 public abstract class ForkingClientServerIntegrationTestsSupport extends ClientServerIntegrationTestsSupport {
 
-	private static volatile ProcessWrapper gemfireServer;
+	private static ProcessWrapper gemfireServer;
 
-	@BeforeClass
-	public static void startGemFireServer() throws IOException {
+	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass) throws IOException {
+
+		int availablePort = setAndGetCacheServerPortProperty();
+
+		setGemFireServerProcess(run(gemfireServerConfigurationClass,
+			String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort)));
+
+		waitForServerToStart("localhost", availablePort);
+	}
+
+	protected static int setAndGetCacheServerPortProperty() throws IOException {
 
 		int availablePort = findAvailablePort();
 
-		gemfireServer = run(GemFireServerConfiguration.class,
-			String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
-
-		waitForServerToStart("localhost", availablePort);
-
 		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(availablePort));
+
+		return availablePort;
 	}
 
 	@AfterClass
 	public static void stopGemFireServer() {
-		System.clearProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY);
 		stop(gemfireServer);
-		gemfireServer = null;
+		setGemFireServerProcess(null);
 	}
 
-	protected Optional<ProcessWrapper> getGemFireServerProcess() {
+	@AfterClass
+	public static void clearCacheServerPortProperty() {
+		System.clearProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY);
+	}
+
+	protected static synchronized Optional<ProcessWrapper> getGemFireServerProcess() {
 		return Optional.ofNullable(gemfireServer);
 	}
 
-	@Configuration
-	public static class BaseGemFireClientConfiguration {
-
-		@Bean
-		ClientCacheConfigurer clientCachePoolPortConfigurer(
-			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":40404}") int port) {
-
-			return (beanName, clientCacheFactoryBean) -> clientCacheFactoryBean.setServers(
-				Collections.singletonList(new ConnectionEndpoint("localhost", port)));
-		}
+	protected static synchronized void setGemFireServerProcess(ProcessWrapper gemfireServerProcess) {
+		gemfireServer = gemfireServerProcess;
 	}
 
 	@EnablePdx
+	@ClientCacheApplication(logLevel = GEMFIRE_LOG_FILE)
+	protected static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
+
+	@EnablePdx
 	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport", logLevel = GEMFIRE_LOG_LEVEL)
-	public static class GemFireServerConfiguration {
+	public static class BaseGemFireServerConfiguration extends ClientServerIntegrationTestsConfiguration {
 
 		public static void main(String[] args) {
 
 			AnnotationConfigApplicationContext applicationContext =
-				new AnnotationConfigApplicationContext(GemFireServerConfiguration.class);
+				new AnnotationConfigApplicationContext(BaseGemFireServerConfiguration.class);
 
 			applicationContext.registerShutdownHook();
 		}
