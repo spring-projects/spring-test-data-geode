@@ -30,7 +30,7 @@ import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
 import org.springframework.data.gemfire.support.ConnectionEndpoint;
 
 /**
- * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link @Configuration} class
+ * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class
  * that registers a {@link ClientCacheConfigurer} used to configure the {@link ClientCache} {@link Pool} port
  * to connect to the launched Apache Geode/Pivotal GemFire Server during integration testing.
  *
