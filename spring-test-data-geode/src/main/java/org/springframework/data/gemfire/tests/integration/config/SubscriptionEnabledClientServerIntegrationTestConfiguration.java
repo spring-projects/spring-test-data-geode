@@ -16,12 +16,10 @@
 
 package org.springframework.data.gemfire.tests.integration.config;
 
-import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeSet;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,12 +27,12 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
 import org.apache.geode.cache.client.internal.PoolImpl;
+import org.apache.geode.internal.concurrent.ConcurrentHashSet;
 import org.apache.geode.management.membership.ClientMembership;
 import org.apache.geode.management.membership.ClientMembershipEvent;
 import org.apache.geode.management.membership.ClientMembershipListenerAdapter;
@@ -45,9 +43,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
+import org.springframework.data.gemfire.client.PoolFactoryBean;
 import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
 import org.springframework.data.gemfire.config.xml.GemfireConstants;
+import org.springframework.data.gemfire.listener.ContinuousQueryListenerContainer;
 import org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport;
+import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -77,7 +78,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("unused")
 public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 
-	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(60);
+	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(15);
 
 	private static final CountDownLatch LATCH = new CountDownLatch(1);
 
@@ -101,7 +102,7 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 
 			private final AtomicBoolean verifyGemFireServerIsRunning = new AtomicBoolean(true);
 
-			private final AtomicReference<String> poolName = new AtomicReference<>(null);
+			private final Set<String> poolNames = new ConcurrentHashSet<>();
 
 			@SuppressWarnings("all")
 			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -121,8 +122,45 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 
 			private boolean shouldVerifyGemFireServerIsRunning(Object bean, String beanName) {
 
-				return isRegion(bean, beanName)
+				return isBeanOfImportance(bean, beanName)
 					&& verifyGemFireServerIsRunning.compareAndSet(true, false);
+			}
+
+			private boolean isBeanOfImportance(Object bean, String beanName) {
+
+				return isContinuousQueryListenerContainer(bean, beanName) || isPool(bean, beanName)
+					|| isRegion(bean, beanName);
+			}
+
+			private boolean isContinuousQueryListenerContainer(Object bean, String beanName) {
+
+				if (bean instanceof ContinuousQueryListenerContainer) {
+
+					ContinuousQueryListenerContainer continuousQueryListenerContainer =
+						(ContinuousQueryListenerContainer) bean;
+
+					return Optional.ofNullable(continuousQueryListenerContainer.getPoolName())
+						.filter(StringUtils::hasText)
+						.map(this.poolNames::add)
+						.orElseGet(() -> {
+							this.poolNames.add(GEMFIRE_DEFAULT_POOL_NAME);
+							return true;
+						});
+				}
+
+				return false;
+			}
+
+			private boolean isPool(Object bean, String beanName) {
+
+				if (bean instanceof PoolFactoryBean) {
+					// TODO: uncomment in SD Lovelace and replace this.poolNames.add(beanName)
+					//this.poolNames.add(((PoolFactoryBean) bean).getName());
+					this.poolNames.add(beanName);
+					return true;
+				}
+
+				return false;
 			}
 
 			private boolean isRegion(Object bean, String beanName) {
@@ -143,7 +181,7 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 						.filter(this::isNotDefaultPool);
 
 					if (poolName.isPresent()) {
-						this.poolName.set(poolName.get());
+						this.poolNames.add(poolName.get());
 						return true;
 					}
 
@@ -152,6 +190,7 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 							.filter(this::isProxyClientRegion);
 
 					if (clientRegionShortcut.isPresent()) {
+						this.poolNames.add(GEMFIRE_DEFAULT_POOL_NAME);
 						return true;
 					}
 				}
@@ -176,6 +215,8 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 					Method resolveClientRegionShortcut = ClientRegionFactoryBean.class
 						.getDeclaredMethod("resolveClientRegionShortcut");
 
+					resolveClientRegionShortcut.setAccessible(true);
+
 					return Optional.ofNullable((ClientRegionShortcut)
 						ReflectionUtils.invokeMethod(resolveClientRegionShortcut, clientRegionFactoryBean));
 				}
@@ -193,42 +234,59 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration {
 			@SuppressWarnings("all")
 			private void verifyClientCacheSubscriptionQueueConnectionEstablished() throws InterruptedException {
 
-				boolean clientCacheSubscriptionQueueConnectionEstablished = false;
+				resolvePoolNames().stream()
+					.map(this::resolvePool)
+					.filter(pool -> pool instanceof PoolImpl)
+					.map(pool -> (PoolImpl) pool)
+					.forEach(pool -> {
 
-				Pool pool = resolvePool(this.poolName.get(), SPRING_DATA_GEODE_POOL_NAME, GEMFIRE_DEFAULT_POOL_NAME);
+						boolean clientCacheSubscriptionQueueConnectionEstablished = false;
 
-				if (pool instanceof PoolImpl) {
+						if (pool instanceof PoolImpl) {
 
-					long timeout = System.currentTimeMillis() + DEFAULT_TIMEOUT;
+							long timeout = System.currentTimeMillis() + DEFAULT_TIMEOUT;
 
-					while (System.currentTimeMillis() < timeout && !((PoolImpl) pool).isPrimaryUpdaterAlive()) {
-						synchronized (pool) {
-							TimeUnit.MILLISECONDS.timedWait(pool, 500L);
+							while (System.currentTimeMillis() < timeout && !((PoolImpl) pool).isPrimaryUpdaterAlive()) {
+								synchronized (pool) {
+									ObjectUtils.doOperationSafely(() -> {
+										TimeUnit.MILLISECONDS.timedWait(pool, 500L);
+										return null;
+									});
+								}
+
+							}
+
+							clientCacheSubscriptionQueueConnectionEstablished =
+								((PoolImpl) pool).isPrimaryUpdaterAlive();
 						}
 
-					}
-
-					clientCacheSubscriptionQueueConnectionEstablished = ((PoolImpl) pool).isPrimaryUpdaterAlive();
-				}
-
-				Assert.state(clientCacheSubscriptionQueueConnectionEstablished,
-					String.format("ClientCache subscription queue connection not established;"
-							+ " Pool [%s] has configuration [locators = %s, servers = %s]",
-						pool, resolvePoolLocators(pool), resolvePoolServers(pool)));
+						Assert.state(clientCacheSubscriptionQueueConnectionEstablished,
+							String.format("ClientCache subscription queue connection not established;"
+									+ " Pool [%s] has configuration [locators = %s, servers = %s]",
+								pool, resolvePoolLocators(pool), resolvePoolServers(pool)));
+					});
 			}
 
-			private Pool resolvePool(String... poolNames) {
+			private Pool resolvePool(String poolName) {
 
-				return Arrays.stream(nullSafeArray(poolNames, String.class))
+				return Optional.ofNullable(poolName)
 					.filter(StringUtils::hasText)
 					.map(PoolManager::find)
 					.filter(Objects::nonNull)
-					.findFirst()
 					.orElse(null);
 			}
 
 			private Iterable<InetSocketAddress> resolvePoolLocators(Pool pool) {
 				return pool != null ? pool.getLocators() : Collections.emptyList();
+			}
+
+			private Set<String> resolvePoolNames() {
+
+				if (this.poolNames.isEmpty()) {
+					this.poolNames.add(GEMFIRE_DEFAULT_POOL_NAME);
+				}
+
+				return this.poolNames;
 			}
 
 			private Iterable<InetSocketAddress> resolvePoolServers(Pool pool) {
