@@ -53,7 +53,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * The {@link SubscriptionEnabledClientServerIntegrationTestConfiguration} class is a base Spring {@link Configuration}
+ * The {@link SubscriptionEnabledClientServerIntegrationTestsConfiguration} class is a base Spring {@link Configuration}
  * class supporting Apache Geode or Pivotal GemFire client/server integration tests when subscriptions are enabled.
  *
  * Subscriptions must be enabled when {@literal Registering Interests} or {@literal Continuous Queries (CQ)}.
@@ -81,8 +81,10 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @SuppressWarnings("unused")
-public class SubscriptionEnabledClientServerIntegrationTestConfiguration
+public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 		extends ClientServerIntegrationTestsConfiguration {
+
+	private static final boolean DEFAULT_SUBSCRIPTION_QUEUE_CONNECTION_FAILURE = true;
 
 	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(15);
 
@@ -95,6 +97,10 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration
 	private static final String GEMFIRE_DEFAULT_POOL_NAME = "DEFAULT";
 
 	private static final String LOCALHOST = ClientServerIntegrationTestsSupport.DEFAULT_HOSTNAME;
+
+	protected boolean isThrowExceptionOnSubscriptionQueueConnectionFailure() {
+		return DEFAULT_SUBSCRIPTION_QUEUE_CONNECTION_FAILURE;
+	}
 
 	@Bean
 	BeanPostProcessor clientServerReadyBeanPostProcessor(ListableBeanFactory beanFactory,
@@ -182,10 +188,20 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration
 				}
 			}
 
+			@SuppressWarnings("all")
 			private void verifyClientCacheNotified() throws InterruptedException {
 
-				Assert.state(LATCH.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS),
-					String.format("CacheServer failed to start on host [%s] and port [%d]", LOCALHOST, port));
+				boolean success = LATCH.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
+
+				String errorMessage = String.format("CacheServer failed to start on host [%s] and port [%d]",
+					LOCALHOST, port);
+
+				if (success) {
+					Assert.state(success, errorMessage);
+				}
+				else if (getLogger().isWarnEnabled()) {
+					getLogger().warn(errorMessage);
+				}
 			}
 
 			@SuppressWarnings("all")
@@ -207,10 +223,16 @@ public class SubscriptionEnabledClientServerIntegrationTestConfiguration
 							}
 						}
 
-						Assert.state(pool.isPrimaryUpdaterAlive(),
-							String.format("ClientCache subscription queue connection not established;"
-									+ " Pool [%s] has configuration [locators = %s, servers = %s]",
-								pool, pool.getLocators(), pool.getServers()));
+						String errorMessage = String.format("ClientCache subscription queue connection not established;"
+								+ " Pool [%s] has configuration [locators = %s, servers = %s]",
+							pool, pool.getLocators(), pool.getServers());
+
+						if (isThrowExceptionOnSubscriptionQueueConnectionFailure()) {
+							Assert.state(pool.isPrimaryUpdaterAlive(), errorMessage);
+						}
+						else if (getLogger().isWarnEnabled()){
+							getLogger().warn(errorMessage);
+						}
 					});
 			}
 
