@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 
@@ -53,8 +52,8 @@ public abstract class IntegrationTestsSupport {
 		closeGemFireCacheWaitOnCloseEvent();
 	}
 
-	@AfterClass
-	public static void clearSpringSystemProperties() {
+	@BeforeClass
+	public static void clearAllSpringPrefixedSystemProperties() {
 
 		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
 			.filter(it -> it.toLowerCase().startsWith("spring"))
