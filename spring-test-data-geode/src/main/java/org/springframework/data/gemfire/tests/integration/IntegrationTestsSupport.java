@@ -16,12 +16,15 @@
 
 package org.springframework.data.gemfire.tests.integration;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 
@@ -48,6 +51,16 @@ public abstract class IntegrationTestsSupport {
 	@BeforeClass
 	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
 		closeGemFireCacheWaitOnCloseEvent();
+	}
+
+	@AfterClass
+	public static void clearSpringSystemProperties() {
+
+		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
+			.filter(it -> it.toLowerCase().startsWith("spring"))
+			.collect(Collectors.toList());
+
+		springSystemProperties.forEach(System::clearProperty);
 	}
 
 	public static void closeGemFireCacheWaitOnCloseEvent() {
