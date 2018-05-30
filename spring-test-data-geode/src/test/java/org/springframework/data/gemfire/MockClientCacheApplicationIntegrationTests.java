@@ -35,12 +35,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Unit tests for an Apache Geode {@link ClientCache} application using mock objects.
+ * Integration tests for an Apache Geode {@link ClientCache} application using mock objects.
  *
  * @author John Blum
  * @see org.junit.Test
- * @see org.apache.geode.Region
+ * @see org.apache.geode.cache.GemFireCache
+ * @see org.apache.geode.cahce.Region
  * @see org.apache.geode.cache.client.ClientCache
+ * @see org.springframework.data.gemfire.client.ClientCacheFactoryBean
+ * @see org.springframework.data.gemfire.client.ClientRegionFactoryBean
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheApplication
  * @see org.springframework.data.gemfire.tests.mock.annotation.EnableGemFireMockObjects
  * @see org.springframework.test.context.ContextConfiguration
@@ -50,7 +53,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @SuppressWarnings("all")
-public class MockClientCacheApplicationTest {
+public class MockClientCacheApplicationIntegrationTests {
 
   @Resource(name = "Example")
   private Region<Object, Object> example;
