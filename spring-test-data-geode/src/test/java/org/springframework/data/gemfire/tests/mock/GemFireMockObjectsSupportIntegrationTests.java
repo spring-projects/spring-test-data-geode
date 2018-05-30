@@ -19,12 +19,14 @@ package org.springframework.data.gemfire.tests.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport;
+import org.springframework.data.gemfire.tests.support.AbstractSecurityManager;
 
 /**
  * Integration tests for {@link GemFireMockObjectsSupport}.
@@ -46,9 +48,25 @@ public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsS
 	}
 
 	@Test
+	public void instantiatesGemFireObjectsFromPropertiesSuccessfully() {
+
+		Properties gemfireProperties = new Properties();
+
+		gemfireProperties.setProperty("name", "TestInstantiatesGemFireObjectsFromPropertiesSuccessfully");
+		gemfireProperties.setProperty("security-manager", TestSecurityManager.class.getName());
+
+		assertThat(TestSecurityManager.CONSTRUCTED.get()).isFalse();
+
+		GemFireMockObjectsSupport.spyOn(new CacheFactory(gemfireProperties)).create();
+
+		assertThat(TestSecurityManager.CONSTRUCTED.get()).isTrue();
+	}
+
+	@Test
 	public void storesGemFirePropertiesSuccessfully() {
 
 		try {
+
 			System.setProperty("gemfire.name", "TestStoresGemFirePropertiesSuccessfully");
 			System.setProperty("gemfire.log-level", "config");
 			System.setProperty("gemfire.locators", "skullbox[12345]");
@@ -86,6 +104,15 @@ public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsS
 			System.clearProperty("gemfire.name");
 			System.clearProperty("gemfire.log-level");
 			System.clearProperty("non-gemfire.property");
+		}
+	}
+
+	public static final class TestSecurityManager extends AbstractSecurityManager {
+
+		private static final AtomicBoolean CONSTRUCTED = new AtomicBoolean(false);
+
+		public TestSecurityManager() {
+			CONSTRUCTED.set(true);
 		}
 	}
 }

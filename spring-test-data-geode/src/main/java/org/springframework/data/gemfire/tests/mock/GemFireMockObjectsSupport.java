@@ -135,7 +135,9 @@ import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
+import org.springframework.data.util.ReflectionUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -146,6 +148,7 @@ import org.springframework.util.StringUtils;
  * @see java.io.File
  * @see java.net.InetSocketAddress
  * @see java.util.Properties
+ * @see java.util.UUID
  * @see org.apache.geode.cache.AttributesMutator
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.CacheFactory
@@ -215,6 +218,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	private static final String GEMFIRE_SYSTEM_PROPERTIES_PREFIX = "gemfire.";
 	private static final String FROM_KEYWORD = "FROM";
 	private static final String WHERE_KEYWORD = "WHERE";
+
+	private static final String[] GEMFIRE_OBJECT_BASED_PROPERTIES = {
+		"security-client-auth-init",
+		"security-manager",
+		"security-post-processor",
+	};
 
 	private static final String REPEATING_REGION_SEPARATOR = Region.SEPARATOR + "{2,}";
 
@@ -313,6 +322,28 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	/**
+	 * Instantiates all Apache Geode/Pivotal GemFire objects which have been declared
+	 * via {@link System#getProperties() System properties}.
+	 *
+	 * @param <T> {@link Class type} of the {@link GemFireCache}.
+	 * @param gemfireCache reference to the {@link GemFireCache} instance.
+	 * @return the given {@link GemFireCache} instance.
+	 * @see org.apache.geode.cache.GemFireCache
+	 */
+	private static <T extends GemFireCache> T instantiateGemFireObjects(T gemfireCache) {
+
+		Properties localGemfireProperties = gemfireProperties.get();
+
+		Arrays.stream(GEMFIRE_OBJECT_BASED_PROPERTIES)
+			.map(localGemfireProperties::getProperty)
+			.filter(StringUtils::hasText)
+			.filter(className -> ClassUtils.isPresent(className, ClassUtils.getDefaultClassLoader()))
+			.forEach(className -> ReflectionUtils.createInstanceIfPresent(className, null));
+
+		return gemfireCache;
+	}
+
+	/**
 	 * Determines whether the given {@link Region} is a root {@link Region}.
 	 *
 	 * @param region {@link Region} to evaluate.
@@ -333,6 +364,23 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 */
 	private static boolean isRootRegion(String regionPath) {
 		return regionPath.lastIndexOf(Region.SEPARATOR) <= 0;
+	}
+
+	/**
+	 * Normalizes the {@link String name} of the Apache Geode/Pivotal GemFire System property by stripping off
+	 * the {@literal gemfire.} prefix.
+	 *
+	 * @param propertyName {@link String name} of the property to normalize.
+	 * @return the {@link String normalized form} of the Apache Geode/Pivotal GemFire System property.
+	 * @see <a href="http://geode.apache.org/docs/guide/16/reference/topics/gemfire_properties.html">GemFire Properties</a>
+	 */
+	private static String normalizeGemFirePropertyName(String propertyName) {
+
+		return Optional.ofNullable(propertyName)
+			.filter(StringUtils::hasText)
+			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
+			.map(it -> it.substring(GEMFIRE_SYSTEM_PROPERTIES_PREFIX.length()))
+			.orElse(propertyName);
 	}
 
 	/**
@@ -2615,7 +2663,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(cacheFactory);
-			return rememberMockedGemFireCache(resolvedMockCache, useSingletonCache);
+			return rememberMockedGemFireCache(instantiateGemFireObjects(resolvedMockCache), useSingletonCache);
 		}).when(cacheFactorySpy).create();
 
 		return cacheFactorySpy;
@@ -2782,7 +2830,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(clientCacheFactory);
-			return rememberMockedGemFireCache(resolvedMockedClientCache, useSingletonCache);
+			return rememberMockedGemFireCache(instantiateGemFireObjects(resolvedMockedClientCache), useSingletonCache);
 		}).when(clientCacheFactorySpy).create();
 
 		return clientCacheFactorySpy;
@@ -2842,15 +2890,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				System.getProperty(propertyName)));
 
 		return gemfireSystemProperties;
-	}
-
-	private static String normalizeGemFirePropertyName(String propertyName) {
-
-		return Optional.ofNullable(propertyName)
-			.filter(StringUtils::hasText)
-			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
-			.map(it -> it.substring(GEMFIRE_SYSTEM_PROPERTIES_PREFIX.length()))
-			.orElse(propertyName);
 	}
 
 	public static class LuceneIndexKey {
