@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.apache.geode.internal.net.SocketCreatorFactory;
 import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 
@@ -48,18 +49,24 @@ public abstract class IntegrationTestsSupport {
 	protected static final String TEST_GEMFIRE_LOG_LEVEL = "error";
 
 	@BeforeClass
-	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
-		closeGemFireCacheWaitOnCloseEvent();
-	}
-
-	@BeforeClass
-	public static void clearAllSpringPrefixedSystemProperties() {
+	public static void clearAllSpringDotPrefixedSystemProperties() {
 
 		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
 			.filter(it -> it.toLowerCase().startsWith("spring"))
 			.collect(Collectors.toList());
 
 		springSystemProperties.forEach(System::clearProperty);
+	}
+
+	@BeforeClass
+	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
+		closeGemFireCacheWaitOnCloseEvent();
+	}
+
+	@BeforeClass
+	public static void closeAnyExistingSocketConfigurationBeforeTestExecution() {
+		SocketCreatorFactory.close();
+		//SSLConfigurationFactory.close();
 	}
 
 	public static void closeGemFireCacheWaitOnCloseEvent() {
