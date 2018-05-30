@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.geode.cache.CacheClosedException;
@@ -48,11 +49,25 @@ public abstract class IntegrationTestsSupport {
 	protected static final String GEMFIRE_LOG_LEVEL_PROPERTY = "spring.data.gemfire.log.level";
 	protected static final String TEST_GEMFIRE_LOG_LEVEL = "error";
 
+	private static final Predicate<String> GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE =
+		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("gemfire");
+
+	private static final Predicate<String> GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE =
+		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("geode");
+
+	private static final Predicate<String> SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE =
+		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("spring");
+
+	private static final Predicate<String> ALL_SYSTEM_PROPERTIES_NAME_PREDICATE =
+		GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE
+			.or(GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
+			.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
+
 	@BeforeClass
-	public static void clearAllSpringDotPrefixedSystemProperties() {
+	public static void clearAllSpringGeodeGemFireDotPrefixedSystemProperties() {
 
 		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
-			.filter(it -> it.toLowerCase().startsWith("spring"))
+			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
 			.collect(Collectors.toList());
 
 		springSystemProperties.forEach(System::clearProperty);
