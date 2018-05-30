@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -42,6 +41,7 @@ import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newU
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,12 +136,15 @@ import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationE
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
  * Mock GemFire Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
  *
  * @author John Blum
+ * @see java.io.File
+ * @see java.net.InetSocketAddress
  * @see java.util.Properties
  * @see org.apache.geode.cache.AttributesMutator
  * @see org.apache.geode.cache.Cache
@@ -199,6 +202,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
 
 	private static final AtomicReference<GemFireCache> singletonCache = new AtomicReference<>(null);
+	private static final AtomicReference<Properties> gemfireProperties = new AtomicReference<>(new Properties());
 
 	private static final Map<String, DiskStore> diskStores = new ConcurrentHashMap<>();
 
@@ -206,6 +210,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
 
+	private static final String CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME = "dsProps";
+	private static final String CLIENT_CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME = "dsProps";
+	private static final String GEMFIRE_SYSTEM_PROPERTIES_PREFIX = "gemfire.";
 	private static final String FROM_KEYWORD = "FROM";
 	private static final String WHERE_KEYWORD = "WHERE";
 
@@ -216,6 +223,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 */
 	public static void destroy() {
 		singletonCache.set(null);
+		gemfireProperties.set(new Properties());
 		diskStores.clear();
 		regions.clear();
 		regionAttributes.clear();
@@ -1139,7 +1147,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		DistributedSystem mockDistributedSystem = mock(DistributedSystem.class);
 
-		when(mockDistributedSystem.getProperties()).thenReturn(new Properties());
+		when(mockDistributedSystem.getProperties()).thenAnswer(invocation -> gemfireProperties.get());
 		when(mockDistributedSystem.getReconnectedSystem()).thenAnswer(invocation -> mockDistributedSystem());
 
 		return mockDistributedSystem;
@@ -1560,7 +1568,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return regionService;
 	}
 
-	// TODO write additional mocking logic for the QueryService interface
+	// TODO: write additional mocking logic for the QueryService interface
 	public static QueryService mockQueryService() {
 
 		QueryService mockQueryService = mock(QueryService.class);
@@ -2605,7 +2613,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				return mockCache;
 			});
 
-		doReturn(rememberMockedGemFireCache(resolvedMockCache, useSingletonCache)).when(cacheFactorySpy).create();
+		doAnswer(invocation -> {
+			storeConfiguration(cacheFactory);
+			return rememberMockedGemFireCache(resolvedMockCache, useSingletonCache);
+		}).when(cacheFactorySpy).create();
 
 		return cacheFactorySpy;
 	}
@@ -2769,10 +2780,77 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				return mockClientCache;
 			});
 
-		doReturn(rememberMockedGemFireCache(resolvedMockedClientCache, useSingletonCache))
-			.when(clientCacheFactorySpy).create();
+		doAnswer(invocation -> {
+			storeConfiguration(clientCacheFactory);
+			return rememberMockedGemFireCache(resolvedMockedClientCache, useSingletonCache);
+		}).when(clientCacheFactorySpy).create();
 
 		return clientCacheFactorySpy;
+	}
+
+	private static void storeConfiguration(CacheFactory cacheFactory) {
+		storeConfiguration(cacheFactory, CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME);
+	}
+
+	private static void storeConfiguration(ClientCacheFactory clientCacheFactory) {
+		storeConfiguration(clientCacheFactory, CLIENT_CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME);
+	}
+
+	private static void storeConfiguration(Object cacheFactory, String staticDistributedSystemPropertiesVariableName) {
+
+		Properties localGemFireProperties = gemfireProperties.get();
+
+		localGemFireProperties.putAll(withGemFireApiProperties(cacheFactory,
+			staticDistributedSystemPropertiesVariableName));
+
+		localGemFireProperties.putAll(withGemFireSystemProperties());
+	}
+
+	private static Properties withGemFireApiProperties(Object cacheFactory,
+			String staticDistributedSystemPropertiesVariableName) {
+
+		try {
+
+			Class<?> cacheFactoryType = Optional.ofNullable(cacheFactory)
+				.map(Object::getClass)
+				.orElse((Class) Object.class);
+
+			Field dsPropsField = cacheFactoryType.getDeclaredField(staticDistributedSystemPropertiesVariableName);
+
+			dsPropsField.setAccessible(true);
+
+			Properties gemfireApiProperties = (Properties) dsPropsField.get(cacheFactory);
+
+			return gemfireApiProperties;
+		}
+		catch (Throwable ignore) {
+			return new Properties();
+		}
+	}
+
+	private static Properties withGemFireSystemProperties() {
+
+		Properties gemfireSystemProperties = new Properties();
+
+		List<String> gemfireSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
+			.filter(StringUtils::hasText)
+			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
+			.collect(Collectors.toList());
+
+		gemfireSystemPropertyNames.stream().forEach(propertyName ->
+			gemfireSystemProperties.setProperty(normalizeGemFirePropertyName(propertyName),
+				System.getProperty(propertyName)));
+
+		return gemfireSystemProperties;
+	}
+
+	private static String normalizeGemFirePropertyName(String propertyName) {
+
+		return Optional.ofNullable(propertyName)
+			.filter(StringUtils::hasText)
+			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
+			.map(it -> it.substring(GEMFIRE_SYSTEM_PROPERTIES_PREFIX.length()))
+			.orElse(propertyName);
 	}
 
 	public static class LuceneIndexKey {
