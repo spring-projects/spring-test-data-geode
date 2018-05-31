@@ -26,8 +26,10 @@ import java.util.stream.Collectors;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.internal.net.SocketCreatorFactory;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
+import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 
 /**
  * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
@@ -82,6 +84,11 @@ public abstract class IntegrationTestsSupport {
 	public static void closeAnyExistingSocketConfigurationBeforeTestExecution() {
 		SocketCreatorFactory.close();
 		//SSLConfigurationFactory.close();
+	}
+
+	@AfterClass
+	public static void destroyAllGemFireMockObjects() {
+		GemFireMockObjectsSupport.destroy();
 	}
 
 	public static void closeGemFireCacheWaitOnCloseEvent() {
