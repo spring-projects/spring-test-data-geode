@@ -86,7 +86,7 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 
 	private static final boolean DEFAULT_SUBSCRIPTION_QUEUE_CONNECTION_FAILURE = true;
 
-	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(15);
+	private static final long DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
 	private static final CountDownLatch LATCH = new CountDownLatch(1);
 
