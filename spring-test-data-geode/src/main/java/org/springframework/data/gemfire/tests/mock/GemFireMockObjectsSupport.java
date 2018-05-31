@@ -130,6 +130,7 @@ import org.apache.geode.pdx.PdxSerializer;
 import org.apache.lucene.analysis.Analyzer;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
@@ -207,6 +208,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	private static final AtomicReference<GemFireCache> singletonCache = new AtomicReference<>(null);
 	private static final AtomicReference<Properties> gemfireProperties = new AtomicReference<>(new Properties());
 
+	private static final List<Object> cachedGemFireObjects = Collections.synchronizedList(new ArrayList<>());
+
 	private static final Map<String, DiskStore> diskStores = new ConcurrentHashMap<>();
 
 	private static final Map<String, Region<Object, Object>> regions = new ConcurrentHashMap<>();
@@ -231,11 +234,64 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * Destroys all mock object state.
 	 */
 	public static void destroy() {
+
 		singletonCache.set(null);
 		gemfireProperties.set(new Properties());
 		diskStores.clear();
 		regions.clear();
 		regionAttributes.clear();
+
+		destroyGemFireObjects();
+	}
+
+	/**
+	 * Destroys all {@link DisposableBean} based {@link Object GemFire objects}.
+	 */
+	private static void destroyGemFireObjects() {
+
+		cachedGemFireObjects.stream()
+			.filter(gemfireObject -> gemfireObject instanceof DisposableBean)
+			.map(gemfireObject -> (DisposableBean) gemfireObject)
+			.forEach(disposableBean -> {
+				ObjectUtils.doOperationSafely(() -> {
+					disposableBean.destroy();
+					return null;
+				});
+			});
+
+		cachedGemFireObjects.clear();
+	}
+
+	/**
+	 * Caches the given {@link Object GemFire object} in order to release resources on shutdown.
+	 *
+	 * @param gemfireObject {@link Object GemFire object} to cache.
+	 */
+	private static void cacheGemFireObject(Object gemfireObject) {
+		Optional.ofNullable(gemfireObject).ifPresent(cachedGemFireObjects::add);
+	}
+
+	/**
+	 * Instantiates all Apache Geode/Pivotal GemFire objects which have been declared
+	 * via {@link System#getProperties() System properties}.
+	 *
+	 * @param <T> {@link Class type} of the {@link GemFireCache}.
+	 * @param gemfireCache reference to the {@link GemFireCache} instance.
+	 * @return the given {@link GemFireCache} instance.
+	 * @see org.apache.geode.cache.GemFireCache
+	 */
+	private static <T extends GemFireCache> T constructGemFireObjects(T gemfireCache) {
+
+		Properties localGemfireProperties = gemfireProperties.get();
+
+		Arrays.stream(GEMFIRE_OBJECT_BASED_PROPERTIES)
+			.map(localGemfireProperties::getProperty)
+			.filter(StringUtils::hasText)
+			.filter(className -> ClassUtils.isPresent(className, ClassUtils.getDefaultClassLoader()))
+			.forEach(className ->
+				cacheGemFireObject(ReflectionUtils.createInstanceIfPresent(className, null)));
+
+		return gemfireCache;
 	}
 
 	/**
@@ -319,28 +375,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			}
 
 		}).orElse(DataPolicy.DEFAULT);
-	}
-
-	/**
-	 * Instantiates all Apache Geode/Pivotal GemFire objects which have been declared
-	 * via {@link System#getProperties() System properties}.
-	 *
-	 * @param <T> {@link Class type} of the {@link GemFireCache}.
-	 * @param gemfireCache reference to the {@link GemFireCache} instance.
-	 * @return the given {@link GemFireCache} instance.
-	 * @see org.apache.geode.cache.GemFireCache
-	 */
-	private static <T extends GemFireCache> T instantiateGemFireObjects(T gemfireCache) {
-
-		Properties localGemfireProperties = gemfireProperties.get();
-
-		Arrays.stream(GEMFIRE_OBJECT_BASED_PROPERTIES)
-			.map(localGemfireProperties::getProperty)
-			.filter(StringUtils::hasText)
-			.filter(className -> ClassUtils.isPresent(className, ClassUtils.getDefaultClassLoader()))
-			.forEach(className -> ReflectionUtils.createInstanceIfPresent(className, null));
-
-		return gemfireCache;
 	}
 
 	/**
@@ -2663,7 +2697,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(cacheFactory);
-			return rememberMockedGemFireCache(instantiateGemFireObjects(resolvedMockCache), useSingletonCache);
+			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockCache), useSingletonCache);
 		}).when(cacheFactorySpy).create();
 
 		return cacheFactorySpy;
@@ -2830,7 +2864,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(clientCacheFactory);
-			return rememberMockedGemFireCache(instantiateGemFireObjects(resolvedMockedClientCache), useSingletonCache);
+			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockedClientCache), useSingletonCache);
 		}).when(clientCacheFactorySpy).create();
 
 		return clientCacheFactorySpy;
