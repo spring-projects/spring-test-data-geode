@@ -25,6 +25,7 @@ import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
 import org.junit.After;
 import org.junit.Test;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport;
 import org.springframework.data.gemfire.tests.support.AbstractSecurityManager;
 
@@ -44,22 +45,52 @@ public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsS
 
 	@After
 	public void tearDown() {
+
 		GemFireMockObjectsSupport.destroy();
+
+		TestSecurityManager.constructed.set(false);
+		TestSecurityManager.destroyed.set(false);
+
+		TestSecurityPostProcessor.constructed.set(false);
 	}
 
 	@Test
-	public void instantiatesGemFireObjectsFromPropertiesSuccessfully() {
+	public void constructsGemFireObjectsFromPropertiesSuccessfully() {
 
 		Properties gemfireProperties = new Properties();
 
-		gemfireProperties.setProperty("name", "TestInstantiatesGemFireObjectsFromPropertiesSuccessfully");
+		gemfireProperties.setProperty("name", "TestConstructsGemFireObjectsFromPropertiesSuccessfully");
 		gemfireProperties.setProperty("security-manager", TestSecurityManager.class.getName());
 
-		assertThat(TestSecurityManager.CONSTRUCTED.get()).isFalse();
+		assertThat(TestSecurityManager.constructed.get()).isFalse();
 
 		GemFireMockObjectsSupport.spyOn(new CacheFactory(gemfireProperties)).create();
 
-		assertThat(TestSecurityManager.CONSTRUCTED.get()).isTrue();
+		assertThat(TestSecurityManager.constructed.get()).isTrue();
+	}
+
+	@Test
+	public void destroysConstructedGemFireObjectsFromPropertiesSuccessfully() {
+
+		Properties gemfireProperties = new Properties();
+
+		gemfireProperties.setProperty("name", "TestConstructsGemFireObjectsFromPropertiesSuccessfully");
+		gemfireProperties.setProperty("security-manager", TestSecurityManager.class.getName());
+		gemfireProperties.setProperty("security-post-processor", TestSecurityPostProcessor.class.getName());
+
+		assertThat(TestSecurityManager.constructed.get()).isFalse();
+		assertThat(TestSecurityManager.destroyed.get()).isFalse();
+		assertThat(TestSecurityPostProcessor.constructed.get()).isFalse();
+
+		GemFireMockObjectsSupport.spyOn(new CacheFactory(gemfireProperties)).create();
+
+		assertThat(TestSecurityManager.constructed.get()).isTrue();
+		assertThat(TestSecurityManager.destroyed.get()).isFalse();
+		assertThat(TestSecurityPostProcessor.constructed.get()).isTrue();
+
+		GemFireMockObjectsSupport.destroyGemFireObjects();
+
+		assertThat(TestSecurityManager.destroyed.get()).isTrue();
 	}
 
 	@Test
@@ -107,12 +138,27 @@ public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsS
 		}
 	}
 
-	public static final class TestSecurityManager extends AbstractSecurityManager {
+	public static final class TestSecurityManager extends AbstractSecurityManager implements DisposableBean {
 
-		private static final AtomicBoolean CONSTRUCTED = new AtomicBoolean(false);
+		private static final AtomicBoolean constructed = new AtomicBoolean(false);
+		private static final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 		public TestSecurityManager() {
-			CONSTRUCTED.set(true);
+			constructed.set(true);
+		}
+
+		@Override
+		public void destroy() throws Exception {
+			destroyed.set(true);
+		}
+	}
+
+	public static final class TestSecurityPostProcessor {
+
+		private static final AtomicBoolean constructed = new AtomicBoolean(false);
+
+		public TestSecurityPostProcessor() {
+			constructed.set(true);
 		}
 	}
 }

@@ -247,7 +247,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	/**
 	 * Destroys all {@link DisposableBean} based {@link Object GemFire objects}.
 	 */
-	private static void destroyGemFireObjects() {
+	static void destroyGemFireObjects() {
 
 		cachedGemFireObjects.stream()
 			.filter(gemfireObject -> gemfireObject instanceof DisposableBean)
