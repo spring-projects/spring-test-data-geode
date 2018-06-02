@@ -215,6 +215,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 				}
 
 				return it.isRunning();
+
 			})
 			.orElse(true);
 	}
