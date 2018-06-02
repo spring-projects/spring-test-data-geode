@@ -17,8 +17,8 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>spring-test-data-geode</module>
-		<module>spring-test-data-gemfire</module>
+		<module>spring-data-geode-test</module>
+		<module>spring-data-gemfire-test</module>
 	</modules>
 
 	<name>Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data</name>

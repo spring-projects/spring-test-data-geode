@@ -11,13 +11,13 @@
 		<version>0.0.1.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>spring-test-data-geode</artifactId>
+	<artifactId>spring-data-gemfire-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Spring Test Framework for Apache Geode using Spring Data for Apache Geode</name>
+	<name>Spring Test Framework for Pivotal GemFire</name>
 	<description>
 		Module using Spring Framework's TestContext to write both Unit and Integration Tests
-		for Spring Data for Apache Geode applications.
+		for Spring Data for Pivotal GemFire applications.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 
@@ -66,7 +66,18 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-geode</artifactId>
+			<artifactId>spring-test-data-geode</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.data</groupId>
+					<artifactId>spring-data-geode</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-gemfire</artifactId>
 		</dependency>
 	</dependencies>
 

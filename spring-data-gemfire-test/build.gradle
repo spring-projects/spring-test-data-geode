@@ -1,16 +1,14 @@
 apply plugin: 'io.spring.convention.spring-module'
-
 apply from: IDE_GRADLE
 
-description = "Spring Test for Pivotal GemFire"
+description = "Spring Test Framework for Pivotal GemFire"
 
 dependencies {
 
-	compile(project(':spring-test-data-geode')) {
+	compile(project(':spring-data-geode-test')) {
 		exclude group: "org.springframework.data", module: "spring-data-geode"
 	}
 
 	compile "org.springframework.data:spring-data-gemfire"
 
 }
-

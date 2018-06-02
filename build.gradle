@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'io.spring.convention.root'
 
 group = 'org.springframework.data'
-description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data'
+description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data.'
 
 ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
