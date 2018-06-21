@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath 'io.spring.gradle:spring-build-conventions:0.0.15.RELEASE'
+    classpath 'io.spring.gradle:spring-build-conventions:0.0.16.RELEASE'
     classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
   }
   repositories {
@@ -18,6 +18,3 @@ ext.snapshotBuild = version.endsWith('SNAPSHOT')
 ext.milestoneBuild = !(releaseBuild || snapshotBuild)
 
 ext.IDE_GRADLE = "$rootDir/gradle/ide.gradle"
-
-ext['apache-geode.version'] = '1.6.0'
-
