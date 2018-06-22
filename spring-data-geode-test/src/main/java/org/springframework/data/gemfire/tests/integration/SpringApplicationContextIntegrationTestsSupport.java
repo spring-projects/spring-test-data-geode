@@ -18,7 +18,7 @@ package org.springframework.data.gemfire.tests.integration;
 
 import java.util.Optional;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -43,7 +43,7 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 	private volatile ConfigurableApplicationContext applicationContext;
 
-	@AfterClass
+	@After
 	public void closeApplicationContext() {
 		Optional.ofNullable(this.applicationContext).ifPresent(ConfigurableApplicationContext::close);
 	}
