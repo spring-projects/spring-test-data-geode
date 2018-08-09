@@ -2095,9 +2095,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		Region<K, V> mockRegion = mock(Region.class, name);
 
+		RegionAttributes<K, V> mockRegionAttributes = mockRegionAttributes(mockRegion, regionAttributes);
+
 		Set<Region<?, ?>> subRegions = new CopyOnWriteArraySet<>();
 
-		when(mockRegion.getAttributes()).thenAnswer(invocation -> mockRegionAttributes(mockRegion, regionAttributes));
+		when(mockRegion.getAttributes()).thenReturn(mockRegionAttributes);
 		when(mockRegion.getFullPath()).thenReturn(toRegionPath(name));
 		when(mockRegion.getName()).thenReturn(toRegionName(name));
 		when(mockRegion.getRegionService()).thenReturn(regionService);
@@ -2150,12 +2152,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockAttributesMutator.getEvictionAttributesMutator()).thenReturn(mockEvictionAttributesMutator);
 		when(mockAttributesMutator.getRegion()).thenReturn(mockRegion);
 
+		AtomicBoolean cloningEnabled = new AtomicBoolean(baseRegionAttributes.getCloningEnabled());
+
 		AtomicInteger evictionMaximum =
 			new AtomicInteger(Optional.ofNullable(baseRegionAttributes.getEvictionAttributes())
 				.map(EvictionAttributes::getMaximum)
 				.orElse(EvictionAttributes.DEFAULT_ENTRIES_MAXIMUM));
-
-		AtomicReference<Boolean> cloningEnabled = new AtomicReference<>(null);
 
 		AtomicReference<CacheLoader<K, V>> cacheLoader = new AtomicReference<>(baseRegionAttributes.getCacheLoader());
 
@@ -2198,8 +2200,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newAdder(gatewaySenderIds, null)).
 			when(mockAttributesMutator).addGatewaySenderId(anyString());
 
-		when(mockAttributesMutator.getCloningEnabled()).thenAnswer(newGetter(() ->
-			Optional.ofNullable(cloningEnabled.get()).orElseGet(baseRegionAttributes::getCloningEnabled)));
+		when(mockAttributesMutator.getCloningEnabled()).thenAnswer(newGetter(cloningEnabled::get));
 
 		doAnswer(invocation -> {
 
