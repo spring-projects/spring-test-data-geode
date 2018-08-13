@@ -30,10 +30,14 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.data.gemfire.config.annotation.CacheServerConfigurer;
 import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
+import org.springframework.data.gemfire.config.annotation.EnableLocator;
+import org.springframework.data.gemfire.config.annotation.EnableLogging;
+import org.springframework.data.gemfire.config.annotation.EnableManager;
 import org.springframework.data.gemfire.support.ConnectionEndpoint;
 import org.springframework.util.ClassUtils;
 
@@ -81,6 +85,13 @@ public class ClientServerIntegrationTestsConfiguration {
 
 		return (beanName, cacheServerFactoryBean) -> cacheServerFactoryBean.setPort(port);
 	}
+
+	@Configuration
+	@EnableLocator
+	@EnableLogging
+	@EnableManager(start = true)
+	@Profile("locator-manager")
+	static class LocatorManagerConfiguration { }
 
 	public static class SpringBootIsAbsentCondition implements Condition {
 
