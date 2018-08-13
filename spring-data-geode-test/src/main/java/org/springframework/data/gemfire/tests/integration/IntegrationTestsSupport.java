@@ -66,7 +66,7 @@ public abstract class IntegrationTestsSupport {
 			.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
 
 	@BeforeClass
-	public static void clearAllSpringGeodeGemFireDotPrefixedSystemProperties() {
+	public static void clearAllSpringApacheGeodeAndPivotalGemFireDotPrefixedSystemProperties() {
 
 		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
 			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
