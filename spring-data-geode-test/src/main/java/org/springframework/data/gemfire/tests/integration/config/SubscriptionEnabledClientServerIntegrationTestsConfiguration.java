@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.gemfire.client.ClientCacheFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
 import org.springframework.data.gemfire.client.PoolFactoryBean;
@@ -115,7 +114,7 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 			@SuppressWarnings("all")
 			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-				if (shouldVerifyGemFireServerIsRunning(bean, beanName)) {
+				if (doVerifyGemFireServerIsRunning(bean, beanName)) {
 					try {
 						verifyClientCacheSubscriptionQueueConnectionsEstablished();
 						verifyClientCacheNotified();
@@ -128,18 +127,14 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 				return bean;
 			}
 
-			private boolean shouldVerifyGemFireServerIsRunning(Object bean, String beanName) {
+			private boolean doVerifyGemFireServerIsRunning(Object bean, String beanName) {
 
-				return isBeanOfImportance(bean, beanName)
+				return isVeryImportantBean(bean, beanName)
 					&& verifyGemFireServerIsRunning.compareAndSet(true, false);
 			}
 
-			private boolean isBeanOfImportance(Object bean, String beanName) {
+			private boolean isVeryImportantBean(Object bean, String beanName) {
 				return isContinuousQueryListenerContainer(bean) || isProxyClientRegion(bean);
-			}
-
-			private boolean isClientCache(Object bean) {
-				return bean instanceof ClientCacheFactoryBean;
 			}
 
 			private boolean isContinuousQueryListenerContainer(Object bean) {
@@ -171,7 +166,7 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 
 			@SuppressWarnings("unchecked")
 			private Optional<ClientRegionShortcut> resolveClientRegionShortcut(
-				ClientRegionFactoryBean<?, ?> clientRegionFactoryBean) {
+					ClientRegionFactoryBean<?, ?> clientRegionFactoryBean) {
 
 				try {
 
