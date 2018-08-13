@@ -54,10 +54,15 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 		applicationContext.register(annotatedClasses);
 		applicationContext.registerShutdownHook();
+		processBeforeRefresh(applicationContext);
 		applicationContext.refresh();
 
 		this.applicationContext = applicationContext;
 
+		return applicationContext;
+	}
+
+	protected ConfigurableApplicationContext processBeforeRefresh(ConfigurableApplicationContext applicationContext) {
 		return applicationContext;
 	}
 
