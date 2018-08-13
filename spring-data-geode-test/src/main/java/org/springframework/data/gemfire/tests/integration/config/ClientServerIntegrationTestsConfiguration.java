@@ -26,11 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.data.gemfire.config.annotation.CacheServerConfigurer;
 import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
 import org.springframework.data.gemfire.support.ConnectionEndpoint;
+import org.springframework.util.ClassUtils;
 
 /**
  * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class
@@ -56,6 +61,7 @@ public class ClientServerIntegrationTestsConfiguration {
 	}
 
 	@Bean
+	@Conditional(SpringBootIsAbsentCondition.class)
 	// Required bean to resolve property placeholders in Spring @Value annotations.
 	static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
@@ -74,5 +80,15 @@ public class ClientServerIntegrationTestsConfiguration {
 			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":40404}") int port) {
 
 		return (beanName, cacheServerFactoryBean) -> cacheServerFactoryBean.setPort(port);
+	}
+
+	public static class SpringBootIsAbsentCondition implements Condition {
+
+		@Override
+		@SuppressWarnings("all")
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return !ClassUtils.isPresent("org.springframework.boot.SpringApplication",
+				Thread.currentThread().getContextClassLoader());
+		}
 	}
 }
