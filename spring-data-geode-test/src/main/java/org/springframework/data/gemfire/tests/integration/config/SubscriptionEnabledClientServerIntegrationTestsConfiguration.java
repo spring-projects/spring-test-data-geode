@@ -25,6 +25,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
@@ -38,10 +40,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.gemfire.client.ClientCacheFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
 import org.springframework.data.gemfire.client.PoolFactoryBean;
-import org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer;
 import org.springframework.data.gemfire.config.xml.GemfireConstants;
 import org.springframework.data.gemfire.listener.ContinuousQueryListenerContainer;
 import org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport;
@@ -120,15 +122,32 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 	}
 
 	private long resolveTimeout() {
+
 		Long timeout = getTimeout();
+
 		return Math.max(timeout != null ? timeout : DEFAULT_TIMEOUT, 0);
 	}
 
 	@Bean
-	ClientCacheConfigurer clientCachePoolSocketConnectTimeoutConfigurer() {
+	BeanPostProcessor clientCachePoolSocketConnectTimeoutBeanPostProcessor() {
 
-		return (beanName, clientCacheFactoryBean) ->
-			clientCacheFactoryBean.setSocketConnectTimeout(Long.valueOf(resolveSocketConnectTimeout()).intValue());
+		return new BeanPostProcessor() {
+
+			@Nullable @Override @SuppressWarnings("all")
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+
+				if (bean instanceof ClientCacheFactoryBean) {
+					((ClientCacheFactoryBean) bean).setSocketConnectTimeout(
+						Long.valueOf(resolveSocketConnectTimeout()).intValue());
+				}
+				else if (bean instanceof PoolFactoryBean) {
+					((PoolFactoryBean) bean).setSocketConnectTimeout(
+						Long.valueOf(resolveSocketConnectTimeout()).intValue());
+				}
+
+				return bean;
+			}
+		};
 	}
 
 	@Bean
@@ -162,34 +181,29 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 			}
 
 			private boolean isVeryImportantBean(Object bean, String beanName) {
-				return isContinuousQueryListenerContainer(bean) || isProxyClientRegion(bean);
+				return isContinuousQueryListenerContainer(bean) || isClientProxyRegion(bean);
 			}
 
 			private boolean isContinuousQueryListenerContainer(Object bean) {
 				return bean instanceof ContinuousQueryListenerContainer;
 			}
 
-			private boolean isProxyClientRegion(Object bean) {
+			private boolean isClientProxyRegion(Object bean) {
 
 				if (bean instanceof ClientRegionFactoryBean) {
 
 					ClientRegionFactoryBean<?, ?> clientRegionFactoryBean = (ClientRegionFactoryBean) bean;
 
-					Optional<String> poolName = clientRegionFactoryBean.getPoolName()
-						.filter(StringUtils::hasText);
-
-					Optional<ClientRegionShortcut> clientRegionShortcut =
-						resolveClientRegionShortcut(clientRegionFactoryBean)
-							.filter(this::isProxyClientRegion);
-
-					return poolName.isPresent() || clientRegionShortcut.isPresent();
+					return clientRegionFactoryBean.getPoolName()
+						.filter(StringUtils::hasText)
+						.map(it -> true)
+						.orElseGet(() -> resolveClientRegionShortcut(clientRegionFactoryBean)
+							.map(ClientRegionShortcutWrapper::valueOf)
+							.filter(ClientRegionShortcutWrapper::isProxy)
+							.isPresent());
 				}
 
 				return false;
-			}
-
-			private boolean isProxyClientRegion(ClientRegionShortcut clientRegionShortcut) {
-				return ClientRegionShortcutWrapper.valueOf(clientRegionShortcut).isProxy();
 			}
 
 			@SuppressWarnings("unchecked")
@@ -269,34 +283,15 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 		};
 	}
 
-	@Bean
-	BeanPostProcessor poolSocketConnectTimeoutPostProcessor() {
+	@PostConstruct
+	public void registerClientMembershipListener() {
 
-		return new BeanPostProcessor() {
+		ClientMembership.registerClientMembershipListener(new ClientMembershipListenerAdapter() {
 
-			@Nullable @Override @SuppressWarnings("all")
-			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-				if (bean instanceof PoolFactoryBean) {
-					((PoolFactoryBean) bean).setSocketConnectTimeout(
-						Long.valueOf(resolveSocketConnectTimeout()).intValue());
-				}
-
-				return bean;
+			@Override
+			public void memberJoined(ClientMembershipEvent event) {
+				LATCH.countDown();
 			}
-		};
-	}
-	@Bean
-	ClientCacheConfigurer registerClientMembershipListener() {
-
-		return (beanName, bean) ->
-
-			ClientMembership.registerClientMembershipListener(new ClientMembershipListenerAdapter() {
-
-				@Override
-				public void memberJoined(ClientMembershipEvent event) {
-					LATCH.countDown();
-				}
-			});
+		});
 	}
 }
