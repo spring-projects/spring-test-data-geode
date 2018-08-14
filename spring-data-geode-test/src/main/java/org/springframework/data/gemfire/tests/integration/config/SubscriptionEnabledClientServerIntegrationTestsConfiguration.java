@@ -97,8 +97,38 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 
 	private static final String LOCALHOST = ClientServerIntegrationTestsSupport.DEFAULT_HOSTNAME;
 
+	protected Long getSocketConnectTimeout() {
+		return resolveTimeout() / 2;
+	}
+
+	protected Long getTimeout() {
+		return DEFAULT_TIMEOUT;
+	}
+
 	protected boolean isThrowExceptionOnSubscriptionQueueConnectionFailure() {
 		return DEFAULT_SUBSCRIPTION_QUEUE_CONNECTION_FAILURE;
+	}
+
+	private long resolveSocketConnectTimeout() {
+
+		Long socketConnectTimeout = getSocketConnectTimeout();
+
+		long resolvedTimeout = resolveTimeout();
+		long resolvedSocketConnectTimeout = socketConnectTimeout != null ? socketConnectTimeout : resolvedTimeout;
+
+		return Math.min(Math.max(resolvedSocketConnectTimeout, 0), resolvedTimeout / 2);
+	}
+
+	private long resolveTimeout() {
+		Long timeout = getTimeout();
+		return Math.max(timeout != null ? timeout : DEFAULT_TIMEOUT, 0);
+	}
+
+	@Bean
+	ClientCacheConfigurer clientCachePoolSocketConnectTimeoutConfigurer() {
+
+		return (beanName, clientCacheFactoryBean) ->
+			clientCacheFactoryBean.setSocketConnectTimeout(Long.valueOf(resolveSocketConnectTimeout()).intValue());
 	}
 
 	@Bean
@@ -109,15 +139,13 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 
 			private final AtomicBoolean verifyGemFireServerIsRunning = new AtomicBoolean(true);
 
-			@Nullable
-			@Override
-			@SuppressWarnings("all")
+			@Nullable @Override @SuppressWarnings("all")
 			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-				if (doVerifyGemFireServerIsRunning(bean, beanName)) {
+				if (isGemFireServerRunningVerificationEnabled(bean, beanName)) {
 					try {
+						verifyClientCacheMemberJoined();
 						verifyClientCacheSubscriptionQueueConnectionsEstablished();
-						verifyClientCacheNotified();
 					}
 					catch (InterruptedException cause) {
 						Thread.currentThread().interrupt();
@@ -127,7 +155,7 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 				return bean;
 			}
 
-			private boolean doVerifyGemFireServerIsRunning(Object bean, String beanName) {
+			private boolean isGemFireServerRunningVerificationEnabled(Object bean, String beanName) {
 
 				return isVeryImportantBean(bean, beanName)
 					&& verifyGemFireServerIsRunning.compareAndSet(true, false);
@@ -184,30 +212,24 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 			}
 
 			@SuppressWarnings("all")
-			private void verifyClientCacheNotified() throws InterruptedException {
+			private void verifyClientCacheMemberJoined() throws InterruptedException {
 
-				boolean success = LATCH.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
+				String errorMessage =
+					String.format("CacheServer failed to start on host [%s] and port [%d]", LOCALHOST, port);
 
-				String errorMessage = String.format("CacheServer failed to start on host [%s] and port [%d]",
-					LOCALHOST, port);
-
-				if (success) {
-					Assert.state(success, errorMessage);
-				}
-				else if (getLogger().isWarnEnabled()) {
-					getLogger().warn(errorMessage);
-				}
+				Assert.state(LATCH.await(resolveTimeout(), TimeUnit.MILLISECONDS), errorMessage);
 			}
 
 			@SuppressWarnings("all")
 			private void verifyClientCacheSubscriptionQueueConnectionsEstablished() {
 
 				resolvePools().stream()
+					.filter(pool -> pool.getSubscriptionEnabled())
 					.filter(pool -> pool instanceof PoolImpl)
 					.map(pool -> (PoolImpl) pool)
 					.forEach(pool -> {
 
-						long timeout = System.currentTimeMillis() + DEFAULT_TIMEOUT;
+						long timeout = System.currentTimeMillis() + resolveTimeout();
 
 						while (System.currentTimeMillis() < timeout && !pool.isPrimaryUpdaterAlive()) {
 							synchronized (pool) {
@@ -231,6 +253,7 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 					});
 			}
 
+			// TODO: PoolManager.getAll() will not include the "DEFAULT" Pool
 			private Collection<Pool> resolvePools() {
 
 				eagerlyInitializeSpringManagedPoolBeans();
@@ -246,6 +269,23 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 		};
 	}
 
+	@Bean
+	BeanPostProcessor poolSocketConnectTimeoutPostProcessor() {
+
+		return new BeanPostProcessor() {
+
+			@Nullable @Override @SuppressWarnings("all")
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+
+				if (bean instanceof PoolFactoryBean) {
+					((PoolFactoryBean) bean).setSocketConnectTimeout(
+						Long.valueOf(resolveSocketConnectTimeout()).intValue());
+				}
+
+				return bean;
+			}
+		};
+	}
 	@Bean
 	ClientCacheConfigurer registerClientMembershipListener() {
 
