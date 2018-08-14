@@ -22,6 +22,7 @@ import java.util.Collections;
 
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
+import org.apache.geode.cache.server.CacheServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,16 +43,26 @@ import org.springframework.data.gemfire.support.ConnectionEndpoint;
 import org.springframework.util.ClassUtils;
 
 /**
- * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class
- * that registers a {@link ClientCacheConfigurer} used to configure the {@link ClientCache} {@link Pool} port
+ * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class that registers
+ * a {@link ClientCacheConfigurer} used to configure the {@link ClientCache} {@literal DEFAULT} {@link Pool} port
  * to connect to the launched Apache Geode/Pivotal GemFire Server during integration testing.
+ *
+ * Additionally, this class registers a {@link CacheServerConfigurer} to configure the {@link CacheServer} port.
+ *
+ * Finally, this class provides a Spring {@link Configuration} class enable the embedded Locator and Manager services
+ * in a server providing the {@literal locator-manager} Spring profile is activated.
  *
  * @author John Blum
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.apache.geode.cache.client.Pool
+ * @see org.apache.geode.cache.server.CacheServer
  * @see org.springframework.context.annotation.Bean
  * @see org.springframework.context.annotation.Configuration
+ * @see org.springframework.context.annotation.Profile
+ * @see org.springframework.data.gemfire.config.annotation.CacheServerConfigurer
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheConfigurer
+ * @see org.springframework.data.gemfire.config.annotation.EnableLocator
+ * @see org.springframework.data.gemfire.config.annotation.EnableManager
  * @since 1.0.0
  */
 @Configuration
@@ -98,6 +109,7 @@ public class ClientServerIntegrationTestsConfiguration {
 		@Override
 		@SuppressWarnings("all")
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+
 			return !ClassUtils.isPresent("org.springframework.boot.SpringApplication",
 				Thread.currentThread().getContextClassLoader());
 		}
