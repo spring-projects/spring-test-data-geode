@@ -22,6 +22,7 @@ import static org.springframework.data.gemfire.util.ArrayUtils.asArray;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -35,7 +36,6 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.tests.util.SocketUtils;
-import org.springframework.data.gemfire.tests.util.ThreadUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
 
 /**
@@ -97,7 +97,10 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		ServerSocket serverSocket = null;
 
 		try {
-			serverSocket = new ServerSocket(0);
+			serverSocket = new ServerSocket();
+			serverSocket.setReuseAddress(true);
+			serverSocket.bind(new InetSocketAddress(0));
+
 			return serverSocket.getLocalPort();
 		}
 		finally {
@@ -232,30 +235,27 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		return waitForServerToStart(host, port, DEFAULT_WAIT_DURATION);
 	}
 
-	protected static boolean waitForServerToStart(final String host, final int port, long duration) {
+	protected static boolean waitForServerToStart(String host, int port, long duration) {
 
-		return ThreadUtils.timedWait(duration, DEFAULT_WAIT_INTERVAL, new ThreadUtils.WaitCondition() {
+		AtomicBoolean connected = new AtomicBoolean(false);
 
-			AtomicBoolean connected = new AtomicBoolean(false);
+		return waitOn(() -> {
 
-			public boolean waiting() {
+			Socket socket = null;
 
-				Socket socket = null;
-
-				try {
-					if (!connected.get()) {
-						socket = new Socket(host, port);
-						connected.set(true);
-					}
+			try {
+				if (!connected.get()) {
+					socket = new Socket(host, port);
+					connected.set(true);
 				}
-				catch (IOException ignore) {
-				}
-				finally {
-					SocketUtils.close(socket);
-				}
-
-				return !connected.get();
 			}
-		});
+			catch (IOException ignore) { }
+			finally {
+				SocketUtils.close(socket);
+			}
+
+			return !connected.get();
+
+		}, duration);
 	}
 }
