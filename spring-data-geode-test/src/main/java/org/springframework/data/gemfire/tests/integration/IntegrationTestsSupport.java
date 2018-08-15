@@ -128,15 +128,20 @@ public abstract class IntegrationTestsSupport {
 		return waitOn(condition, DEFAULT_WAIT_DURATION);
 	}
 
-	@SuppressWarnings("all")
 	protected static boolean waitOn(Condition condition, long duration) {
+		return waitOn(condition, duration, DEFAULT_WAIT_INTERVAL);
+	}
 
+	@SuppressWarnings("all")
+	protected static boolean waitOn(Condition condition, long duration, long interval) {
+
+		long resolvedInterval = Math.max(Math.min(interval, duration), 1);
 		long timeout = System.currentTimeMillis() + duration;
 
 		try {
 			while (!condition.evaluate() && System.currentTimeMillis() < timeout) {
 				synchronized (condition) {
-					TimeUnit.MILLISECONDS.timedWait(condition, DEFAULT_WAIT_INTERVAL);
+					TimeUnit.MILLISECONDS.timedWait(condition, resolvedInterval);
 				}
 			}
 		}
