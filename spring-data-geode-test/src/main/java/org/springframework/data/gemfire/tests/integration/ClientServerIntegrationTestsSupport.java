@@ -254,7 +254,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 				SocketUtils.close(socket);
 			}
 
-			return !connected.get();
+			return connected.get();
 
 		}, duration);
 	}
