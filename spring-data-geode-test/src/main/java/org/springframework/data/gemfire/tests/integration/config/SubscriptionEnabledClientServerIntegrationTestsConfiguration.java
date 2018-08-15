@@ -85,8 +85,11 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration
  * @since 1.0.0
+ * @deprecated This class provides not benefit since the Region and associated Pool are created and initialized
+ * in the same breath.
  */
 @Configuration
+@Deprecated
 @SuppressWarnings("unused")
 public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 		extends ClientServerIntegrationTestsConfiguration {
