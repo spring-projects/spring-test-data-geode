@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.Optional;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -37,9 +38,12 @@ import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBean
  * @author John Blum
  * @see java.lang.annotation.Annotation
  * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.context.ApplicationListener
  * @see org.springframework.context.annotation.Bean
  * @see org.springframework.context.annotation.Configuration
  * @see org.springframework.context.annotation.ImportAware
+ * @see org.springframework.context.event.ContextClosedEvent
+ * @see org.springframework.context.event.EventListener
  * @see org.springframework.core.annotation.AnnotationAttributes
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
@@ -48,7 +52,7 @@ import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBean
  */
 @Configuration
 @SuppressWarnings("unused")
-public class GemFireMockObjectsConfiguration implements ImportAware {
+public class GemFireMockObjectsConfiguration implements ApplicationListener<ContextClosedEvent>, ImportAware {
 
 	private boolean useSingletonCache = false;
 
@@ -92,7 +96,12 @@ public class GemFireMockObjectsConfiguration implements ImportAware {
 	}
 
 	@EventListener
-	public void releaseMockResources(ContextClosedEvent event) {
+	public void releaseMockObjectResources(ContextClosedEvent event) {
 		GemFireMockObjectsSupport.destroy();
+	}
+
+	@Override
+	public void onApplicationEvent(ContextClosedEvent event) {
+		releaseMockObjectResources(event);
 	}
 }
