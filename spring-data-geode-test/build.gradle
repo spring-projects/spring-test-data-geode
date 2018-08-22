@@ -8,10 +8,12 @@ repositories {
 
 dependencies {
 
+	compile "edu.umd.cs.mtc:multithreadedtc"
+	compile "junit:junit"
+	compile "org.assertj:assertj-core"
+	compile "org.mockito:mockito-core"
+	compile "org.projectlombok:lombok"
+	compile "org.springframework:spring-test"
 	compile "org.springframework.data:spring-data-geode"
-
-	compile("org.springframework.boot:spring-boot-starter-test") {
-		exclude group: "org.springframework.boot", module: "spring-boot-starter-logging";
-	}
 
 }
