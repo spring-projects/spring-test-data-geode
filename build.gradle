@@ -17,5 +17,3 @@ description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using 
 ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
 ext.milestoneBuild = !(releaseBuild || snapshotBuild)
-
-ext.IDE_GRADLE = "$rootDir/gradle/ide.gradle"
