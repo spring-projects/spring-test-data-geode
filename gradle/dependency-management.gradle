@@ -7,8 +7,8 @@ dependencyManagement {
 		dependency "edu.umd.cs.mtc:multithreadedtc:$multithreadedtcVersion"
 		dependency "junit:junit:$junitVersion"
 		dependency "org.assertj:assertj-core:$assertjVersion"
-		dependency "org.projectlombok:lombok:$lombokVersion"
 		dependency "org.mockito:mockito-core:$mockitoVersion"
+		dependency "org.projectlombok:lombok:$lombokVersion"
 		dependency "org.springframework.shell:spring-shell:$springShellVersion"
 	}
 }
