@@ -66,6 +66,13 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		return applicationContext;
 	}
 
+	protected <T extends ConfigurableApplicationContext> T setApplicationContext(T applicationContext) {
+
+		this.applicationContext = applicationContext;
+
+		return applicationContext;
+	}
+
 	@SuppressWarnings("unchecked")
 	protected <T extends ConfigurableApplicationContext> T getApplicationContext() {
 		return (T) this.applicationContext;
