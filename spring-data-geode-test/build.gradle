@@ -12,4 +12,6 @@ dependencies {
 	compile "org.springframework:spring-test"
 	compile "org.springframework.data:spring-data-geode"
 
+	provided "org.springframework.boot:spring-boot-starter"
+
 }
