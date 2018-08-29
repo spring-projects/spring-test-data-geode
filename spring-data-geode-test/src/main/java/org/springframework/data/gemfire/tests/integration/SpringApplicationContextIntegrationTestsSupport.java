@@ -57,9 +57,7 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		processBeforeRefresh(applicationContext);
 		applicationContext.refresh();
 
-		this.applicationContext = applicationContext;
-
-		return applicationContext;
+		return setApplicationContext(applicationContext);
 	}
 
 	protected ConfigurableApplicationContext processBeforeRefresh(ConfigurableApplicationContext applicationContext) {

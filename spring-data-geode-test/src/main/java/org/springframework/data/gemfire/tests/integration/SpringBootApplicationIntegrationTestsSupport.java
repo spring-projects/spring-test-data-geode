@@ -16,6 +16,7 @@
 
 package org.springframework.data.gemfire.tests.integration;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -27,6 +28,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * {@link SpringApplicationBuilder} class.
  *
  * @author John Blum
+ * @see org.springframework.boot.SpringApplication
  * @see org.springframework.boot.builder.SpringApplicationBuilder
  * @see org.springframework.context.ConfigurableApplicationContext
  * @see org.springframework.data.gemfire.tests.integration.SpringApplicationContextIntegrationTestsSupport
@@ -49,10 +51,18 @@ public abstract class SpringBootApplicationIntegrationTestsSupport
 	@Override
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
 
-		return setApplicationContext(new SpringApplicationBuilder(annotatedClasses)
+		return setApplicationContext(processBeforeRun(processBeforeBuild(new SpringApplicationBuilder(annotatedClasses)
 			.initializers(this::processBeforeRefresh)
-			.web(getWebApplicationType())
-			.build()
+			.web(getWebApplicationType()))
+			.build())
 			.run(getArguments()));
+	}
+
+	protected SpringApplicationBuilder processBeforeBuild(SpringApplicationBuilder springApplicationBuilder) {
+		return springApplicationBuilder;
+	}
+
+	protected SpringApplication processBeforeRun(SpringApplication springApplication) {
+		return springApplication;
 	}
 }
