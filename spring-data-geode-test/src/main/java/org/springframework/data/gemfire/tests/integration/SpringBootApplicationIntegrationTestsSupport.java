@@ -14,12 +14,11 @@
  *  permissions and limitations under the License.
  */
 
-package org.springframework.data.gemfire.tests.integration.config;
+package org.springframework.data.gemfire.tests.integration;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.gemfire.tests.integration.SpringApplicationContextIntegrationTestsSupport;
 
 /**
  * The {@link SpringBootApplicationIntegrationTestsSupport} class is an extension of Spring Test
