@@ -88,6 +88,7 @@
 		<lombok.version>1.18.2</lombok.version>
 		<mockito.version>2.21.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
+		<spring-boot.version>2.1.0.M2</spring-boot.version>
 		<spring-data-release-train.version>Lovelace-RC2</spring-data-release-train.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
@@ -125,6 +126,11 @@
 				<groupId>edu.umd.cs.mtc</groupId>
 				<artifactId>multithreadedtc</artifactId>
 				<version>${multithreadedtc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring-boot.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
