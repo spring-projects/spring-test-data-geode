@@ -56,7 +56,7 @@ public class GemFireMockObjectsConfiguration implements ApplicationListener<Cont
 
 	private boolean useSingletonCache = false;
 
-	@Override
+	@Override @SuppressWarnings("all")
 	public void setImportMetadata(AnnotationMetadata importingClassMetadata) {
 
 		Optional.of(importingClassMetadata)
@@ -100,7 +100,7 @@ public class GemFireMockObjectsConfiguration implements ApplicationListener<Cont
 		GemFireMockObjectsSupport.destroy();
 	}
 
-	@Override
+	@Override @SuppressWarnings("all")
 	public void onApplicationEvent(ContextClosedEvent event) {
 		releaseMockObjectResources(event);
 	}
