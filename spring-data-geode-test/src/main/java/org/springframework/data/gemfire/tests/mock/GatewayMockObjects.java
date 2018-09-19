@@ -54,7 +54,7 @@ public abstract class GatewayMockObjects extends MockObjectsSupport {
 		when(mockGatewayReceiver.getBindAddress()).thenReturn(bindAddress);
 		when(mockGatewayReceiver.getEndPort()).thenReturn(endPort);
 		when(mockGatewayReceiver.getHost()).thenReturn(host);
-		when(mockGatewayReceiver.getHostnameForSenders()).thenReturn(hostnameForSenders);
+		//when(mockGatewayReceiver.getHostnameForSenders()).thenReturn(hostnameForSenders);
 		when(mockGatewayReceiver.isManualStart()).thenReturn(manualStart);
 		when(mockGatewayReceiver.getMaximumTimeBetweenPings()).thenReturn(maxTimeBetweenPings);
 		when(mockGatewayReceiver.getPort()).thenReturn(port);
