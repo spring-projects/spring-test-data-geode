@@ -116,6 +116,7 @@ import org.apache.geode.cache.query.QueryService;
 import org.apache.geode.cache.query.QueryStatistics;
 import org.apache.geode.cache.server.CacheServer;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
+import org.apache.geode.cache.server.ServerLoadProbe;
 import org.apache.geode.cache.wan.GatewayEventFilter;
 import org.apache.geode.cache.wan.GatewayEventSubstitutionFilter;
 import org.apache.geode.cache.wan.GatewayReceiver;
@@ -836,6 +837,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		AtomicReference<String> bindAddress = new AtomicReference<>(CacheServer.DEFAULT_BIND_ADDRESS);
 		AtomicReference<String> hostnameForClients = new AtomicReference<>(CacheServer.DEFAULT_HOSTNAME_FOR_CLIENTS);
+		AtomicReference<ServerLoadProbe> serverLoadProbe = new AtomicReference<>(null);
 
 		doAnswer(newSetter(bindAddress, null))
 			.when(mockCacheServer).setBindAddress(anyString());
@@ -864,6 +866,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(port, null))
 			.when(mockCacheServer).setPort(anyInt());
 
+		doAnswer(newSetter(serverLoadProbe, null))
+			.when(mockCacheServer).setLoadProbe(any(ServerLoadProbe.class));
+
 		doAnswer(newSetter(socketBufferSize, null))
 			.when(mockCacheServer).setSocketBufferSize(anyInt());
 
@@ -879,7 +884,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockCacheServer.getHostnameForClients()).thenAnswer(newGetter(hostnameForClients));
 		when(mockCacheServer.getInterestRegistrationListeners()).thenReturn(Collections.emptySet());
 		when(mockCacheServer.getLoadPollInterval()).thenAnswer(newGetter(loadPollInterval));
-		when(mockCacheServer.getLoadProbe()).thenThrow(newUnsupportedOperationException(NOT_SUPPORTED));
+		when(mockCacheServer.getLoadProbe()).thenAnswer(newGetter(serverLoadProbe));
 		when(mockCacheServer.getMaxConnections()).thenAnswer(newGetter(maxConnections));
 		when(mockCacheServer.getMaximumMessageCount()).thenAnswer(newGetter(maxMessageCount));
 		when(mockCacheServer.getMaximumTimeBetweenPings()).thenAnswer(newGetter(maxTimeBetweenPings));
