@@ -44,6 +44,7 @@ import org.springframework.data.gemfire.util.RegionUtils;
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.Region
  * @see org.apache.geode.cache.client.ClientCache
+ * @see org.apache.geode.cache.control.ResourceManager
  * @see org.apache.geode.distributed.DistributedMember
  * @see org.apache.geode.distributed.DistributedSystem
  * @since 1.0.0
@@ -51,8 +52,11 @@ import org.springframework.data.gemfire.util.RegionUtils;
 @SuppressWarnings("unused")
 public abstract class CacheMockObjects {
 
-	private static <T extends GemFireCache> T mockGemFireCache(T mockGemFireCache,
+	@SuppressWarnings("unchecked")
+	public static <T extends GemFireCache> T mockGemFireCache(T mockGemFireCache,
 			DistributedSystem distributedSystem, ResourceManager resourceManager, Region<?, ?>... regions) {
+
+		mockGemFireCache = mockGemFireCache != null ? mockGemFireCache : (T) mock(GemFireCache.class);
 
 		when(mockGemFireCache.getDistributedSystem()).thenReturn(distributedSystem);
 		when(mockGemFireCache.getResourceManager()).thenReturn(resourceManager);
@@ -92,6 +96,19 @@ public abstract class CacheMockObjects {
 
 		return mockDistributeMember;
 
+	}
+
+	public static ResourceManager mockResourceManager(float criticalHeapPercentage, float criticalOffHeapPercentage,
+			float evictionHeapPercentage, float evictionOffHeapPercentage) {
+
+		ResourceManager mockResourceManager = mock(ResourceManager.class);
+
+		when(mockResourceManager.getCriticalHeapPercentage()).thenReturn(criticalHeapPercentage);
+		when(mockResourceManager.getCriticalOffHeapPercentage()).thenReturn(criticalOffHeapPercentage);
+		when(mockResourceManager.getEvictionHeapPercentage()).thenReturn(evictionHeapPercentage);
+		when(mockResourceManager.getEvictionOffHeapPercentage()).thenReturn(evictionOffHeapPercentage);
+
+		return mockResourceManager;
 	}
 
 	@SuppressWarnings("unchecked")
