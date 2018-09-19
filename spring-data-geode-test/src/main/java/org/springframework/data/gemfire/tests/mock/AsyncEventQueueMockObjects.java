@@ -24,8 +24,8 @@ import org.apache.geode.cache.wan.GatewaySender;
 
 /**
  * The {@link AsyncEventQueueMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link AsyncEventQueue} related objects in the {@literal org.apache.geode.cache.asyncqueue}
- * package.
+ * or Pivotal GemFire {@link AsyncEventQueue} objects and related objects in the
+ * {@literal org.apache.geode.cache.asyncqueue} package.
  *
  * @author John Blum
  * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
@@ -40,7 +40,7 @@ public abstract class AsyncEventQueueMockObjects {
 			boolean forwardExpirationDestroy, int maximumQueueMemory, GatewaySender.OrderPolicy orderPolicy,
 			boolean parallel, boolean persistent, boolean primary, int size) {
 
-		AsyncEventQueue mockAsyncEventQueue = mock(AsyncEventQueue.class);
+		AsyncEventQueue mockAsyncEventQueue = mock(AsyncEventQueue.class, id);
 
 		when(mockAsyncEventQueue.getId()).thenReturn(id);
 		when(mockAsyncEventQueue.isBatchConflationEnabled()).thenReturn(batchConflationEnabled);
