@@ -36,6 +36,7 @@ import org.apache.geode.cache.wan.GatewaySender;
  * @see org.apache.geode.cache.wan.GatewayReceiver
  * @see org.apache.geode.cache.wan.GatewaySender
  * @see org.mockito.Mockito
+ * @see org.springframework.data.gemfire.tests.mock.MockObjectsSupport
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
