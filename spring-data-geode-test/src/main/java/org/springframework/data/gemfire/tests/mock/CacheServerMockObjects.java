@@ -50,7 +50,7 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 	// TODO mock ClientSessions and InterestRegistrationListeners
 	public static CacheServer mockCacheServer(String bindAddress, ClientSubscriptionConfig clientSubscriptionConfig,
 			String hostnameForClients, long loadPollInterval, ServerLoadProbe serverLoadProbe, int maxConnections,
-			int maxMessageCount, int maxTimeBetweenPings, int maxThreads, int messageTimeToLive, int port,
+			int maxMessageCount, int maxThreads, int maxTimeBetweenPings, int messageTimeToLive, int port,
 			boolean running, int socketBufferSize, boolean tcpNoDelay) throws Exception {
 
 		AtomicBoolean runningState = new AtomicBoolean(running);
@@ -58,7 +58,7 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 		CacheServer mockCacheServer = mock(CacheServer.class);
 
 		when(mockCacheServer.getBindAddress()).thenReturn(bindAddress);
-		when(mockCacheServer.getClientSubscriptionConfig()).thenReturn(clientSubscriptionConfig);
+		when(mockCacheServer.getHostnameForClients()).thenReturn(hostnameForClients);
 		when(mockCacheServer.getLoadPollInterval()).thenReturn(loadPollInterval);
 		when(mockCacheServer.getLoadProbe()).thenReturn(serverLoadProbe);
 		when(mockCacheServer.getMaxConnections()).thenReturn(maxConnections);
@@ -70,6 +70,11 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 		when(mockCacheServer.isRunning()).thenAnswer(newGetter(runningState));
 		when(mockCacheServer.getSocketBufferSize()).thenReturn(socketBufferSize);
 		when(mockCacheServer.getTcpNoDelay()).thenReturn(tcpNoDelay);
+
+		Optional.ofNullable(clientSubscriptionConfig)
+			.ifPresent(it -> when(mockCacheServer.getClientSubscriptionConfig()).thenReturn(it));
+
+		Optional.ofNullable(serverLoadProbe).ifPresent(it -> when(mockCacheServer.getLoadProbe()).thenReturn(it));
 
 		doAnswer(invocation -> {
 			runningState.set(true);
