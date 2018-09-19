@@ -124,8 +124,8 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 
 		when(mockServerMetrics.getClientCount()).thenReturn(clientCount);
 		when(mockServerMetrics.getConnectionCount()).thenReturn(connectionCount);
-		when(mockServerMetrics.getMaxConnections()).thenReturn(connectionCount);
-		when(mockServerMetrics.getSubscriptionConnectionCount()).thenReturn(connectionCount);
+		when(mockServerMetrics.getMaxConnections()).thenReturn(maxConnections);
+		when(mockServerMetrics.getSubscriptionConnectionCount()).thenReturn(subscriptionConnectionCount);
 
 		return mockServerMetrics;
 	}
