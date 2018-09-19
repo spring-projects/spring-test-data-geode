@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.geode.cache.Cache;
@@ -56,13 +57,16 @@ public abstract class CacheMockObjects {
 	public static <T extends GemFireCache> T mockGemFireCache(T mockGemFireCache,
 			DistributedSystem distributedSystem, ResourceManager resourceManager, Region<?, ?>... regions) {
 
-		mockGemFireCache = mockGemFireCache != null ? mockGemFireCache : (T) mock(GemFireCache.class);
+		T theMockGemFireCache = mockGemFireCache != null ? mockGemFireCache : (T) mock(GemFireCache.class);
 
-		when(mockGemFireCache.getDistributedSystem()).thenReturn(distributedSystem);
-		when(mockGemFireCache.getResourceManager()).thenReturn(resourceManager);
-		when(mockGemFireCache.rootRegions()).thenReturn(asSet(regions));
+		when(theMockGemFireCache.getDistributedSystem()).thenReturn(distributedSystem);
+		when(theMockGemFireCache.getResourceManager()).thenReturn(resourceManager);
 
-		return mockGemFireCache;
+		Optional.ofNullable(regions)
+			.filter(it -> it.length != 0)
+			.ifPresent(it ->  when(theMockGemFireCache.rootRegions()).thenReturn(asSet(it)));
+
+		return theMockGemFireCache;
 	}
 
 	public static ClientCache mockClientCache(DistributedSystem distributedSystem, ResourceManager resourceManager,
