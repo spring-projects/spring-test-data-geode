@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.mock;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.query.Index;
@@ -42,7 +43,7 @@ public abstract class IndexMockObjects extends MockObjectsSupport {
 	public static Index mockIndex(String name, String fromClause, String indexedExpression, String projectionAttributes,
 			Region region, IndexStatistics statistics, IndexType type) {
 
-		Index mockIndex = mock(Index.class, name);
+		Index mockIndex = mock(Index.class, withSettings().name(name).lenient());
 
 		when(mockIndex.getName()).thenReturn(name);
 		when(mockIndex.getCanonicalizedFromClause()).thenReturn(fromClause);
@@ -62,7 +63,7 @@ public abstract class IndexMockObjects extends MockObjectsSupport {
 			long numberOfMapIndexKeys, long numberOfValues, long numberOfUpdates, int readLockCount,
 			long totalUpdateTime, long totalUses) {
 
-		IndexStatistics mockIndexStatistics = mock(IndexStatistics.class);
+		IndexStatistics mockIndexStatistics = mock(IndexStatistics.class, withSettings().lenient());
 
 		when(mockIndexStatistics.getNumberOfBucketIndexes()).thenReturn(numberOfBucketIndexes);
 		when(mockIndexStatistics.getNumberOfKeys()).thenReturn(numberOfKeys);

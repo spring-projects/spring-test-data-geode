@@ -19,6 +19,7 @@ package org.springframework.data.gemfire.tests.mock;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,7 +56,7 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 
 		AtomicBoolean runningState = new AtomicBoolean(running);
 
-		CacheServer mockCacheServer = mock(CacheServer.class);
+		CacheServer mockCacheServer = mock(CacheServer.class, withSettings().lenient());
 
 		when(mockCacheServer.getBindAddress()).thenReturn(bindAddress);
 		when(mockCacheServer.getHostnameForClients()).thenReturn(hostnameForClients);
@@ -94,7 +95,8 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 	public static ClientSubscriptionConfig mockClientSubscriptionConfig(int capacity, String diskStoreName,
 			String evictionPolicy) {
 
-		ClientSubscriptionConfig mockClientSubscriptionConfig = mock(ClientSubscriptionConfig.class);
+		ClientSubscriptionConfig mockClientSubscriptionConfig =
+			mock(ClientSubscriptionConfig.class, withSettings().lenient());
 
 		when(mockClientSubscriptionConfig.getCapacity()).thenReturn(capacity);
 		when(mockClientSubscriptionConfig.getDiskStoreName()).thenReturn(diskStoreName);
@@ -118,7 +120,7 @@ public abstract class CacheServerMockObjects extends MockObjectsSupport {
 	public static ServerMetrics mockServerMetrics(int clientCount, int connectionCount, int maxConnections,
 			int subscriptionConnectionCount) {
 
-		ServerMetrics mockServerMetrics = mock(ServerMetrics.class);
+		ServerMetrics mockServerMetrics = mock(ServerMetrics.class, withSettings().lenient());
 
 		when(mockServerMetrics.getClientCount()).thenReturn(clientCount);
 		when(mockServerMetrics.getConnectionCount()).thenReturn(connectionCount);

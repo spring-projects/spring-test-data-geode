@@ -19,6 +19,7 @@ package org.springframework.data.gemfire.tests.mock;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,7 +49,7 @@ public abstract class GatewayMockObjects extends MockObjectsSupport {
 
 		AtomicBoolean running = new AtomicBoolean(initialRunningState);
 
-		GatewayReceiver mockGatewayReceiver = mock(GatewayReceiver.class);
+		GatewayReceiver mockGatewayReceiver = mock(GatewayReceiver.class, withSettings().lenient());
 
 		when(mockGatewayReceiver.getBindAddress()).thenReturn(bindAddress);
 		when(mockGatewayReceiver.getEndPort()).thenReturn(endPort);
@@ -78,7 +79,7 @@ public abstract class GatewayMockObjects extends MockObjectsSupport {
 		AtomicBoolean running = new AtomicBoolean(initialRunningState);
 		AtomicBoolean runningState = new AtomicBoolean(running.get());
 
-		GatewaySender mockGatewaySender = mock(GatewaySender.class, id);
+		GatewaySender mockGatewaySender = mock(GatewaySender.class, withSettings().name(id).lenient());
 
 		when(mockGatewaySender.getAlertThreshold()).thenReturn(alertThreshold);
 		when(mockGatewaySender.isBatchConflationEnabled()).thenReturn(batchConflationEnabled);

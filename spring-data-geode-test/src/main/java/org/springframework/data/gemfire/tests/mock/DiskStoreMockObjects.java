@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.mock;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public abstract class DiskStoreMockObjects extends MockObjectsSupport {
 			int compactionThreshold, File[] diskDirectories, int[] diskDirectorySizes, float diskUsageCriticalPercentage,
 			float diskUsageWarningPercentage, long maxOplogSize, int queueSize, long timeInterval, int writeBufferSize) {
 
-		DiskStore mockDiskStore = mock(DiskStore.class, name);
+		DiskStore mockDiskStore = mock(DiskStore.class, withSettings().name(name).lenient());
 
 		when(mockDiskStore.getAllowForceCompaction()).thenReturn(allowForceCompaction);
 		when(mockDiskStore.getAutoCompact()).thenReturn(autoCompact);

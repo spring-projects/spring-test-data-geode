@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.mock;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import org.apache.geode.cache.asyncqueue.AsyncEventQueue;
 import org.apache.geode.cache.wan.GatewaySender;
@@ -41,7 +42,7 @@ public abstract class AsyncEventQueueMockObjects {
 			boolean forwardExpirationDestroy, int maximumQueueMemory, GatewaySender.OrderPolicy orderPolicy,
 			boolean parallel, boolean persistent, boolean primary, int size) {
 
-		AsyncEventQueue mockAsyncEventQueue = mock(AsyncEventQueue.class, id);
+		AsyncEventQueue mockAsyncEventQueue = mock(AsyncEventQueue.class, withSettings().name(id).lenient());
 
 		when(mockAsyncEventQueue.getId()).thenReturn(id);
 		when(mockAsyncEventQueue.isBatchConflationEnabled()).thenReturn(batchConflationEnabled);

@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -53,7 +54,7 @@ public abstract class PoolMockObjects extends MockObjectsSupport {
 
 		AtomicBoolean destroyed = new AtomicBoolean(initialDestroyedState);
 
-		Pool mockPool = mock(Pool.class, name);
+		Pool mockPool = mock(Pool.class, withSettings().name(name).lenient());
 
 		when(mockPool.isDestroyed()).thenAnswer(newGetter(destroyed));
 		when(mockPool.getFreeConnectionTimeout()).thenReturn(freeConnectionTimeout);

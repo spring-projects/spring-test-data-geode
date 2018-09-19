@@ -19,6 +19,7 @@ package org.springframework.data.gemfire.tests.mock;
 import static org.apache.geode.internal.util.CollectionUtils.asSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -54,12 +55,14 @@ import org.springframework.data.gemfire.util.RegionUtils;
 public abstract class CacheMockObjects {
 
 	@SuppressWarnings("unchecked")
-	public static <T extends GemFireCache> T mockGemFireCache(T mockGemFireCache,
+	public static <T extends GemFireCache> T mockGemFireCache(T mockGemFireCache, String name,
 			DistributedSystem distributedSystem, ResourceManager resourceManager, Region<?, ?>... regions) {
 
-		T theMockGemFireCache = mockGemFireCache != null ? mockGemFireCache : (T) mock(GemFireCache.class);
+		T theMockGemFireCache = mockGemFireCache != null ? mockGemFireCache
+			: (T) mock(GemFireCache.class, withSettings().name(name).lenient());
 
 		when(theMockGemFireCache.getDistributedSystem()).thenReturn(distributedSystem);
+		when(theMockGemFireCache.getName()).thenReturn(name);
 		when(theMockGemFireCache.getResourceManager()).thenReturn(resourceManager);
 
 		Optional.ofNullable(regions)
@@ -69,21 +72,23 @@ public abstract class CacheMockObjects {
 		return theMockGemFireCache;
 	}
 
-	public static ClientCache mockClientCache(DistributedSystem distributedSystem, ResourceManager resourceManager,
+	public static ClientCache mockClientCache(String name, DistributedSystem distributedSystem, ResourceManager resourceManager,
 			Region<?, ?>... regions) {
 
-		return mockGemFireCache(mock(ClientCache.class), distributedSystem, resourceManager, regions);
+		return mockGemFireCache(mock(ClientCache.class, withSettings().name(name).lenient()),
+			name, distributedSystem, resourceManager, regions);
 	}
 
-	public static Cache mockPeerCache(DistributedSystem distributedSystem, ResourceManager resourceManager,
+	public static Cache mockPeerCache(String name, DistributedSystem distributedSystem, ResourceManager resourceManager,
 			Region<?, ?>... regions) {
 
-		return mockGemFireCache(mock(Cache.class), distributedSystem, resourceManager, regions);
+		return mockGemFireCache(mock(Cache.class, withSettings().name(name).lenient()),
+			name, distributedSystem, resourceManager, regions);
 	}
 
 	public static DistributedSystem mockDistributedSystem(DistributedMember distributedMember) {
 
-		DistributedSystem mockDistributedSystem = mock(DistributedSystem.class);
+		DistributedSystem mockDistributedSystem = mock(DistributedSystem.class, withSettings().lenient());
 
 		when(mockDistributedSystem.getDistributedMember()).thenReturn(distributedMember);
 
@@ -92,7 +97,7 @@ public abstract class CacheMockObjects {
 
 	public static DistributedMember mockDistributedMember(String name, String... groups) {
 
-		DistributedMember mockDistributeMember = mock(DistributedMember.class, name);
+		DistributedMember mockDistributeMember = mock(DistributedMember.class, withSettings().name(name).lenient());
 
 		when(mockDistributeMember.getName()).thenReturn(name);
 		when(mockDistributeMember.getGroups()).thenReturn(Arrays.asList(groups));
@@ -105,7 +110,7 @@ public abstract class CacheMockObjects {
 	public static ResourceManager mockResourceManager(float criticalHeapPercentage, float criticalOffHeapPercentage,
 			float evictionHeapPercentage, float evictionOffHeapPercentage) {
 
-		ResourceManager mockResourceManager = mock(ResourceManager.class);
+		ResourceManager mockResourceManager = mock(ResourceManager.class, withSettings().lenient());
 
 		when(mockResourceManager.getCriticalHeapPercentage()).thenReturn(criticalHeapPercentage);
 		when(mockResourceManager.getCriticalOffHeapPercentage()).thenReturn(criticalOffHeapPercentage);
@@ -118,7 +123,7 @@ public abstract class CacheMockObjects {
 	@SuppressWarnings("unchecked")
 	public static <K, V> Region<K, V> mockRegion(String name, DataPolicy dataPolicy) {
 
-		Region<K, V> mockRegion = mock(Region.class, name);
+		Region<K, V> mockRegion = mock(Region.class, withSettings().name(name).lenient());
 
 		when(mockRegion.getName()).thenReturn(RegionUtils.toRegionName(name));
 		when(mockRegion.getFullPath()).thenReturn(RegionUtils.toRegionPath(name));
