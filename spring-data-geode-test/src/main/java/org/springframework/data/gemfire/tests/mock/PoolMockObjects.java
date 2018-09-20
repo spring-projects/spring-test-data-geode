@@ -75,13 +75,13 @@ public abstract class PoolMockObjects extends MockObjectsSupport {
 		when(mockPool.getServerGroup()).thenReturn(serverGroup);
 		when(mockPool.getServers()).thenReturn(servers);
 		when(mockPool.getSocketBufferSize()).thenReturn(socketBufferSize);
-		when(mockPool.getSocketConnectTimeout()).thenReturn(socketConnectTimeout);
+		//when(mockPool.getSocketConnectTimeout()).thenReturn(socketConnectTimeout);
 		when(mockPool.getStatisticInterval()).thenReturn(statisticInterval);
 		when(mockPool.getSubscriptionAckInterval()).thenReturn(subscriptionAckInterval);
 		when(mockPool.getSubscriptionEnabled()).thenReturn(subscriptionEnabled);
 		when(mockPool.getSubscriptionMessageTrackingTimeout()).thenReturn(subscriptionMessageTrackingTimeout);
 		when(mockPool.getSubscriptionRedundancy()).thenReturn(subscriptionRedundancy);
-		when(mockPool.getSubscriptionTimeoutMultiplier()).thenReturn(subscriptionTimeoutMultiplier);
+		//when(mockPool.getSubscriptionTimeoutMultiplier()).thenReturn(subscriptionTimeoutMultiplier);
 		when(mockPool.getThreadLocalConnections()).thenReturn(threadLocalConnections);
 
 		doAnswer(newSetter(destroyed, true)).when(mockPool).destroy();
