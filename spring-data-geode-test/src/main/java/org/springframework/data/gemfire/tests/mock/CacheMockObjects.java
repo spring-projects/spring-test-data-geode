@@ -129,7 +129,7 @@ public abstract class CacheMockObjects {
 		when(mockRegion.getFullPath()).thenReturn(RegionUtils.toRegionPath(name));
 
 		RegionAttributes<K, V> mockRegionAttributes = mock(RegionAttributes.class,
-			String.format("%sRegionAttributes", name));
+			withSettings().name(String.format("%sRegionAttributes", name)).lenient());
 
 		when(mockRegionAttributes.getDataPolicy()).thenReturn(dataPolicy);
 		when(mockRegion.getAttributes()).thenReturn(mockRegionAttributes);
