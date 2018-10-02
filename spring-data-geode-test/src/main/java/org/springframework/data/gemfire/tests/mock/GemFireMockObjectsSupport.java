@@ -42,6 +42,7 @@ import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newU
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1230,10 +1231,28 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockDiskStoreFactory;
 	}
 
+	public static DistributedMember mockDistributedMember() {
+
+		DistributedMember mockDistributedMember = mock(DistributedMember.class);
+
+		when(mockDistributedMember.getGroups()).thenAnswer(invocation ->
+			new ArrayList<>(StringUtils.commaDelimitedListToSet(gemfireProperties.get().getProperty("groups"))));
+
+		when(mockDistributedMember.getHost())
+			.thenReturn(ObjectUtils.doOperationSafely(() -> InetAddress.getLocalHost().getHostName(), null));
+
+		when(mockDistributedMember.getName()).thenAnswer(invocation -> gemfireProperties.get().getProperty("name"));
+
+		return mockDistributedMember;
+	}
+
 	public static DistributedSystem mockDistributedSystem() {
+
+		DistributedMember mockDistributedMember = mockDistributedMember();
 
 		DistributedSystem mockDistributedSystem = mock(DistributedSystem.class);
 
+		when(mockDistributedSystem.getDistributedMember()).thenReturn(mockDistributedMember);
 		when(mockDistributedSystem.getProperties()).thenAnswer(invocation -> gemfireProperties.get());
 		when(mockDistributedSystem.getReconnectedSystem()).thenAnswer(invocation -> mockDistributedSystem());
 
