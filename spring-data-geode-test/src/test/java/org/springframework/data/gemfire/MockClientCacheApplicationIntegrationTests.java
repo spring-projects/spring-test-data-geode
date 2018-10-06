@@ -18,6 +18,8 @@ package org.springframework.data.gemfire;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
+
 import javax.annotation.Resource;
 
 import org.apache.geode.cache.GemFireCache;
@@ -26,6 +28,7 @@ import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
@@ -55,8 +58,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SuppressWarnings("all")
 public class MockClientCacheApplicationIntegrationTests {
 
+  @Autowired
+  private ClientCache clientCache;
+
   @Resource(name = "Example")
   private Region<Object, Object> example;
+
+  @Test
+  public void clientCacheIsMocked() {
+
+    assertThat(this.clientCache).isNotNull();
+    assertThat(this.clientCache).isInstanceOf(ClientCache.class);
+    assertThat(this.clientCache.isClosed()).isFalse();
+
+    Set<Region<?, ?>> rootRegions = this.clientCache.rootRegions();
+
+    assertThat(rootRegions).isNotNull();
+    assertThat(rootRegions).hasSize(1);
+    assertThat(rootRegions).containsExactly(this.example);
+  }
 
   @Test
   public void exampleRegionIsMocked() {
@@ -68,8 +88,8 @@ public class MockClientCacheApplicationIntegrationTests {
     assertThat(this.example.get(1)).isEqualTo("test");
   }
 
-  @EnableGemFireMockObjects
   @ClientCacheApplication
+  @EnableGemFireMockObjects
   static class TestConfiguration {
 
     @Bean("Example")
