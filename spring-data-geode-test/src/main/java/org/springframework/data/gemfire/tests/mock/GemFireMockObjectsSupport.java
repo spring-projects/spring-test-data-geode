@@ -2867,7 +2867,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				}).when(clientCacheFactorySpy).setPoolThreadLocalConnections(anyBoolean());
 
 				when(mockClientCache.getCurrentServers()).thenAnswer(invocation ->
-					Collections.unmodifiableSet(new HashSet<>(defaultPool.get().getServers())));
+					Collections.unmodifiableSet(new HashSet<>(mockClientCache.getDefaultPool().getServers())));
 
 				when(mockClientCache.getDefaultPool()).thenAnswer(invocation -> {
 
