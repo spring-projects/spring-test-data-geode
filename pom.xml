@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.data.build</groupId>
 		<artifactId>spring-data-parent</artifactId>
-		<version>2.1.0.RC2</version>
+		<version>2.1.0.RELEASE</version>
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
@@ -86,10 +86,10 @@
 		<assertj.version>3.11.1</assertj.version>
 		<junit.version>4.12</junit.version>
 		<lombok.version>1.18.2</lombok.version>
-		<mockito.version>2.22.0</mockito.version>
+		<mockito.version>2.23.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<spring-boot.version>2.1.0.M3</spring-boot.version>
-		<spring-data-release-train.version>Lovelace-RC2</spring-data-release-train.version>
+		<spring-boot.version>2.1.0.M4</spring-boot.version>
+		<spring-data-release-train.version>Lovelace-RELEASE</spring-data-release-train.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
