@@ -51,11 +51,16 @@ public abstract class SpringBootApplicationIntegrationTestsSupport
 	@Override
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
 
-		return setApplicationContext(processBeforeRun(processBeforeBuild(new SpringApplicationBuilder(annotatedClasses)
-			.initializers(this::processBeforeRefresh)
-			.web(getWebApplicationType()))
-			.build())
-			.run(getArguments()));
+		return setApplicationContext(processBeforeRun(processBeforeBuild(contextClass(
+			new SpringApplicationBuilder(annotatedClasses)
+				.initializers(this::processBeforeRefresh)
+				.web(getWebApplicationType())))
+				.build())
+				.run(getArguments()));
+	}
+
+	protected SpringApplicationBuilder contextClass(SpringApplicationBuilder builder) {
+		return builder;
 	}
 
 	protected SpringApplicationBuilder processBeforeBuild(SpringApplicationBuilder springApplicationBuilder) {
