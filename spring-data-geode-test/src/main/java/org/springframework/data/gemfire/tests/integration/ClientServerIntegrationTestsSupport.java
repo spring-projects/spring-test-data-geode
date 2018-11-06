@@ -16,7 +16,6 @@
 
 package org.springframework.data.gemfire.tests.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.gemfire.tests.process.ProcessExecutor.launch;
 import static org.springframework.data.gemfire.util.ArrayUtils.asArray;
 
@@ -25,18 +24,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.geode.cache.server.CacheServer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
-import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.tests.util.SocketUtils;
-import org.springframework.data.gemfire.util.CollectionUtils;
 
 /**
  * The {@link ClientServerIntegrationTestsSupport} class is a abstract base class encapsulating common functionality
@@ -44,9 +40,12 @@ import org.springframework.data.gemfire.util.CollectionUtils;
  *
  * @author John Blum
  * @see java.io.File
+ * @see java.lang.Process
+ * @see java.net.InetSocketAddress
  * @see java.net.ServerSocket
  * @see java.net.Socket
  * @see java.time.LocalDateTime
+ * @see java.util.concurrent.TimeUnit
  * @see org.apache.geode.cache.server.CacheServer
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -63,34 +62,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 
 	protected static final String DEBUG_ENDPOINT = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005";
 	protected static final String DEBUGGING_ENABLED_PROPERTY = "spring.data.gemfire.debugging.enabled";
-	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.directory.delete-on-exit";
 	protected static final String PROCESS_RUN_MANUAL_PROPERTY = "spring.data.gemfire.process.run-manual";
-	protected static final String SYSTEM_PROPERTIES_LOG_FILE = "system-properties.log";
-
-	protected static String asApplicationName(Class<?> type) {
-		return type.getSimpleName();
-	}
-
-	protected static String asDirectoryName(Class<?> type) {
-		return String.format("%1$s-%2$s", asApplicationName(type),
-			LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss")));
-	}
-
-	protected static File createDirectory(String pathname) {
-		return createDirectory(new File(pathname));
-	}
-
-	protected static File createDirectory(File directory) {
-
-		assertThat(directory.isDirectory() || directory.mkdirs())
-			.as(String.format("Failed to create directory [%s]", directory)).isTrue();
-
-		if (isDeleteDirectoryOnExit()) {
-			directory.deleteOnExit();
-		}
-
-		return directory;
-	}
 
 	protected static int findAvailablePort() throws IOException {
 
@@ -108,57 +80,16 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		}
 	}
 
-	protected static String getClassNameAsPath(Class type) {
-		return type.getName().replaceAll("\\.", "/");
-	}
-
-	protected static String getClassNameAsPath(Object obj) {
-		return getClassNameAsPath(obj.getClass());
-	}
-
-	protected static String getPackageNameAsPath(Class type) {
-		return type.getPackage().getName().replaceAll("\\.", "/");
-	}
-
-	protected static String getPackageNameAsPath(Object obj) {
-		return getPackageNameAsPath(obj.getClass());
-	}
-
-	protected static String getContextXmlFileLocation(Class type) {
-		return getClassNameAsPath(type).concat("-context.xml");
-	}
-
-	protected static String getServerContextXmlFileLocation(Class type) {
-		return getClassNameAsPath(type).concat("-server-context.xml");
-	}
-
-	protected static boolean isDeleteDirectoryOnExit() {
-		return Boolean.valueOf(System.getProperty(DIRECTORY_DELETE_ON_EXIT_PROPERTY, Boolean.TRUE.toString()));
-	}
-
 	protected static int intValue(Number number) {
 		return number != null ? number.intValue() : 0;
 	}
 
-	protected static String logFile() {
-		return logFile(GEMFIRE_LOG_FILE);
+	protected static boolean isProcessRunAuto() {
+		return !isProcessRunManual();
 	}
 
-	protected static String logFile(String defaultLogFilePathname) {
-		return System.getProperty(GEMFIRE_LOG_FILE_PROPERTY, defaultLogFilePathname);
-	}
-
-	protected static String logLevel() {
-		return logLevel(GEMFIRE_LOG_LEVEL);
-	}
-
-	protected static String logLevel(String defaultLogLevel) {
-		return System.getProperty(GEMFIRE_LOG_LEVEL_PROPERTY, defaultLogLevel);
-	}
-
-	protected static void logSystemProperties() throws IOException {
-		FileUtils.write(new File(SYSTEM_PROPERTIES_LOG_FILE),
-			String.format("%s", CollectionUtils.toString(System.getProperties())));
+	protected static boolean isProcessRunManual() {
+		return Boolean.getBoolean(PROCESS_RUN_MANUAL_PROPERTY);
 	}
 
 	protected static ProcessWrapper run(Class<?> type, String... arguments) throws IOException {
@@ -177,14 +108,6 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 			throws IOException {
 
 		return isProcessRunAuto() ? launch(createDirectory(workingDirectory), classpath, type, arguments) : null;
-	}
-
-	protected static boolean isProcessRunAuto() {
-		return !isProcessRunManual();
-	}
-
-	protected static boolean isProcessRunManual() {
-		return Boolean.getBoolean(PROCESS_RUN_MANUAL_PROPERTY);
 	}
 
 	protected static AnnotationConfigApplicationContext runSpringApplication(Class<?> annotatedClass, String... args) {
@@ -231,6 +154,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		return waitForServerToStart(cacheServer.getBindAddress(), cacheServer.getPort(), duration);
 	}
 
+	@SuppressWarnings("all")
 	protected static boolean waitForServerToStart(String host, int port) {
 		return waitForServerToStart(host, port, DEFAULT_WAIT_DURATION);
 	}
@@ -257,5 +181,27 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 			return connected.get();
 
 		}, duration);
+	}
+
+	protected static int waitForProcessToStop(Process process, File directory) {
+		return waitForProcessToStop(process, directory, DEFAULT_WAIT_DURATION);
+	}
+
+	protected static int waitForProcessToStop(Process process, File directory, long duration) {
+
+		long timeout = System.currentTimeMillis() + duration;
+
+		try {
+			while (process.isAlive() && System.currentTimeMillis() < timeout) {
+				if (process.waitFor(DEFAULT_WAIT_INTERVAL, TimeUnit.MILLISECONDS)) {
+					return process.exitValue();
+				}
+			}
+		}
+		catch (InterruptedException ignore) {
+			Thread.currentThread().interrupt();
+		}
+
+		return process.isAlive() ? -1 : process.exitValue();
 	}
 }
