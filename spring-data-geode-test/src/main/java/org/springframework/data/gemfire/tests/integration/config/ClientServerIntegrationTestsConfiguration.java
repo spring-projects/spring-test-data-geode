@@ -69,6 +69,8 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("unused")
 public class ClientServerIntegrationTestsConfiguration {
 
+	private static final int DEFAULT_PORT = CacheServer.DEFAULT_PORT;
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected Logger getLogger() {
@@ -83,18 +85,18 @@ public class ClientServerIntegrationTestsConfiguration {
 	}
 
 	@Bean
-	ClientCacheConfigurer clientCachePoolPortConfigurer(
-		@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":40404}") int port) {
+	CacheServerConfigurer cacheServerPortConfigurer(
+			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":" + DEFAULT_PORT + "}") int port) {
 
-		return (beanName, clientCacheFactoryBean) -> clientCacheFactoryBean.setServers(
-			Collections.singletonList(new ConnectionEndpoint("localhost", port)));
+		return (beanName, cacheServerFactoryBean) -> cacheServerFactoryBean.setPort(port);
 	}
 
 	@Bean
-	CacheServerConfigurer cacheServerPortConfigurer(
-			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":40404}") int port) {
+	ClientCacheConfigurer clientCachePoolPortConfigurer(
+			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":" + DEFAULT_PORT + "}") int port) {
 
-		return (beanName, cacheServerFactoryBean) -> cacheServerFactoryBean.setPort(port);
+		return (beanName, clientCacheFactoryBean) -> clientCacheFactoryBean.setServers(
+			Collections.singletonList(new ConnectionEndpoint("localhost", port)));
 	}
 
 	@Configuration
