@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.geode.cache.Cache;
+import org.apache.geode.cache.client.ClientCache;
 import org.junit.AfterClass;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.config.annotation.CacheServerApplication;
@@ -33,17 +35,21 @@ import org.springframework.data.gemfire.tests.integration.config.ClientServerInt
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 
 /**
- * The {@link ForkingClientServerIntegrationTestsSupport} class...
+ * The {@link ForkingClientServerIntegrationTestsSupport} class is an abstract base class used to configure
+ * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @see org.apache.geode.cache.Cache
+ * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
+ * @see org.springframework.data.gemfire.config.annotation.ClientCacheApplication
+ * @see org.springframework.data.gemfire.config.annotation.EnablePdx
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
+ * @see org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration
  * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-// TODO: this class is a WIP; I need to figure out client/server configuration and logistics
-// when launching a CacheServer; this class will be replaced by a JUnit Rule anyhow
 public abstract class ForkingClientServerIntegrationTestsSupport extends ClientServerIntegrationTestsSupport {
 
 	private static ProcessWrapper gemfireServer;
@@ -51,7 +57,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
 
-		int availablePort = setAndGetCacheServerPortProperty();
+		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAvailablePort()));
 
 		List<String> argumentList = new ArrayList<>();
 
@@ -64,13 +70,18 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		waitForServerToStart("localhost", availablePort);
 	}
 
-	protected static int setAndGetCacheServerPortProperty() throws IOException {
+	protected static int setAndGetCacheServerPortProperty(int port) throws IOException {
 
-		int availablePort = findAvailablePort();
+		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(port));
 
-		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(availablePort));
+		return port;
+	}
 
-		return availablePort;
+	protected static int setAndGetPoolPortProperty(int port) {
+
+		System.setProperty(GEMFIRE_POOL_SERVERS_PROPERTY, String.format(GEMFIRE_LOCALHOST_PORT, port));
+
+		return port;
 	}
 
 	@AfterClass
@@ -80,8 +91,9 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	}
 
 	@AfterClass
-	public static void clearCacheServerPortProperty() {
+	public static void clearCacheServerPortAndPoolPortProperties() {
 		System.clearProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY);
+		System.clearProperty(GEMFIRE_POOL_SERVERS_PROPERTY);
 	}
 
 	protected static synchronized Optional<ProcessWrapper> getGemFireServerProcess() {
@@ -93,7 +105,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	}
 
 	@EnablePdx
-	@ClientCacheApplication(logLevel = GEMFIRE_LOG_FILE)
+	@ClientCacheApplication(logLevel = GEMFIRE_LOG_LEVEL)
 	protected static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
 
 	@EnablePdx
