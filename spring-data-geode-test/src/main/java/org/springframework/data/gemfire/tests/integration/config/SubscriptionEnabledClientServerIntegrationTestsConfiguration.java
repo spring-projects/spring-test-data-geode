@@ -19,7 +19,6 @@ package org.springframework.data.gemfire.tests.integration.config;
 import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeMap;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -40,12 +39,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.data.gemfire.client.ClientCacheFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
 import org.springframework.data.gemfire.client.PoolFactoryBean;
@@ -53,7 +47,6 @@ import org.springframework.data.gemfire.config.xml.GemfireConstants;
 import org.springframework.data.gemfire.listener.ContinuousQueryListenerContainer;
 import org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
-import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -135,29 +128,6 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 		Long timeout = getTimeout();
 
 		return Math.max(timeout != null ? timeout : DEFAULT_TIMEOUT, 0);
-	}
-
-	@Bean
-	@Conditional(ClientCacheFactoryBeanSetSocketConnectTimeoutPresentCondition.class)
-	BeanPostProcessor clientCachePoolSocketConnectTimeoutBeanPostProcessor() {
-
-		return new BeanPostProcessor() {
-
-			@Nullable @Override @SuppressWarnings("all")
-			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-				if (bean instanceof ClientCacheFactoryBean) {
-					((ClientCacheFactoryBean) bean).setSocketConnectTimeout(
-						Long.valueOf(resolveSocketConnectTimeout()).intValue());
-				}
-				else if (bean instanceof PoolFactoryBean) {
-					((PoolFactoryBean) bean).setSocketConnectTimeout(
-						Long.valueOf(resolveSocketConnectTimeout()).intValue());
-				}
-
-				return bean;
-			}
-		};
 	}
 
 	@Bean
@@ -303,16 +273,5 @@ public class SubscriptionEnabledClientServerIntegrationTestsConfiguration
 				LATCH.countDown();
 			}
 		});
-	}
-
-	public static class ClientCacheFactoryBeanSetSocketConnectTimeoutPresentCondition implements Condition {
-
-		@Override @SuppressWarnings("all")
-		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-
-			return Arrays.stream(ArrayUtils.nullSafeArray(ClientCacheFactoryBean.class.getMethods(), Method.class))
-				.map(Method::getName)
-				.anyMatch("setSocketConnectTimeout"::equals);
-		}
 	}
 }

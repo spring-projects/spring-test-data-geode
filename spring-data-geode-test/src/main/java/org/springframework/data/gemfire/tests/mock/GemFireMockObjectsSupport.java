@@ -106,7 +106,6 @@ import org.apache.geode.cache.lucene.LuceneIndexFactory;
 import org.apache.geode.cache.lucene.LuceneQuery;
 import org.apache.geode.cache.lucene.LuceneQueryFactory;
 import org.apache.geode.cache.lucene.LuceneQueryProvider;
-import org.apache.geode.cache.lucene.LuceneSerializer;
 import org.apache.geode.cache.lucene.LuceneService;
 import org.apache.geode.cache.query.CqAttributes;
 import org.apache.geode.cache.query.CqQuery;
@@ -180,7 +179,6 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.lucene.LuceneQuery
  * @see org.apache.geode.cache.lucene.LuceneQueryFactory
  * @see org.apache.geode.cache.lucene.LuceneQueryProvider
- * @see org.apache.geode.cache.lucene.LuceneSerializer
  * @see org.apache.geode.cache.lucene.LuceneService
  * @see org.apache.geode.cache.query.CqAttributes
  * @see org.apache.geode.cache.query.CqQuery
@@ -1921,8 +1919,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		LuceneIndexFactory mockLuceneIndexFactory = mock(LuceneIndexFactory.class);
 
-		AtomicReference<LuceneSerializer> luceneSerializerReference = new AtomicReference<>(null);
-
 		Map<String, Analyzer> fieldAnalyzers = new ConcurrentHashMap<>();
 
 		Set<String> fields = new CopyOnWriteArraySet<>();
@@ -1970,21 +1966,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockLuceneIndexFactory;
 		});
 
-		when(mockLuceneIndexFactory.setLuceneSerializer(any(LuceneSerializer.class))).thenAnswer(invocation -> {
-
-			Optional.ofNullable(invocation.<LuceneSerializer>getArgument(0))
-				.map(luceneSerializer -> {
-					luceneSerializerReference.set(luceneSerializer);
-					return luceneSerializer;
-				})
-				.orElseGet(() -> {
-					luceneSerializerReference.set(null);
-					return null;
-				});
-
-			return mockLuceneIndexFactory;
-		});
-
 		doAnswer(invocation -> {
 
 			String indexName = invocation.getArgument(0);
@@ -1996,7 +1977,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			when(mockLuceneIndex.getFieldAnalyzers()).thenReturn(Collections.unmodifiableMap(fieldAnalyzers));
 			when(mockLuceneIndex.getFieldNames()).thenAnswer(in -> fields.toArray(new String[fields.size()]));
-			when(mockLuceneIndex.getLuceneSerializer()).thenAnswer(in -> luceneSerializerReference.get());
 			when(mockLuceneIndex.getName()).thenReturn(indexName);
 			when(mockLuceneIndex.getRegionPath()).thenReturn(regionPath);
 
