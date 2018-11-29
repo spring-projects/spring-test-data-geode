@@ -66,7 +66,7 @@ public abstract class IntegrationTestsSupport {
 	protected static final long DEFAULT_WAIT_DURATION = TimeUnit.SECONDS.toMillis(30);
 	protected static final long DEFAULT_WAIT_INTERVAL = 500L; // milliseconds
 
-	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.directory.delete-on-exit";
+	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.test.directory.delete-on-exit";
 	protected static final String GEMFIRE_LOG_FILE = "gemfire-server.log";
 	protected static final String GEMFIRE_LOG_FILE_PROPERTY = "spring.data.gemfire.log.file";
 	protected static final String GEMFIRE_LOG_LEVEL = "error";
@@ -268,6 +268,10 @@ public abstract class IntegrationTestsSupport {
 		}
 
 		return condition.evaluate();
+	}
+
+	protected void withDeleteDirectoryOnExit(boolean delete) {
+		System.setProperty(DIRECTORY_DELETE_ON_EXIT_PROPERTY, String.valueOf(delete));
 	}
 
 	protected boolean withQueryDebugging() {
