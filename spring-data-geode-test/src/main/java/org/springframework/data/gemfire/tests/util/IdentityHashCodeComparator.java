@@ -27,6 +27,8 @@ import java.util.Comparator;
 @SuppressWarnings("unused")
 public class IdentityHashCodeComparator implements Comparator<Object> {
 
+	public static final IdentityHashCodeComparator INSTANCE = new IdentityHashCodeComparator();
+
 	@Override
 	public int compare(Object objectOne, Object objectTwo) {
 
