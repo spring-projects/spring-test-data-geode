@@ -270,7 +270,7 @@ public abstract class IntegrationTestsSupport {
 		return condition.evaluate();
 	}
 
-	protected void withDeleteDirectoryOnExit(boolean delete) {
+	protected void usingDeleteDirectoryOnExit(boolean delete) {
 		System.setProperty(DIRECTORY_DELETE_ON_EXIT_PROPERTY, String.valueOf(delete));
 	}
 
