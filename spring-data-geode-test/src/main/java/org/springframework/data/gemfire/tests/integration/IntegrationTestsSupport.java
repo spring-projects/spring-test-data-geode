@@ -40,6 +40,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
+import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
@@ -116,6 +117,11 @@ public abstract class IntegrationTestsSupport {
 		if (isQueryDebuggingEnabled()) {
 			System.setProperty(GEMFIRE_QUERY_VERBOSE_PROPERTY, Boolean.TRUE.toString());
 		}
+	}
+
+	@AfterClass
+	public static void clearAllBeanFactoryLocators() {
+		GemfireBeanFactoryLocator.clear();
 	}
 
 	@AfterClass
