@@ -63,8 +63,8 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 	public static final String GEMFIRE_POOL_SERVERS_PROPERTY = "spring.data.gemfire.pool.servers";
 
 	protected static final String DEBUG_ENDPOINT = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005";
-	protected static final String DEBUGGING_ENABLED_PROPERTY = "spring.data.gemfire.debugging.enabled";
-	protected static final String PROCESS_RUN_MANUAL_PROPERTY = "spring.data.gemfire.process.run-manual";
+	protected static final String DEBUGGING_ENABLED_PROPERTY = "spring.data.gemfire.test.debugging.enabled";
+	protected static final String PROCESS_RUN_MANUAL_PROPERTY = "spring.data.gemfire.test.process.run-manual";
 
 	protected static int findAvailablePort() throws IOException {
 
