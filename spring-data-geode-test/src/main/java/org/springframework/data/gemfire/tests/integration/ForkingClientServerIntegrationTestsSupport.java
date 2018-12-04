@@ -96,12 +96,12 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		System.clearProperty(GEMFIRE_POOL_SERVERS_PROPERTY);
 	}
 
-	protected static synchronized Optional<ProcessWrapper> getGemFireServerProcess() {
-		return Optional.ofNullable(gemfireServer);
-	}
-
 	protected static synchronized void setGemFireServerProcess(ProcessWrapper gemfireServerProcess) {
 		gemfireServer = gemfireServerProcess;
+	}
+
+	protected static synchronized Optional<ProcessWrapper> getGemFireServerProcess() {
+		return Optional.ofNullable(gemfireServer);
 	}
 
 	@EnablePdx
