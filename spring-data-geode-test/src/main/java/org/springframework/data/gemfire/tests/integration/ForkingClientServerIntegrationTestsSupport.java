@@ -24,9 +24,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.AfterClass;
+
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
-import org.junit.AfterClass;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.config.annotation.CacheServerApplication;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;

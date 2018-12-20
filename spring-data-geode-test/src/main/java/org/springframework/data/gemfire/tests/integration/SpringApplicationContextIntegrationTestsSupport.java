@@ -19,6 +19,7 @@ package org.springframework.data.gemfire.tests.integration;
 import java.util.Optional;
 
 import org.junit.After;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
