@@ -88,7 +88,7 @@
 		<lombok.version>1.18.4</lombok.version>
 		<mockito.version>2.23.4</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+		<spring-boot.version>2.1.1.RELEASE</spring-boot.version>
 		<spring-data-release-train.version>Lovelace-SR3</spring-data-release-train.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
