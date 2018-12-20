@@ -31,14 +31,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.internal.InternalDataSerializer;
 import org.apache.geode.internal.net.SocketCreatorFactory;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
@@ -76,6 +77,9 @@ public abstract class IntegrationTestsSupport {
 	protected static final String SYSTEM_PROPERTIES_LOG_FILE = "system-properties.log";
 	protected static final String TEST_GEMFIRE_LOG_LEVEL = "error";
 
+	private static final Predicate<String> JAVAX_NET_SSL_NAME_PREDICATE =
+		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("javax.net.ssl");
+
 	private static final Predicate<String> GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE =
 		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("gemfire");
 
@@ -86,18 +90,19 @@ public abstract class IntegrationTestsSupport {
 		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("spring");
 
 	private static final Predicate<String> ALL_SYSTEM_PROPERTIES_NAME_PREDICATE =
-		GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE
+		JAVAX_NET_SSL_NAME_PREDICATE
+			.or(GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
 			.or(GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
 			.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
 
 	@BeforeClass
-	public static void clearAllGemFireGeodeAndSpringDotPrefixedSystemProperties() {
+	public static void clearAllJavaGemFireGeodeAndSpringDotPrefixedSystemProperties() {
 
-		List<String> springSystemProperties = System.getProperties().stringPropertyNames().stream()
+		List<String> allSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
 			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
 			.collect(Collectors.toList());
 
-		springSystemProperties.forEach(System::clearProperty);
+		allSystemPropertyNames.forEach(System::clearProperty);
 	}
 
 	@BeforeClass
