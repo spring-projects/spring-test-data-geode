@@ -409,7 +409,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 *
 	 * @param propertyName {@link String name} of the property to normalize.
 	 * @return the {@link String normalized form} of the Apache Geode/Pivotal GemFire System property.
-	 * @see <a href="http://geode.apache.org/docs/guide/16/reference/topics/gemfire_properties.html">GemFire Properties</a>
+	 * @see <a href="https://geode.apache.org/docs/guide/16/reference/topics/gemfire_properties.html">GemFire Properties</a>
 	 */
 	private static String normalizeGemFirePropertyName(String propertyName) {
 
