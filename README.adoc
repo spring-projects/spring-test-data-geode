@@ -1,18 +1,196 @@
 image:https://api.travis-ci.org/spring-projects/spring-boot-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-boot-data-geode"]
 
-== Spring Test Framework for Apache Geode & Pivotal GemFire 
+[[about]]
+== Spring Test Framework for Apache Geode & Pivotal GemFire
 
-This project is a _Spring Data_ module building on the core _Spring Framework's_ `TestContext` used to
-write _Unit_ and _Integration Tests_ for both _Spring Data_ for https://pivotal.io/pivotal-gemfire[Pivotal GemFire]
-as well as _Spring Data_ for https://geode.apache.org/[Apache Geode].
+The STDG project is a _Spring Data_ module, building on the core _Spring Framework's_ `TestContext`, used to write
+_Unit_ and _Integration Tests_ when building _Spring Data_ for https://geode.apache.org/[Apache Geode]
+& https://pivotal.io/pivotal-gemfire[Pivotal GemFire] (SDG) applications.
 
-This project was born from https://projects.spring.io/spring-data-gemfire/[_Spring Data for Pivotal GemFire's_]
-(https://github.com/spring-projects/spring-data-gemfire[GitHub project])
-https://github.com/spring-projects/spring-data-gemfire/tree/2.0.6.RELEASE/src/test/java/org/springframework/data/gemfire/test[test framework].
-This _test framework_ is used in SDG's test suite to test the proper function of Apache Geode or Pivotal GemFire
-when used in a _Spring_ context.
+This project was born from https://spring.io/projects/spring-data-gemfire[_Spring Data for Pivotal GemFire's_]
+(https://github.com/spring-projects/spring-data-gemfire[@GitHub])
+https://github.com/spring-projects/spring-data-gemfire/tree/2.1.6.RELEASE/src/test/java/org/springframework/data/gemfire/test[test framework].
+This _test framework_ is used in SDG's test suite to test the proper function of Apache Geode & Pivotal GemFire
+in a _Spring_ context.
 
-For many years, users have asked for a way to test their Apache Geode or Pivotal GemFire-based, _Spring_ applications,
-whether writing _Unit_ or _Integrations_ tests.  This project is the answer.
+For several years now, users have asked for a way to test their Apache Geode & Pivotal GemFire based,
+_Spring_ applications reliably and easily, when writing _Unit_ and _Integrations_ tests.
 
-This **new** project is still under development and will have documentation and examples, soon.
+Additionally, STDG was created to consolidate the testing efforts, lessons learned, and knowledge of effectively testing
+all Spring for Apache Geode/Pivotal GemFire projects: _Spring Boot for Apache Geode & Pivotal GemFire_ (SBDG)
+and _Spring Session for Apache Geode & Pivotal GemFire_ (SSDG).
+
+Eventually, STDG will replace the SDG test classes so that tests and testing efforts are consistent across all Spring
+projects for Apache Geode/Pivotal GemFire: SDG, SBDG and SSDG.
+
+This (relatively) **new** project is still under development and will have documentation, examples
+and an extensive test suite once complete.
+
+In the meantime, you can review the
+https://github.com/spring-projects/spring-boot-data-geode/tree/master/spring-geode-autoconfigure/src/test/java/org/springframework/geode/boot/autoconfigure[test suite for SBDG]
+and the https://github.com/spring-projects/spring-session-data-geode/tree/master/spring-session-data-geode/src/test/java/org/springframework/session/data/gemfire[test suite for SSDG]
+to get a sense of how this project is used and works.
+
+[[nutshell]]
+== STDG in a Nutshell
+
+Until proper documentation has been provided, this very short and simple tutorial will hopefully give you a better idea
+of how this project is used.
+
+[[unit-tests]]
+=== Unit Testing with STDG
+
+We all write tests, right?  TDD style?  ;-)
+
+As we begin to write tests, we typically start with _Unit Tests_ since they are designed to test the subject
+in isolation, without dependencies, to get feedback quickly, i.e. "_Is my logic correct?_"
+
+It is often common in _Unit Tests_ to *mock* dependencies since the test makes an assumption that the dependencies
+"_work as designed_".  During _Unit Testing_, it does not matter whether or not the dependencies actually work
+as expected (that is the function/job/purpose of the _Integration Tests_), just that they have a contract and our
+application components, the "_Subject Under Test_" (SUT), honors that contract and uses the external dependencies
+correctly. Essentially we asserting that the interactions between our application components and external dependencies
+is correct and results in the desired outcome.
+
+Well, it is, or should be, no different when you are using Apache Geode or Pivotal GemFire.
+
+For instance, you might want to mock that your _Data Access Object_ (DAO) performs the proper interactions on
+a GemFire/Geode Region, performing the right CRUD operations, making sure the right (OQL) Queries are executed
+for the Use Case or business function/workflow being performed by the application.
+
+In this case, we don't care whether the Region is real or not, that an OQL Query is actually well formed and would
+actually execute properly, performantly and return the correct results.  We would "mock" the Regions' behavior in this
+case to make sure that our DAO interactions with the Region are correct, that it handles the translation of Exceptions
+or other Error conditions, that it transforms values to/from the backend data store (i.e. Region), and so on. That is
+how you properly test the subject.
+
+To support _Unit Testing_ with Apache Geode or Pivotal GemFire in a Spring context, STDG provides the
+`@EnableGemFireMockObjects` annotation.  If you want to use GemFire/Geode Mock Objects (e.g. a "mock" Region) rather
+than a "live" Region, than you simply only need to annotate your test configuration with `@EnableGemFireMockObjects`.
+
+For example:
+
+.Unit Test with GemFire/Geode Mock Objects
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleUnitTestClass {
+
+  // test case methods here
+
+  @EnableGemFireMockObjects
+  @ClientCacheApplication
+  @EnableEntityDefinedRegions(clientRegionShortcut = ClientRegionShortcut.LOCAL)
+  static class TestConfiguration { }
+
+}
+----
+
+
+In the example above, `@EnableGemFireMockObjects` creates "mocks" for the `ClientCache` and all `Regions` identified
+and created by the `@EnableEntityDefinedRegions(..)` annotation.  There are no "live" GemFire/Geode objects
+when "mocking" is enabled.
+
+It really is that simple!
+
+TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this guide
+for the time being.
+
+[[integration-testing]]
+=== Integration Testing with STDG
+
+You should write many more _Unit Tests_ than _Integration Tests_ to get reliable and fast feedback.  This is a
+no brainer and software development 101.
+
+However, _Unit Tests_ do not completely take the place of _Integration Tests_, either.  Both are necessary, as are
+perhaps other forms of testing (e.g. Functional Testing, Acceptance Testing, Smoke Testing, Performance Testing,
+Concurrency Testing, etc).
+
+For instance, you should verify that the (OQL) Query you just constructed, maybe even generated, is well-formed
+and yields the desired results, is performant, and all that jazz.  You can only reliably do that by executing
+the (OQL) Query against an actual GemFire/Geode Region with a properly constructed and deliberate data set.
+
+This sort _Integration Test_ does not have a complex arrangement, and can be performed simply by removing
+or disabling the `@EnableGemFireMockObjects` annotation in our previous example above.
+
+However, other forms of _Integration Testing_ might require a more complex arrangement,
+such as client/server integration tests.
+
+For instance, you may want to test that a client receives all the events from the server to which it has explicitly
+registered interests.  For this type of test, you need to have a (1 or more) GemFire/Geode server(s) running,
+and perhaps even a few clients.
+
+Ideally, you want to fork a GemFire/Geode server JVM process in the _Integration Test_ class requiring
+a server instance.
+
+Once again, STDG comes to the rescue.
+
+For example:
+
+.Client/Server Integration Test
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = GeodeClientTestConfiguration.class)
+class ExampleIntegrationTestClass extends ForkingClientServerIntegrationTestsSupport {
+
+  @BeforeClass
+  public static void startGemFireServer() {
+    startGemFireSever(GeodeServerTestConfiguration.class);
+  }
+
+  // test case method here
+
+  @CacheServerApplication
+  @EnableEntityDefinedRegions
+  static class GeodeServerTestConfiguration {
+
+    public static void main(String[] args) {
+
+        AnnotationConfigApplicationContext applicationContext =
+          new AnnotationConfigApplicationContext(GeodeServerTestConfiguration.class);
+
+        applicationContext.registerShutdownHook();
+    }
+  }
+
+  @ClientCacheApplication
+  @EnableEntityDefinedRegions
+  static class GeodeClientTestConfiguration { }
+
+}
+----
+
+First we extend the STDG provided `ForkingClientServerIntegrationTestsSupport` class.  Then, we define a JUnit
+`@BeforeClass` static setup method to fork our GemFire/Geode JVM process using the `GeodeServerTestConfiguration.class`
+specifying exactly how the server should be configured and finally we create the matching `GeodeClientTestConfiguration`
+class to configure and bootstrap our JUnit, Spring `TestContext` based test, which acts as the client.
+
+STDG takes care of coordinating the client & server, using random connection ports, etc.  You simply just need to
+provide the configuration of the client and server as required by your application and test case(s).
+
+Notice, too, that I am using SDG's
+https://docs.spring.io/spring-data/geode/docs/current/reference/html/#bootstrap-annotation-config[Annotation-based configuration model]
+(e.g. `CacheServerApplication`, `@EnableEntityDefinedRegions`) to make the GemFire/Geode configuration even easier.
+
+If you are using SBDG with this project, then some of the annotations are not even required (e.g. `ClientCacheApplication`).
+
+When SBDG & STDG are combined, the power you have is quite extensive.
+
+NOTE: Through the _Integration Test_ support provided by and in STDG is relatively simple, this is also not quite yet
+the ideal way for writing client/sever _Integration Tests_.  Eventually, we want to include an annotation, something
+like `@ClientServerIntegrationTest(serverConfigClass = GeodeServerTestConfiguration.class)`, the equivalent to
+`@EnableGemFireMockObjects` for _Unit Testing_, to make configuration and testing of client/server applications
+that much easier.  See https://github.com/spring-projects/spring-test-data-geode/issues/9[Issue #9] for more details.
+This feature would be loosely based on, and similar to,
+_Spring Boot_ https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html[Testing]
+with _Test Slices_.
+
+[[conclusion]]
+=== Conclusion
+
+Anyway, we hope this has intrigued your interests and gets you started for now.  Ideas, contributions, or other
+feedback is most welcomed.
+
+Thank you!
