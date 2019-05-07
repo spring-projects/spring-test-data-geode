@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.mock.config;
 
 import static org.mockito.Mockito.when;
@@ -120,7 +119,9 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 			implements CacheFactoryBean.CacheFactoryInitializer<CacheFactory> {
 
 		protected static CacheFactoryBean spyOn(CacheFactoryBean cacheFactoryBean, boolean useSingletonCache) {
+
 			cacheFactoryBean.setCacheFactoryInitializer(new SpyingCacheFactoryInitializer(useSingletonCache));
+
 			return cacheFactoryBean;
 		}
 
@@ -146,8 +147,8 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 		protected static ClientCacheFactoryBean spyOn(ClientCacheFactoryBean clientCacheFactoryBean,
 				boolean useSingletonCache) {
 
-			clientCacheFactoryBean.setCacheFactoryInitializer(
-				new SpyingClientCacheFactoryInitializer(useSingletonCache));
+			clientCacheFactoryBean
+				.setCacheFactoryInitializer(new SpyingClientCacheFactoryInitializer(useSingletonCache));
 
 			return clientCacheFactoryBean;
 		}
@@ -171,7 +172,9 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	protected static class MockingPoolFactoryInitializer implements PoolFactoryBean.PoolFactoryInitializer {
 
 		protected static PoolFactoryBean mock(PoolFactoryBean poolFactoryBean) {
+
 			poolFactoryBean.setPoolFactoryInitializer(new MockingPoolFactoryInitializer());
+
 			return poolFactoryBean;
 		}
 

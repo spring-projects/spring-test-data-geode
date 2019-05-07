@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,9 +64,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.mockito.ArgumentMatchers;
-import org.mockito.stubbing.Answer;
 
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
@@ -133,6 +129,8 @@ import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.DistributedSystem;
 import org.apache.geode.pdx.PdxSerializer;
 import org.apache.lucene.analysis.Analyzer;
+import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
@@ -150,24 +148,30 @@ import org.springframework.util.StringUtils;
  *
  * @author John Blum
  * @see java.io.File
+ * @see java.net.InetAddress
  * @see java.net.InetSocketAddress
  * @see java.util.Properties
  * @see java.util.UUID
  * @see org.apache.geode.cache.AttributesMutator
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.CacheFactory
+ * @see org.apache.geode.cache.CacheListener
+ * @see org.apache.geode.cache.CacheLoader
+ * @see org.apache.geode.cache.CacheWriter
  * @see org.apache.geode.cache.CustomExpiry
  * @see org.apache.geode.cache.DiskStore
  * @see org.apache.geode.cache.DiskStoreFactory
- * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.EvictionAttributes
  * @see org.apache.geode.cache.EvictionAttributesMutator
  * @see org.apache.geode.cache.ExpirationAttributes
+ * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.PartitionAttributes
  * @see org.apache.geode.cache.Region
  * @see org.apache.geode.cache.RegionAttributes
  * @see org.apache.geode.cache.RegionFactory
  * @see org.apache.geode.cache.RegionService
+ * @see org.apache.geode.cache.Scope
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventListener
  * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
  * @see org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory
  * @see org.apache.geode.cache.client.ClientCache
@@ -176,6 +180,7 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.client.Pool
  * @see org.apache.geode.cache.client.PoolFactory
  * @see org.apache.geode.cache.control.ResourceManager
+ * @see org.apache.geode.cache.execute.RegionFunctionContext
  * @see org.apache.geode.cache.lucene.LuceneIndex
  * @see org.apache.geode.cache.lucene.LuceneIndexFactory
  * @see org.apache.geode.cache.lucene.LuceneQuery
@@ -192,10 +197,15 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.query.QueryStatistics
  * @see org.apache.geode.cache.server.CacheServer
  * @see org.apache.geode.cache.server.ClientSubscriptionConfig
+ * @see org.apache.geode.cache.server.ServerLoadProbe
+ * @see org.apache.geode.cache.wan.GatewayEventFilter
+ * @see org.apache.geode.cache.wan.GatewayEventSubstitutionFilter
  * @see org.apache.geode.cache.wan.GatewayReceiver
  * @see org.apache.geode.cache.wan.GatewayReceiverFactory
  * @see org.apache.geode.cache.wan.GatewaySender
  * @see org.apache.geode.cache.wan.GatewaySenderFactory
+ * @see org.apache.geode.cache.wan.GatewayTransportFilter
+ * @see org.apache.geode.compression.Compressor
  * @see org.apache.geode.distributed.DistributedMember
  * @see org.apache.geode.distributed.DistributedSystem
  * @see org.apache.geode.pdx.PdxSerializer
@@ -271,7 +281,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * @param gemfireObject {@link Object GemFire object} to cache.
 	 */
 	private static void cacheGemFireObject(Object gemfireObject) {
-		Optional.ofNullable(gemfireObject).ifPresent(cachedGemFireObjects::add);
+
+		Optional.ofNullable(gemfireObject).
+			ifPresent(cachedGemFireObjects::add);
 	}
 
 	/**
@@ -478,7 +490,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	@SuppressWarnings("unchecked")
 	private static <K, V> Region<K, V> rememberMockedRegion(Region<K, V> mockRegion) {
 
-		String mockRegionPath = Optional.ofNullable(mockRegion).map(Region::getFullPath)
+		String mockRegionPath = Optional.ofNullable(mockRegion)
+			.map(Region::getFullPath)
 			.orElseThrow(() -> newIllegalArgumentException("Region is required"));
 
 		if (regions.putIfAbsent(mockRegionPath, (Region) mockRegion) != null) {
@@ -500,7 +513,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T extends GemFireCache> Optional<T> resolveMockedGemFireCache(boolean useSingletonCache) {
-		return Optional.ofNullable((T) singletonCache.get()).filter(it -> useSingletonCache);
+
+		return Optional.ofNullable((T) singletonCache.get())
+			.filter(it -> useSingletonCache);
 	}
 
 	/**
@@ -516,8 +531,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	@SuppressWarnings("unchecked")
 	private static <K, V> RegionAttributes<K, V> resolveRegionAttributes(String regionAttributesId) {
 
-		return (RegionAttributes<K, V>) Optional.ofNullable(regionAttributes.get(regionAttributesId)).orElseThrow(() ->
-			newIllegalStateException("RegionAttributes with ID [%s] cannot be found", regionAttributesId));
+		return (RegionAttributes<K, V>) Optional.ofNullable(regionAttributes.get(regionAttributesId))
+			.orElseThrow(() -> newIllegalStateException("RegionAttributes with ID [%s] cannot be found",
+				regionAttributesId));
 	}
 
 	/**
@@ -534,7 +550,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return Optional.ofNullable(regionName)
 			.map(String::trim)
 			.map(it -> {
+
 				int lastIndexOfRegionSeparator = it.lastIndexOf(Region.SEPARATOR);
+
 				return lastIndexOfRegionSeparator < 0 ? it : it.substring(lastIndexOfRegionSeparator);
 			})
 			.filter(it -> !it.isEmpty())

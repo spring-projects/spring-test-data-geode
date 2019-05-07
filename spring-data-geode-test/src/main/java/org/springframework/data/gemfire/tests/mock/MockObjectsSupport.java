@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.mock;
 
 import java.util.Collection;
@@ -90,6 +89,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <E, C extends Collection<E>, R> Answer<R> newAdder(C collection, R returnValue) {
+
 		return invocation -> {
 			collection.add(invocation.getArgument(0));
 			return returnValue;
@@ -97,6 +97,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicBoolean argument, R returnValue) {
+
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
 			return returnValue;
@@ -104,6 +105,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicBoolean argument, Boolean value, R returnValue) {
+
 		return invocation -> {
 			argument.set(value);
 			return returnValue;
@@ -111,6 +113,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicInteger argument, R returnValue) {
+
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
 			return returnValue;
@@ -118,6 +121,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicInteger argument, Integer value, R returnValue) {
+
 		return invocation -> {
 			argument.set(value);
 			return returnValue;
@@ -125,6 +129,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicLong argument, R returnValue) {
+
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
 			return returnValue;
@@ -132,6 +137,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <R> Answer<R> newSetter(AtomicLong argument, Long value, R returnValue) {
+
 		return invocation -> {
 			argument.set(value);
 			return returnValue;
@@ -139,6 +145,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, R returnValue) {
+
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
 			return returnValue;
@@ -146,6 +153,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, T value, R returnValue) {
+
 		return invocation -> {
 			argument.set(value);
 			return returnValue;
@@ -153,6 +161,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, Function<?, T> converter, R returnValue) {
+
 		return invocation -> {
 			argument.set(converter.apply(invocation.getArgument(0)));
 			return returnValue;
@@ -160,6 +169,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <K, V, R> Answer<R> newSetter(Map<K, V> argument, R returnValue) {
+
 		return invocation -> {
 			argument.put(invocation.getArgument(0), invocation.getArgument(1));
 			return returnValue;
@@ -167,6 +177,7 @@ public abstract class MockObjectsSupport {
 	}
 
 	protected static <T> Answer<Void> newVoidAnswer(Consumer<InvocationOnMock> methodInvocation) {
+
 		return invocation -> {
 			methodInvocation.accept(invocation);
 			return null;

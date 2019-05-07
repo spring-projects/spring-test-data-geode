@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.integration;
 
 import java.util.Optional;
@@ -46,7 +45,9 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 	@After
 	public void closeApplicationContext() {
-		Optional.ofNullable(this.applicationContext).ifPresent(ConfigurableApplicationContext::close);
+
+		Optional.ofNullable(this.applicationContext)
+			.ifPresent(ConfigurableApplicationContext::close);
 	}
 
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
