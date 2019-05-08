@@ -92,6 +92,10 @@ In the example above, `@EnableGemFireMockObjects` creates "mocks" for the `Clien
 and created by the `@EnableEntityDefinedRegions(..)` annotation.  There are no "live" GemFire/Geode objects
 when "mocking" is enabled.
 
+Here is 1
+https://github.com/spring-projects/spring-test-data-geode/blob/master/spring-data-geode-test/src/test/java/org/springframework/data/gemfire/MockClientCacheApplicationIntegrationTests.java[example]
+of a concrete _Unit Test_ in action, using STDG's `@EnableGemFireMockObjects` annotation.
+
 It really is that simple!
 
 TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this guide
@@ -169,6 +173,10 @@ class to configure and bootstrap our JUnit, Spring `TestContext` based test, whi
 
 STDG takes care of coordinating the client & server, using random connection ports, etc.  You simply just need to
 provide the configuration of the client and server as required by your application and test case(s).
+
+Here is 1
+https://github.com/spring-projects/spring-boot-data-geode/blob/master/spring-geode-autoconfigure/src/test/java/org/springframework/geode/boot/autoconfigure/security/ssl/AutoConfiguredSslIntegrationTests.java[example]
+of a concrete client/server _Integration Test_ extending STDG's `ForkingClientServerIntegrationTestsSupprt` class.
 
 Notice, too, that I am using SDG's
 https://docs.spring.io/spring-data/geode/docs/current/reference/html/#bootstrap-annotation-config[Annotation-based configuration model]
