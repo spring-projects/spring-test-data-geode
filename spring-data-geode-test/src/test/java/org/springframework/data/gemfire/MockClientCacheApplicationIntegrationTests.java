@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +25,7 @@ import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientRegionShortcut;
+import org.apache.geode.internal.cache.GemFireCacheImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +69,7 @@ public class MockClientCacheApplicationIntegrationTests {
 
     assertThat(this.clientCache).isNotNull();
     assertThat(this.clientCache).isInstanceOf(ClientCache.class);
+    assertThat(this.clientCache).isNotInstanceOf(GemFireCacheImpl.class);
     assertThat(this.clientCache.isClosed()).isFalse();
 
     Set<Region<?, ?>> rootRegions = this.clientCache.rootRegions();
