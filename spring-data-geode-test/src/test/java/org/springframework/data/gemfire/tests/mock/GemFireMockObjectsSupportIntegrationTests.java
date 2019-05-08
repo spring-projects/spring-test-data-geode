@@ -148,7 +148,7 @@ public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsS
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			destroyed.set(true);
 		}
 	}
