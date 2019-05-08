@@ -137,6 +137,7 @@ import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
+import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -229,8 +230,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
 
-	private static final String CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME = "dsProps";
-	private static final String CLIENT_CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME = "dsProps";
+	private static final String CACHE_FACTORY_DS_PROPS_FIELD_NAME = "dsProps";
+	private static final String CACHE_FACTORY_INTERNAL_CACHE_BUILDER_FIELD_NAME = "internalCacheBuilder";
+	private static final String CLIENT_CACHE_FACTORY_DS_PROPS_FIELD_NAME = "dsProps";
+	private static final String INTERNAL_CACHE_BUILDER_CONFIG_PROPERTIES_FIELD_NAME = "configProperties";
 	private static final String GEMFIRE_SYSTEM_PROPERTIES_PREFIX = "gemfire.";
 	private static final String FROM_KEYWORD = "FROM";
 	private static final String WHERE_KEYWORD = "WHERE";
@@ -2915,33 +2918,30 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	private static void storeConfiguration(CacheFactory cacheFactory) {
-		storeConfiguration(cacheFactory, CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME);
+		storeConfiguration(cacheFactory, CACHE_FACTORY_DS_PROPS_FIELD_NAME);
 	}
 
 	private static void storeConfiguration(ClientCacheFactory clientCacheFactory) {
-		storeConfiguration(clientCacheFactory, CLIENT_CACHE_FACTORY_DS_PROPS_CLASS_VARIABLE_NAME);
+		storeConfiguration(clientCacheFactory, CLIENT_CACHE_FACTORY_DS_PROPS_FIELD_NAME);
 	}
 
-	private static void storeConfiguration(Object cacheFactory, String staticDistributedSystemPropertiesVariableName) {
+	private static void storeConfiguration(Object cacheFactory, String gemfirePropertiesFieldName) {
 
 		Properties localGemFireProperties = gemfireProperties.get();
 
-		localGemFireProperties.putAll(withGemFireApiProperties(cacheFactory,
-			staticDistributedSystemPropertiesVariableName));
-
+		localGemFireProperties.putAll(withGemFireApiProperties(cacheFactory, gemfirePropertiesFieldName));
 		localGemFireProperties.putAll(withGemFireSystemProperties());
 	}
 
-	private static Properties withGemFireApiProperties(Object cacheFactory,
-			String staticDistributedSystemPropertiesVariableName) {
+	private static Properties withGemFireApiProperties(Object cacheFactory, String gemfirePropertiesFieldName) {
+
+		Class<?> cacheFactoryType = Optional.ofNullable(cacheFactory)
+			.map(Object::getClass)
+			.orElse((Class) Object.class);
 
 		try {
 
-			Class<?> cacheFactoryType = Optional.ofNullable(cacheFactory)
-				.map(Object::getClass)
-				.orElse((Class) Object.class);
-
-			Field dsPropsField = cacheFactoryType.getDeclaredField(staticDistributedSystemPropertiesVariableName);
+			Field dsPropsField = cacheFactoryType.getDeclaredField(gemfirePropertiesFieldName);
 
 			dsPropsField.setAccessible(true);
 
@@ -2949,7 +2949,32 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			return gemfireApiProperties;
 		}
-		catch (Throwable ignore) {
+		catch (Throwable cause) {
+
+			if (cause instanceof NoSuchFieldException
+				&& !CACHE_FACTORY_INTERNAL_CACHE_BUILDER_FIELD_NAME.equals(gemfirePropertiesFieldName)) {
+
+				return Arrays.stream(ArrayUtils.nullSafeArray(cacheFactoryType.getDeclaredFields(), Field.class))
+					.filter(field -> CACHE_FACTORY_INTERNAL_CACHE_BUILDER_FIELD_NAME.equals(field.getName()))
+					.findFirst()
+					.map(field -> {
+
+						field.setAccessible(true);
+
+						Object internalCacheBuilder =
+							ObjectUtils.doOperationSafely(() -> field.get(cacheFactory), null);
+
+						if (internalCacheBuilder != null) {
+							return withGemFireApiProperties(internalCacheBuilder,
+								INTERNAL_CACHE_BUILDER_CONFIG_PROPERTIES_FIELD_NAME);
+						}
+
+						return null;
+
+					})
+					.orElseGet(Properties::new);
+			}
+
 			return new Properties();
 		}
 	}
