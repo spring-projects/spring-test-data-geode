@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.integration;
 
 import org.springframework.boot.SpringApplication;
@@ -51,16 +50,16 @@ public abstract class SpringBootApplicationIntegrationTestsSupport
 	@Override
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
 
-		return setApplicationContext(processBeforeRun(processBeforeBuild(contextClass(
-			new SpringApplicationBuilder(annotatedClasses)
+		return setApplicationContext(processBeforeRun(processBeforeBuild(
+			newSpringApplicationBuilder(annotatedClasses)
 				.initializers(this::processBeforeRefresh)
-				.web(getWebApplicationType())))
+				.web(getWebApplicationType()))
 				.build())
 				.run(getArguments()));
 	}
 
-	protected SpringApplicationBuilder contextClass(SpringApplicationBuilder builder) {
-		return builder;
+	protected SpringApplicationBuilder newSpringApplicationBuilder(Class<?>... annotatedClasses) {
+		return new SpringApplicationBuilder(annotatedClasses);
 	}
 
 	protected SpringApplicationBuilder processBeforeBuild(SpringApplicationBuilder springApplicationBuilder) {
