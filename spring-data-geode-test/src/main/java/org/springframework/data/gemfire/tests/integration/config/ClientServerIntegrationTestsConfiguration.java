@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.integration.config;
 
 import static org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport.GEMFIRE_CACHE_SERVER_PORT_PROPERTY;
@@ -23,8 +22,7 @@ import java.util.Collections;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.server.CacheServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
@@ -41,6 +39,9 @@ import org.springframework.data.gemfire.config.annotation.EnableLogging;
 import org.springframework.data.gemfire.config.annotation.EnableManager;
 import org.springframework.data.gemfire.support.ConnectionEndpoint;
 import org.springframework.util.ClassUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class that registers

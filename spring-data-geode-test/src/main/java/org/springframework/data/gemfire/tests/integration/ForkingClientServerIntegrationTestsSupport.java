@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.integration;
 
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
@@ -24,9 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.AfterClass;
+
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
-import org.junit.AfterClass;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.config.annotation.CacheServerApplication;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
