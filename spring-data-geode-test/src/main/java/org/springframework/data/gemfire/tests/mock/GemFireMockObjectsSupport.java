@@ -65,6 +65,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.Answer;
+
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
@@ -98,6 +101,7 @@ import org.apache.geode.cache.client.ClientRegionFactory;
 import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolFactory;
+import org.apache.geode.cache.client.PoolManager;
 import org.apache.geode.cache.control.ResourceManager;
 import org.apache.geode.cache.execute.RegionFunctionContext;
 import org.apache.geode.cache.lucene.LuceneIndex;
@@ -127,10 +131,10 @@ import org.apache.geode.cache.wan.GatewayTransportFilter;
 import org.apache.geode.compression.Compressor;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.DistributedSystem;
+import org.apache.geode.internal.cache.PoolManagerImpl;
 import org.apache.geode.pdx.PdxSerializer;
 import org.apache.lucene.analysis.Analyzer;
-import org.mockito.ArgumentMatchers;
-import org.mockito.stubbing.Answer;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
@@ -180,6 +184,7 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.client.ClientRegionFactory
  * @see org.apache.geode.cache.client.Pool
  * @see org.apache.geode.cache.client.PoolFactory
+ * @see org.apache.geode.cache.client.PoolManager
  * @see org.apache.geode.cache.control.ResourceManager
  * @see org.apache.geode.cache.execute.RegionFunctionContext
  * @see org.apache.geode.cache.lucene.LuceneIndex
@@ -257,7 +262,23 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		regions.clear();
 		regionAttributes.clear();
 
+		closePools();
 		destroyGemFireObjects();
+	}
+
+	/**
+	 * Closes all {@link Pool Pools}.
+	 *
+	 * @see org.apache.geode.cache.client.Pool
+	 * @see org.apache.geode.cache.client.PoolManager
+	 */
+	static void closePools() {
+
+		// TODO: add support for keepAlive (??)
+		ObjectUtils.doOperationSafely(() -> {
+			PoolManager.close();
+			return null;
+		}, null);
 	}
 
 	/**
@@ -581,7 +602,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.orElseThrow(() -> newIllegalArgumentException("Region path [%s] is required", regionPath));
 	}
 
-	/* (non-Javadoc) */
 	@SuppressWarnings("unchecked")
 	private static <T extends GemFireCache> T mockCacheApi(T mockGemFireCache) {
 
@@ -618,7 +638,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockRegionServiceApi(mockGemFireCache);
 	}
 
-	/* (non-Javadoc) */
 	private static <T extends RegionService> T mockRegionServiceApi(T mockRegionService) {
 
 		AtomicBoolean closed = new AtomicBoolean(false);
@@ -1668,10 +1687,19 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getSubscriptionRedundancy()).thenReturn(subscriptionRedundancy.get());
 			when(mockPool.getThreadLocalConnections()).thenReturn(threadLocalConnections.get());
 
+			register(mockPool);
+
 			return mockPool;
 		});
 
 		return mockPoolFactory;
+	}
+
+	private static Pool register(Pool pool) {
+
+		PoolManagerImpl.getPMI().register(pool);
+
+		return pool;
 	}
 
 	public static Pool mockQueryService(Pool pool) {
