@@ -1687,7 +1687,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getSubscriptionRedundancy()).thenReturn(subscriptionRedundancy.get());
 			when(mockPool.getThreadLocalConnections()).thenReturn(threadLocalConnections.get());
 
-			register(mockPool);
+			//register(mockPool);
 
 			return mockPool;
 		});

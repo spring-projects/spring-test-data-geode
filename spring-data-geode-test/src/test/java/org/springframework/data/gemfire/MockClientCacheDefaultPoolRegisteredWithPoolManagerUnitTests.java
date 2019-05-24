@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,6 +72,7 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 
 	@Test
 	@DirtiesContext
+	@Ignore("Apache Geode/Pivotal GemFire does not support Mock Pools")
 	public void defaultPoolRegisteredWithPoolManager() {
 
 		Pool geodeDefaultPool = PoolManager.find("DEFAULT");
