@@ -60,18 +60,16 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAvailablePort()));
 
-		List<String> argumentList = new ArrayList<>();
+		List<String> argumentList = new ArrayList<>(Arrays.asList(nullSafeArray(arguments, String.class)));
 
-		argumentList.addAll(Arrays.asList(nullSafeArray(arguments, String.class)));
 		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
 
-		setGemFireServerProcess(run(gemfireServerConfigurationClass,
-			argumentList.toArray(new String[argumentList.size()])));
+		setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
 
 		waitForServerToStart("localhost", availablePort);
 	}
 
-	protected static int setAndGetCacheServerPortProperty(int port) throws IOException {
+	protected static int setAndGetCacheServerPortProperty(int port) {
 
 		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(port));
 

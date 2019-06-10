@@ -77,10 +77,10 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	@Nullable @Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-		return (isGemFireProperties(bean, beanName) ? set((Properties) bean)
-			: (bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, this.useSingletonCache)
-			: (bean instanceof PoolFactoryBean ? mockThePoolFactoryBean((PoolFactoryBean) bean)
-			: bean)));
+		return isGemFireProperties(bean, beanName) ? set((Properties) bean)
+			: bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, this.useSingletonCache)
+			: bean instanceof PoolFactoryBean ? mockThePoolFactoryBean((PoolFactoryBean) bean)
+			: bean;
 	}
 
 	@Nullable @Override
@@ -101,7 +101,9 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	private Object set(Properties gemfireProperties) {
+
 		this.gemfireProperties.set(gemfireProperties);
+
 		return gemfireProperties;
 	}
 

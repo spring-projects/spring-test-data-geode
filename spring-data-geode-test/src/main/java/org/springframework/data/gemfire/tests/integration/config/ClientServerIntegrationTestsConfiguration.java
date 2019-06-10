@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.integration.config;
 import static org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport.GEMFIRE_CACHE_SERVER_PORT_PROPERTY;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
@@ -96,8 +97,13 @@ public class ClientServerIntegrationTestsConfiguration {
 	ClientCacheConfigurer clientCachePoolPortConfigurer(
 			@Value("${" + GEMFIRE_CACHE_SERVER_PORT_PROPERTY + ":" + DEFAULT_PORT + "}") int port) {
 
-		return (beanName, clientCacheFactoryBean) -> clientCacheFactoryBean.setServers(
-			Collections.singletonList(new ConnectionEndpoint("localhost", port)));
+		return (beanName, clientCacheFactoryBean) -> {
+
+			List<ConnectionEndpoint> servers =
+				Collections.singletonList(new ConnectionEndpoint("localhost", port));
+
+			clientCacheFactoryBean.setServers(servers);
+		};
 	}
 
 	@Configuration
