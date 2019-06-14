@@ -78,6 +78,7 @@ import org.apache.geode.cache.CustomExpiry;
 import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.DiskStore;
 import org.apache.geode.cache.DiskStoreFactory;
+import org.apache.geode.cache.EntryNotFoundException;
 import org.apache.geode.cache.EvictionAttributes;
 import org.apache.geode.cache.EvictionAttributesMutator;
 import org.apache.geode.cache.ExpirationAction;
@@ -2171,6 +2172,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		RegionAttributes<K, V> mockRegionAttributes = mockRegionAttributes(mockRegion, regionAttributes);
 
+		Set<K> invalidatedKeys = new HashSet<>();
 		Set<Region<?, ?>> subRegions = new CopyOnWriteArraySet<>();
 
 		when(mockRegion.getAttributes()).thenReturn(mockRegionAttributes);
@@ -2186,16 +2188,80 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return regions.get(subRegionFullPath);
 		});
 
-		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation ->
-			data.get(invocation.<K>getArgument(0)));
+		// Region.containsKey(key)
+		when(mockRegion.containsKey(any())).thenAnswer(invocation ->
+			data.containsKey(invocation.getArgument(0)));
 
-		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(invocation ->
-			data.entrySet().stream().filter(entry -> entry.getKey().equals(invocation.getArgument(0))).findFirst()
+		// Region.get(key)
+		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+			V value = data.get(key);
+
+			if (invalidatedKeys.contains(key)) {
+				value = null;
+			}
+
+			// TODO: CacheLoader
+			Optional.ofNullable(value);
+
+			return value;
+		});
+
+		// Region.getEntry(key)
+		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(regionGetEntryInvocation ->
+			data.entrySet().stream()
+				.filter(entry -> entry.getKey().equals(regionGetEntryInvocation.getArgument(0)))
+				.findFirst()
+				.map(entry -> {
+
+					Map.Entry<K, V> entrySpy = spy(entry);
+
+					doAnswer(entryGetValueInvocation ->
+							invalidatedKeys.contains(entry.getKey()) ? null : entry.getValue())
+						.when(entrySpy).getValue();
+
+					return entrySpy;
+
+				})
 				.orElse(null));
 
-		when(mockRegion.put(any(), any())).thenAnswer(invocation ->
-			data.put(invocation.getArgument(0), invocation.getArgument(1)));
+		// Region.invalidate(key)
+		doAnswer(invocation -> {
 
+			K key = invocation.getArgument(0);
+
+			if (data.containsKey(key)) {
+				invalidatedKeys.add(key);
+			}
+			else {
+				throw new EntryNotFoundException(String.format("Entry with key [%s] not found", key));
+			}
+
+			return null;
+
+		}).when(mockRegion).invalidate(any());
+
+		// Region.put(key, value)
+		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+			V newValue = invocation.getArgument(1);
+			V existingValue = data.put(key, newValue);
+
+			return invalidatedKeys.remove(key) ? null : existingValue;
+		});
+
+		// Region.remove(key)
+		when(mockRegion.remove(any())).thenAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+			V value  = data.remove(key);
+
+			return invalidatedKeys.remove(key) ? null : value;
+		});
+
+		// Region.size()
 		when(mockRegion.size()).thenAnswer(invocation -> data.size());
 
 		when(mockRegion.subregions(anyBoolean())).thenAnswer(invocation -> {

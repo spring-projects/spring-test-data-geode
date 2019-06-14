@@ -89,6 +89,14 @@ public class MockClientCacheApplicationIntegrationTests {
     assertThat(this.example.getName()).isEqualTo("Example");
     assertThat(this.example.put(1, "test")).isNull();
     assertThat(this.example.get(1)).isEqualTo("test");
+    assertThat(this.example.containsKey(1)).isTrue();
+
+    this.example.invalidate(1);
+
+    assertThat(this.example.containsKey(1)).isTrue();
+    assertThat(this.example.get(1)).isNull();
+    assertThat(this.example.remove(1)).isNull();
+    assertThat(this.example.containsKey(1)).isFalse();
   }
 
   @ClientCacheApplication
