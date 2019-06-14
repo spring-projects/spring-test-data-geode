@@ -86,10 +86,11 @@
 		<assertj.version>3.12.2</assertj.version>
 		<junit.version>4.12</junit.version>
 		<lombok.version>1.18.8</lombok.version>
-		<mockito.version>2.27.0</mockito.version>
+		<mockito.version>2.28.2</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
+		<spring.version>5.1.8.RELEASE</spring.version>
 		<spring-boot.version>2.1.4.RELEASE</spring-boot.version>
-		<spring-data-releasetrain.version>Lovelace-BUILD-SNAPSHOT</spring-data-releasetrain.version>
+		<spring-data-releasetrain.version>Lovelace-SR9</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
