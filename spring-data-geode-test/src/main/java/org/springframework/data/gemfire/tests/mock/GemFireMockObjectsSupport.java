@@ -1165,7 +1165,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(subscriptionDiskStoreName, () -> null))
 			.when(mockClientSubscriptionConfig).setDiskStoreName(anyString());
 
-		doAnswer(newSetter(subscriptionEvictionPolicy, stringToSubscriptionEvictionPolicyConverter, null))
+		doAnswer(newSetter(subscriptionEvictionPolicy, stringToSubscriptionEvictionPolicyConverter, () -> null))
 			.when(mockClientSubscriptionConfig).setEvictionPolicy(anyString());
 
 		when(mockClientSubscriptionConfig.getCapacity()).thenAnswer(newGetter(subscriptionCapacity));
