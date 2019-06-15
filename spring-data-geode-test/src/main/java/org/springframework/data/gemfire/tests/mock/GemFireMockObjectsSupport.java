@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 import static org.springframework.data.gemfire.tests.util.IOUtils.doSafeIo;
 import static org.springframework.data.gemfire.tests.util.ObjectUtils.rethrowAsRuntimeException;
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
@@ -50,6 +51,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -74,16 +76,19 @@ import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.CacheListener;
 import org.apache.geode.cache.CacheLoader;
 import org.apache.geode.cache.CacheWriter;
+import org.apache.geode.cache.CacheWriterException;
 import org.apache.geode.cache.CustomExpiry;
 import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.DiskStore;
 import org.apache.geode.cache.DiskStoreFactory;
+import org.apache.geode.cache.EntryEvent;
 import org.apache.geode.cache.EntryNotFoundException;
 import org.apache.geode.cache.EvictionAttributes;
 import org.apache.geode.cache.EvictionAttributesMutator;
 import org.apache.geode.cache.ExpirationAction;
 import org.apache.geode.cache.ExpirationAttributes;
 import org.apache.geode.cache.GemFireCache;
+import org.apache.geode.cache.LoaderHelper;
 import org.apache.geode.cache.PartitionAttributes;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
@@ -787,7 +792,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(batchTimeInterval, mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setDiskStoreName(anyString()))
-			.thenAnswer(newSetter(diskStoreName, mockAsyncEventQueueFactory));
+			.thenAnswer(newSetter(diskStoreName, () -> mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setDiskSynchronous(anyBoolean()))
 			.thenAnswer(newSetter(diskSynchronous, mockAsyncEventQueueFactory));
@@ -799,13 +804,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(forwardExpirationDestroy, mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setGatewayEventSubstitutionListener(any(GatewayEventSubstitutionFilter.class)))
-			.thenAnswer(newSetter(gatewayEventSubstitutionFilter, mockAsyncEventQueueFactory));
+			.thenAnswer(newSetter(gatewayEventSubstitutionFilter, () -> mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setMaximumQueueMemory(anyInt()))
 			.thenAnswer(newSetter(maximumQueueMemory, mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setOrderPolicy(any(GatewaySender.OrderPolicy.class)))
-			.thenAnswer(newSetter(orderPolicy, mockAsyncEventQueueFactory));
+			.thenAnswer(newSetter(orderPolicy, () -> mockAsyncEventQueueFactory));
 
 		when(mockAsyncEventQueueFactory.setParallel(anyBoolean()))
 			.thenAnswer(newSetter(parallel, mockAsyncEventQueueFactory));
@@ -882,10 +887,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicReference<String> hostnameForClients = new AtomicReference<>(CacheServer.DEFAULT_HOSTNAME_FOR_CLIENTS);
 		AtomicReference<ServerLoadProbe> serverLoadProbe = new AtomicReference<>(null);
 
-		doAnswer(newSetter(bindAddress, null))
+		doAnswer(newSetter(bindAddress, () -> null))
 			.when(mockCacheServer).setBindAddress(anyString());
 
-		doAnswer(newSetter(hostnameForClients, null))
+		doAnswer(newSetter(hostnameForClients, () -> null))
 			.when(mockCacheServer).setHostnameForClients(anyString());
 
 		doAnswer(newSetter(loadPollInterval, null))
@@ -909,7 +914,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(port, null))
 			.when(mockCacheServer).setPort(anyInt());
 
-		doAnswer(newSetter(serverLoadProbe, null))
+		doAnswer(newSetter(serverLoadProbe, () -> null))
 			.when(mockCacheServer).setLoadProbe(any(ServerLoadProbe.class));
 
 		doAnswer(newSetter(socketBufferSize, null))
@@ -1048,7 +1053,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(cloningEnabled, mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setCompressor(any(Compressor.class)))
-			.thenAnswer(newSetter(compressor, mockClientRegionFactory));
+			.thenAnswer(newSetter(compressor, () -> mockClientRegionFactory));
 
 		doAnswer(newSetter(concurrencyChecksEnabled, mockClientRegionFactory))
 			.when(mockClientRegionFactory).setConcurrencyChecksEnabled(anyBoolean());
@@ -1057,49 +1062,49 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(concurrencyLevel, mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setCustomEntryIdleTimeout(any(CustomExpiry.class)))
-			.thenAnswer(newSetter(customEntryIdleTimeout, mockClientRegionFactory));
+			.thenAnswer(newSetter(customEntryIdleTimeout, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setCustomEntryTimeToLive(any(CustomExpiry.class)))
-			.thenAnswer(newSetter(customEntryTimeToLive, mockClientRegionFactory));
+			.thenAnswer(newSetter(customEntryTimeToLive, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setDiskStoreName(anyString()))
-			.thenAnswer(newSetter(diskStoreName, mockClientRegionFactory));
+			.thenAnswer(newSetter(diskStoreName, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setDiskSynchronous(anyBoolean()))
 			.thenAnswer(newSetter(diskSynchronous, mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setEntryIdleTimeout(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(entryIdleTimeout, mockClientRegionFactory));
+			.thenAnswer(newSetter(entryIdleTimeout, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setEntryTimeToLive(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(entryTimeToLive, mockClientRegionFactory));
+			.thenAnswer(newSetter(entryTimeToLive, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setEvictionAttributes(any(EvictionAttributes.class)))
-			.thenAnswer(newSetter(evictionAttributes, mockClientRegionFactory));
+			.thenAnswer(newSetter(evictionAttributes, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setInitialCapacity(anyInt()))
 			.thenAnswer(newSetter(initialCapacity, mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setKeyConstraint(any(Class.class)))
-			.thenAnswer(newSetter(keyConstraint, mockClientRegionFactory));
+			.thenAnswer(newSetter(keyConstraint, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setLoadFactor(anyFloat()))
-			.thenAnswer(newSetter(loadFactor, mockClientRegionFactory));
+			.thenAnswer(newSetter(loadFactor, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setPoolName(anyString()))
-			.thenAnswer(newSetter(poolName, mockClientRegionFactory));
+			.thenAnswer(newSetter(poolName, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setRegionIdleTimeout(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(regionIdleTimeout, mockClientRegionFactory));
+			.thenAnswer(newSetter(regionIdleTimeout, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setRegionTimeToLive(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(regionTimeToLive, mockClientRegionFactory));
+			.thenAnswer(newSetter(regionTimeToLive, () -> mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setStatisticsEnabled(anyBoolean()))
 			.thenAnswer(newSetter(statisticsEnabled, mockClientRegionFactory));
 
 		when(mockClientRegionFactory.setValueConstraint(any(Class.class)))
-			.thenAnswer(newSetter(valueConstraint, mockClientRegionFactory));
+			.thenAnswer(newSetter(valueConstraint, () -> mockClientRegionFactory));
 
 		RegionAttributes<K, V> mockRegionAttributes =
 			mock(RegionAttributes.class, mockObjectIdentifier("MockRegionAttributes"));
@@ -1157,7 +1162,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(subscriptionCapacity, null))
 			.when(mockClientSubscriptionConfig).setCapacity(anyInt());
 
-		doAnswer(newSetter(subscriptionDiskStoreName, null))
+		doAnswer(newSetter(subscriptionDiskStoreName, () -> null))
 			.when(mockClientSubscriptionConfig).setDiskStoreName(anyString());
 
 		doAnswer(newSetter(subscriptionEvictionPolicy, stringToSubscriptionEvictionPolicyConverter, null))
@@ -1228,10 +1233,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		});
 
 		when(mockDiskStoreFactory.setDiskUsageCriticalPercentage(anyFloat()))
-			.thenAnswer(newSetter(diskUsageCriticalPercentage, mockDiskStoreFactory));
+			.thenAnswer(newSetter(diskUsageCriticalPercentage, () -> mockDiskStoreFactory));
 
 		when(mockDiskStoreFactory.setDiskUsageWarningPercentage(anyFloat()))
-			.thenAnswer(newSetter(diskUsageWarningPercentage, mockDiskStoreFactory));
+			.thenAnswer(newSetter(diskUsageWarningPercentage, () -> mockDiskStoreFactory));
 
 		when(mockDiskStoreFactory.setMaxOplogSize(anyLong()))
 			.thenAnswer(newSetter(maxOplogSize, mockDiskStoreFactory));
@@ -1325,13 +1330,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		CopyOnWriteArrayList<GatewayTransportFilter> gatewayTransportFilters = new CopyOnWriteArrayList<>();
 
 		when(mockGatewayReceiverFactory.setBindAddress(anyString()))
-			.thenAnswer(newSetter(bindAddress, mockGatewayReceiverFactory));
+			.thenAnswer(newSetter(bindAddress, () -> mockGatewayReceiverFactory));
 
 		when(mockGatewayReceiverFactory.setEndPort(anyInt()))
 			.thenAnswer(newSetter(endPort, mockGatewayReceiverFactory));
 
 		when(mockGatewayReceiverFactory.setHostnameForSenders(anyString()))
-			.thenAnswer(newSetter(hostnameForSenders, mockGatewayReceiverFactory));
+			.thenAnswer(newSetter(hostnameForSenders, () -> mockGatewayReceiverFactory));
 
 		when(mockGatewayReceiverFactory.setManualStart(anyBoolean()))
 			.thenAnswer(newSetter(manualStart, mockGatewayReceiverFactory));
@@ -1433,7 +1438,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(batchTimeInterval, mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setDiskStoreName(anyString()))
-			.thenAnswer(newSetter(diskStoreName, mockGatewaySenderFactory));
+			.thenAnswer(newSetter(diskStoreName, () -> mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setDiskSynchronous(anyBoolean()))
 			.thenAnswer(newSetter(diskSynchronous, mockGatewaySenderFactory));
@@ -1442,13 +1447,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(dispatcherThreads, mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setGatewayEventSubstitutionFilter(any(GatewayEventSubstitutionFilter.class)))
-			.thenAnswer(newSetter(gatewayEventSubstitutionFilter, mockGatewaySenderFactory));
+			.thenAnswer(newSetter(gatewayEventSubstitutionFilter, () -> mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setMaximumQueueMemory(anyInt()))
 			.thenAnswer(newSetter(maximumQueueMemory, mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setOrderPolicy(any(GatewaySender.OrderPolicy.class)))
-			.thenAnswer(newSetter(orderPolicy, mockGatewaySenderFactory));
+			.thenAnswer(newSetter(orderPolicy, () -> mockGatewaySenderFactory));
 
 		when(mockGatewaySenderFactory.setParallel(anyBoolean())).thenAnswer(newSetter(parallel, mockGatewaySenderFactory));
 
@@ -1624,7 +1629,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(retryAttempts, mockPoolFactory));
 
 		when(mockPoolFactory.setServerGroup(anyString()))
-			.thenAnswer(newSetter(serverGroup, mockPoolFactory));
+			.thenAnswer(newSetter(serverGroup, () -> mockPoolFactory));
 
 		when(mockPoolFactory.setSocketBufferSize(anyInt()))
 			.thenAnswer(newSetter(socketBufferSize, mockPoolFactory));
@@ -2168,14 +2173,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		Map<K, V> data = new ConcurrentHashMap<>();
 
-		Region<K, V> mockRegion = mock(Region.class, name);
+		Region<K, V> mockRegion = mock(Region.class, withSettings().name(name).lenient());
 
 		RegionAttributes<K, V> mockRegionAttributes = mockRegionAttributes(mockRegion, regionAttributes);
 
 		Set<K> invalidatedKeys = new HashSet<>();
 		Set<Region<?, ?>> subRegions = new CopyOnWriteArraySet<>();
 
-		when(mockRegion.getAttributes()).thenReturn(mockRegionAttributes);
 		when(mockRegion.getFullPath()).thenReturn(toRegionPath(name));
 		when(mockRegion.getName()).thenReturn(toRegionName(name));
 		when(mockRegion.getRegionService()).thenReturn(regionService);
@@ -2196,14 +2200,32 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
-			V value = data.get(key);
+			V value = invalidatedKeys.contains(key) ? null : data.get(key);
 
-			if (invalidatedKeys.contains(key)) {
-				value = null;
+			if (value == null) {
+
+				value = Optional.ofNullable(mockRegionAttributes.getCacheLoader())
+					.map(cacheLoader -> {
+
+						LoaderHelper<K, V> mockLoaderHelper = mock(LoaderHelper.class, withSettings().lenient());
+
+						when(mockLoaderHelper.getArgument()).thenReturn(null);
+						when(mockLoaderHelper.getKey()).thenReturn(key);
+						when(mockLoaderHelper.getRegion()).thenReturn(mockRegion);
+
+						return cacheLoader.load(mockLoaderHelper);
+
+					})
+					.map(loadedValue -> {
+
+						data.put(key, loadedValue);
+						invalidatedKeys.remove(key);
+
+						return loadedValue;
+
+					})
+					.orElse(value);
 			}
-
-			// TODO: CacheLoader
-			Optional.ofNullable(value);
 
 			return value;
 		});
@@ -2231,11 +2253,22 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			K key = invocation.getArgument(0);
 
-			if (data.containsKey(key)) {
-				invalidatedKeys.add(key);
-			}
-			else {
+			if (!data.containsKey(key)) {
 				throw new EntryNotFoundException(String.format("Entry with key [%s] not found", key));
+			}
+
+			if (invalidatedKeys.add(key)) {
+
+				EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+				when(mockEntryEvent.getKey()).thenReturn(key);
+				when(mockEntryEvent.getNewValue()).thenReturn(null);
+				when(mockEntryEvent.getOldValue()).thenReturn(data.get(key));
+				when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+				Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+					.filter(Objects::nonNull)
+					.forEach(cacheListener -> cacheListener.afterInvalidate(mockEntryEvent));
 			}
 
 			return null;
@@ -2247,7 +2280,49 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			K key = invocation.getArgument(0);
 			V newValue = invocation.getArgument(1);
+
+			Assert.notNull(newValue, "Value is required");
+
+			boolean entryExists = data.containsKey(key);
+
+			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
+
+			when(mockEntryEvent.getKey()).thenReturn(key);
+			when(mockEntryEvent.getNewValue()).thenReturn(newValue);
+			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
+			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
+
+			if (cacheWriter != null) {
+				try {
+					if (entryExists) {
+						cacheWriter.beforeUpdate(mockEntryEvent);
+					}
+					else {
+						cacheWriter.beforeCreate(mockEntryEvent);
+					}
+				}
+				catch (Throwable cause) {
+					throw new CacheWriterException("Create/Update Error", cause);
+				}
+			}
+
 			V existingValue = data.put(key, newValue);
+
+			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+				.filter(Objects::nonNull)
+				.forEach(cacheListener -> {
+
+					if (entryExists) {
+						cacheListener.afterUpdate(mockEntryEvent);
+					}
+					else {
+						cacheListener.afterCreate(mockEntryEvent);
+					}
+				});
 
 			return invalidatedKeys.remove(key) ? null : existingValue;
 		});
@@ -2256,7 +2331,32 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegion.remove(any())).thenAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
+
+			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
+
+			when(mockEntryEvent.getKey()).thenReturn(key);
+			when(mockEntryEvent.getNewValue()).thenReturn(null);
+			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
+			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
+
+			if (cacheWriter != null) {
+				try {
+					cacheWriter.beforeDestroy(mockEntryEvent);
+				}
+				catch (Throwable cause) {
+					throw new CacheWriterException("Destroy Error", cause);
+				}
+			}
+
 			V value  = data.remove(key);
+
+			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+				.filter(Objects::nonNull)
+				.forEach(cacheListener -> cacheListener.afterDestroy(mockEntryEvent));
 
 			return invalidatedKeys.remove(key) ? null : value;
 		});
@@ -2282,12 +2382,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	private static <K, V> RegionAttributes<K, V> mockRegionAttributes(Region<K, V> mockRegion,
 			RegionAttributes<K, V> baseRegionAttributes) {
 
-		AttributesMutator<K, V> mockAttributesMutator = mock(AttributesMutator.class);
+		AttributesMutator<K, V> mockAttributesMutator = mock(AttributesMutator.class, withSettings().lenient());
 
-		EvictionAttributesMutator mockEvictionAttributesMutator = mock(EvictionAttributesMutator.class);
+		EvictionAttributesMutator mockEvictionAttributesMutator =
+			mock(EvictionAttributesMutator.class, withSettings().lenient());
 
-		RegionAttributes<K, V> mockRegionAttributes = mock(RegionAttributes.class);
+		RegionAttributes<K, V> mockRegionAttributes = mock(RegionAttributes.class, withSettings().lenient());
 
+		when(mockRegion.getAttributes()).thenReturn(mockRegionAttributes);
 		when(mockRegion.getAttributesMutator()).thenReturn(mockAttributesMutator);
 		when(mockAttributesMutator.getEvictionAttributesMutator()).thenReturn(mockEvictionAttributesMutator);
 		when(mockAttributesMutator.getRegion()).thenReturn(mockRegion);
@@ -2357,7 +2459,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockAttributesMutator).initCacheListeners(any(CacheListener[].class));
 
-
 		doAnswer(invocation -> asyncEventQueueIds.remove(invocation.getArgument(0)))
 			.when(mockAttributesMutator).removeAsyncEventQueueId(anyString());
 
@@ -2367,35 +2468,36 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(invocation -> gatewaySenderIds.remove(invocation.getArgument(0)))
 			.when(mockAttributesMutator).removeGatewaySenderId(anyString());
 
-		doAnswer(newSetter(cacheLoader, baseRegionAttributes.getCacheLoader()))
+		doAnswer(newSetter(cacheLoader))
 			.when(mockAttributesMutator).setCacheLoader(any(CacheLoader.class));
 
-		doAnswer(newSetter(cacheWriter, baseRegionAttributes.getCacheWriter()))
+		doAnswer(newSetter(cacheWriter))
 			.when(mockAttributesMutator).setCacheWriter(any(CacheWriter.class));
 
 		doAnswer(newSetter(cloningEnabled, null))
 			.when(mockAttributesMutator).setCloningEnabled(anyBoolean());
 
-		doAnswer(newSetter(customEntryIdleTimeout, baseRegionAttributes.getCustomEntryIdleTimeout()))
+		doAnswer(newSetter(customEntryIdleTimeout))
 			.when(mockAttributesMutator).setCustomEntryIdleTimeout(any(CustomExpiry.class));
 
-		doAnswer(newSetter(customEntryTimeToLive, baseRegionAttributes.getCustomEntryTimeToLive()))
+		doAnswer(newSetter(customEntryTimeToLive))
 			.when(mockAttributesMutator).setCustomEntryTimeToLive(any(CustomExpiry.class));
 
-		doAnswer(newSetter(entryIdleTimeout, baseRegionAttributes.getEntryIdleTimeout()))
+		doAnswer(newSetter(entryIdleTimeout))
 			.when(mockAttributesMutator).setEntryIdleTimeout(any(ExpirationAttributes.class));
 
-		doAnswer(newSetter(entryTimeToLive, baseRegionAttributes.getEntryTimeToLive()))
+		doAnswer(newSetter(entryTimeToLive))
 			.when(mockAttributesMutator).setEntryTimeToLive(any(ExpirationAttributes.class));
 
-		doAnswer(newSetter(regionIdleTimeout, baseRegionAttributes.getRegionIdleTimeout()))
+		doAnswer(newSetter(regionIdleTimeout))
 			.when(mockAttributesMutator).setRegionIdleTimeout(any(ExpirationAttributes.class));
 
-		doAnswer(newSetter(regionTimeToLive, baseRegionAttributes.getRegionTimeToLive()))
+		doAnswer(newSetter(regionTimeToLive))
 			.when(mockAttributesMutator).setRegionTimeToLive(any(ExpirationAttributes.class));
 
 		// Mock EvictionAttributesMutator
-		doAnswer(newSetter(evictionMaximum, null)).when(mockEvictionAttributesMutator).setMaximum(anyInt());
+		doAnswer(newSetter(evictionMaximum, null))
+			.when(mockEvictionAttributesMutator).setMaximum(anyInt());
 
 		// Mock RegionAttributes
 		when(mockRegionAttributes.getAsyncEventQueueIds())
@@ -2619,16 +2721,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		});
 
 		when(mockRegionFactory.setCacheLoader(any(CacheLoader.class)))
-			.thenAnswer(newSetter(cacheLoader, mockRegionFactory));
+			.thenAnswer(newSetter(cacheLoader, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setCacheWriter(any(CacheWriter.class)))
-			.thenAnswer(newSetter(cacheWriter, mockRegionFactory));
+			.thenAnswer(newSetter(cacheWriter, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setCloningEnabled(anyBoolean()))
 			.thenAnswer(newSetter(cloningEnabled, mockRegionFactory));
 
 		when(mockRegionFactory.setCompressor(any(Compressor.class)))
-			.thenAnswer(newSetter(compressor, mockRegionFactory));
+			.thenAnswer(newSetter(compressor, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setConcurrencyChecksEnabled(anyBoolean()))
 			.then(newSetter(concurrencyChecksEnabled, mockRegionFactory));
@@ -2637,15 +2739,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(concurrencyLevel, mockRegionFactory));
 
 		when(mockRegionFactory.setCustomEntryIdleTimeout(any(CustomExpiry.class)))
-			.thenAnswer(newSetter(customEntryIdleTimeout, mockRegionFactory));
+			.thenAnswer(newSetter(customEntryIdleTimeout, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setCustomEntryTimeToLive(any(CustomExpiry.class)))
-			.thenAnswer(newSetter(customEntryTimeToLive, mockRegionFactory));
+			.thenAnswer(newSetter(customEntryTimeToLive, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setDataPolicy(any(DataPolicy.class)))
-			.thenAnswer(newSetter(dataPolicy, mockRegionFactory));
+			.thenAnswer(newSetter(dataPolicy, () -> mockRegionFactory));
 
-		when(mockRegionFactory.setDiskStoreName(anyString())).thenAnswer(newSetter(diskStoreName, mockRegionFactory));
+		when(mockRegionFactory.setDiskStoreName(anyString()))
+			.thenAnswer(newSetter(diskStoreName, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setDiskSynchronous(anyBoolean()))
 			.thenAnswer(newSetter(diskSynchronous, mockRegionFactory));
@@ -2657,13 +2760,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(newSetter(enableSubscriptionConflation, mockRegionFactory));
 
 		when(mockRegionFactory.setEntryIdleTimeout(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(entryIdleTimeout, mockRegionFactory));
+			.thenAnswer(newSetter(entryIdleTimeout, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setEntryTimeToLive(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(entryTimeToLive, mockRegionFactory));
+			.thenAnswer(newSetter(entryTimeToLive, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setEvictionAttributes(any(EvictionAttributes.class)))
-			.thenAnswer(newSetter(evictionAttributes, mockRegionFactory));
+			.thenAnswer(newSetter(evictionAttributes, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setIgnoreJTA(anyBoolean())).thenAnswer(newSetter(ignoreJta, mockRegionFactory));
 
@@ -2673,9 +2776,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionFactory.setInitialCapacity(anyInt())).thenAnswer(newSetter(initialCapacity, mockRegionFactory));
 
 		when(mockRegionFactory.setKeyConstraint(any(Class.class)))
-			.thenAnswer(newSetter(keyConstraint, mockRegionFactory));
+			.thenAnswer(newSetter(keyConstraint, () -> mockRegionFactory));
 
-		when(mockRegionFactory.setLoadFactor(anyFloat())).thenAnswer(newSetter(loadFactor, mockRegionFactory));
+		when(mockRegionFactory.setLoadFactor(anyFloat())).thenAnswer(newSetter(loadFactor, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setLockGrantor(anyBoolean())).thenAnswer(newSetter(lockGrantor, mockRegionFactory));
 
@@ -2685,26 +2788,26 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionFactory.setOffHeap(anyBoolean())).thenAnswer(newSetter(offHeap, mockRegionFactory));
 
 		when(mockRegionFactory.setPartitionAttributes(any(PartitionAttributes.class)))
-			.thenAnswer(newSetter(partitionAttributes, mockRegionFactory));
+			.thenAnswer(newSetter(partitionAttributes, () -> mockRegionFactory));
 
-		when(mockRegionFactory.setPoolName(anyString())).thenAnswer(newSetter(poolName, mockRegionFactory));
+		when(mockRegionFactory.setPoolName(anyString())).thenAnswer(newSetter(poolName, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setRegionIdleTimeout(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(regionIdleTimeout, mockRegionFactory));
+			.thenAnswer(newSetter(regionIdleTimeout, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setRegionTimeToLive(any(ExpirationAttributes.class)))
-			.thenAnswer(newSetter(regionTimeToLive, mockRegionFactory));
+			.thenAnswer(newSetter(regionTimeToLive, () -> mockRegionFactory));
 
-		when(mockRegionFactory.setScope(any(Scope.class))).thenAnswer(newSetter(scope, mockRegionFactory));
+		when(mockRegionFactory.setScope(any(Scope.class))).thenAnswer(newSetter(scope, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setStatisticsEnabled(anyBoolean()))
 			.thenAnswer(newSetter(statisticsEnabled, mockRegionFactory));
 
 		when(mockRegionFactory.setSubscriptionAttributes(any(SubscriptionAttributes.class)))
-			.thenAnswer(newSetter(subscriptionAttributes, mockRegionFactory));
+			.thenAnswer(newSetter(subscriptionAttributes, () -> mockRegionFactory));
 
 		when(mockRegionFactory.setValueConstraint(any(Class.class)))
-			.thenAnswer(newSetter(valueConstraint, mockRegionFactory));
+			.thenAnswer(newSetter(valueConstraint, () -> mockRegionFactory));
 
 		RegionAttributes<K, V> mockRegionAttributes =
 			mock(RegionAttributes.class, mockObjectIdentifier("MockRegionAttributes"));
@@ -2771,16 +2874,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		AtomicReference<Float> evictionOffHeapPercentage = new AtomicReference<>(0.0f);
 
-		doAnswer(newSetter(criticalHeapPercentage, null))
+		doAnswer(newSetter(criticalHeapPercentage, () -> null))
 			.when(mockResourceManager).setCriticalHeapPercentage(anyFloat());
 
-		doAnswer(newSetter(criticalOffHeapPercentage, null))
+		doAnswer(newSetter(criticalOffHeapPercentage, () -> null))
 			.when(mockResourceManager).setCriticalOffHeapPercentage(anyFloat());
 
-		doAnswer(newSetter(evictionHeapPercentage, null))
+		doAnswer(newSetter(evictionHeapPercentage, () -> null))
 			.when(mockResourceManager).setEvictionHeapPercentage(anyFloat());
 
-		doAnswer(newSetter(evictionOffHeapPercentage, null))
+		doAnswer(newSetter(evictionOffHeapPercentage, () -> null))
 			.when(mockResourceManager).setEvictionOffHeapPercentage(anyFloat());
 
 		when(mockResourceManager.getCriticalHeapPercentage()).thenAnswer(newGetter(criticalHeapPercentage));
@@ -2812,7 +2915,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
 				AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
 
-				doAnswer(newSetter(pdxDiskStoreName, cacheFactorySpy))
+				doAnswer(newSetter(pdxDiskStoreName, () -> cacheFactorySpy))
 					.when(cacheFactorySpy).setPdxDiskStore(anyString());
 
 				doAnswer(newSetter(pdxIgnoreUnreadFields, cacheFactorySpy))
@@ -2824,7 +2927,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				doAnswer(newSetter(pdxReadSerialized, cacheFactorySpy))
 					.when(cacheFactorySpy).setPdxReadSerialized(anyBoolean());
 
-				doAnswer(newSetter(pdxSerializer, cacheFactorySpy))
+				doAnswer(newSetter(pdxSerializer, () -> cacheFactorySpy))
 					.when(cacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
 
 				when(mockCache.getPdxDiskStore()).thenAnswer(newGetter(pdxDiskStoreName));
@@ -2865,7 +2968,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
 				AtomicReference<Pool> defaultPool = new AtomicReference<>(null);
 
-				doAnswer(newSetter(pdxDiskStoreName, clientCacheFactorySpy))
+				doAnswer(newSetter(pdxDiskStoreName, () -> clientCacheFactorySpy))
 					.when(clientCacheFactorySpy).setPdxDiskStore(anyString());
 
 				doAnswer(newSetter(pdxIgnoreUnreadFields, clientCacheFactorySpy))
@@ -2877,7 +2980,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				doAnswer(newSetter(pdxReadSerialized, clientCacheFactorySpy))
 					.when(clientCacheFactorySpy).setPdxReadSerialized(anyBoolean());
 
-				doAnswer(newSetter(pdxSerializer, clientCacheFactorySpy))
+				doAnswer(newSetter(pdxSerializer, () -> clientCacheFactorySpy))
 					.when(clientCacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
 
 				PoolFactory mockPoolFactory = mockPoolFactory();

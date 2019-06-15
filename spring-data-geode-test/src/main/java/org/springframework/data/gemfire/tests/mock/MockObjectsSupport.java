@@ -36,6 +36,13 @@ import org.springframework.util.StringUtils;
  * used in mocking using Mockito.
  *
  * @author John Blum
+ * @see java.util.concurrent.atomic.AtomicBoolean
+ * @see java.util.concurrent.atomic.AtomicInteger
+ * @see java.util.concurrent.atomic.AtomicLong
+ * @see java.util.concurrent.atomic.AtomicReference
+ * @see java.util.function.Consumer
+ * @see java.util.function.Function
+ * @see java.util.function.Supplier
  * @see org.mockito.invocation.InvocationOnMock
  * @see org.mockito.stubbing.Answer
  * @since 0.0.1
@@ -144,35 +151,53 @@ public abstract class MockObjectsSupport {
 		};
 	}
 
-	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, R returnValue) {
+	protected static <T> Answer<T> newSetter(AtomicReference<T> argument) {
+		return invocation -> argument.getAndSet(invocation.getArgument(0));
+	}
+
+	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, Supplier<R> returnValue) {
 
 		return invocation -> {
 			argument.set(invocation.getArgument(0));
-			return returnValue;
+			return returnValue.get();
 		};
 	}
 
-	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, T value, R returnValue) {
+	protected static <T> Answer<T> newSetterWithArument(AtomicReference<T> argument, T value) {
+		return invocation -> argument.getAndSet(value);
+	}
+
+	protected static <T, R> Answer<R> newSetterWithArgument(AtomicReference<T> argument, T value,
+			Supplier<R> returnValue) {
 
 		return invocation -> {
 			argument.set(value);
-			return returnValue;
+			return returnValue.get();
 		};
 	}
 
-	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, Function<?, T> converter, R returnValue) {
+	protected static <T> Answer<T> newSetter(AtomicReference<T> argument, Function<?, T> converter) {
+		return invocation -> argument.getAndSet(converter.apply(invocation.getArgument(0)));
+	}
+
+	protected static <T, R> Answer<R> newSetter(AtomicReference<T> argument, Function<?, T> converter,
+			Supplier<R> returnValue) {
 
 		return invocation -> {
 			argument.set(converter.apply(invocation.getArgument(0)));
-			return returnValue;
+			return returnValue.get();
 		};
 	}
 
-	protected static <K, V, R> Answer<R> newSetter(Map<K, V> argument, R returnValue) {
+	protected static <K, V> Answer<V> newSetter(Map<K, V> argument) {
+		return invocation -> argument.put(invocation.getArgument(0), invocation.getArgument(1));
+	}
+
+	protected static <K, V, R> Answer<R> newSetter(Map<K, V> argument, Supplier<R> returnValue) {
 
 		return invocation -> {
 			argument.put(invocation.getArgument(0), invocation.getArgument(1));
-			return returnValue;
+			return returnValue.get();
 		};
 	}
 
