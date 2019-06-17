@@ -45,27 +45,27 @@ We all write tests, right?  TDD style?  ;-)
 As we begin to write tests, we typically start with _Unit Tests_ since they are designed to test the subject
 in isolation, without dependencies, to get feedback quickly, i.e. "_Is my logic correct?_"
 
-It is often common in _Unit Tests_ to *mock* dependencies since the test makes an assumption that the dependencies
+It common when writing _Unit Tests_ to *mock* the dependencies since the test should assume that the dependencies
 "_work as designed_".  During _Unit Testing_, it does not matter whether or not the dependencies actually work
-as expected (that is the function/job/purpose of the _Integration Tests_), just that they have a contract and our
-application components, the "_Subject Under Test_" (SUT), honors that contract and uses the external dependencies
-correctly. Essentially we asserting that the interactions between our application components and external dependencies
-is correct and results in the desired outcome.
+as expected (that is the purpose of _Integration Tests_), just that they have a contract and our application components,
+the "_Subject Under Test_" (SUT), honors that contract and uses the external dependencies correctly. Essentially we
+are asserting that the interactions between our application components and external dependencies is correct
+and the results lead to the desired outcome.
 
 Well, it is, or should be, no different when you are using Apache Geode or Pivotal GemFire.
 
 For instance, you might want to mock that your _Data Access Object_ (DAO) performs the proper interactions on
 a GemFire/Geode Region, performing the right CRUD operations, making sure the right (OQL) Queries are executed
-for the Use Case or business function/workflow being performed by the application.
+for the Use Case or business function and workflow being performed by the application.
 
-In this case, we don't care whether the Region is real or not, that an OQL Query is actually well formed and would
-actually execute properly, performantly and return the correct results.  We would "mock" the Regions' behavior in this
-case to make sure that our DAO interactions with the Region are correct, that it handles the translation of Exceptions
+In this case, we don't care whether the Region is real or not, or that an OQL Query is actually well formed and would
+execute properly, performantly, returning the correct results.  We would "mock" the Regions' behavior in this case
+to make sure that our DAO interactions with the Region are correct, that it handles the translation of Exceptions
 or other Error conditions, that it transforms values to/from the backend data store (i.e. Region), and so on. That is
 how you properly test the subject.
 
 To support _Unit Testing_ with Apache Geode or Pivotal GemFire in a Spring context, STDG provides the
-`@EnableGemFireMockObjects` annotation.  If you want to use GemFire/Geode Mock Objects (e.g. a "mock" Region) rather
+`@EnableGemFireMockObjects` annotation.  If you want to use GemFire/Geode Mock Objects, e.g. a "mock" Region rather
 than a "live" Region, than you simply only need to annotate your test configuration with `@EnableGemFireMockObjects`.
 
 For example:
@@ -88,9 +88,9 @@ class ExampleUnitTestClass {
 ----
 
 
-In the example above, `@EnableGemFireMockObjects` creates "mocks" for the `ClientCache` and all `Regions` identified
-and created by the `@EnableEntityDefinedRegions(..)` annotation.  There are no "live" GemFire/Geode objects
-when "mocking" is enabled.
+In the example above, `@EnableGemFireMockObjects` creates "mocks" for the `ClientCache`, all the `Regions` identified
+and created by the `@EnableEntityDefinedRegions(..)` annotation, along with all the object GemFire/Geode object types.
+There are no "live" GemFire/Geode objects when "mocking" is enabled.
 
 Here is 1
 https://github.com/spring-projects/spring-test-data-geode/blob/master/spring-data-geode-test/src/test/java/org/springframework/data/gemfire/MockClientCacheApplicationIntegrationTests.java[example]
@@ -100,6 +100,249 @@ It really is that simple!
 
 TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this guide
 for the time being.
+
+[[unit-tests-mock-region-data]]
+==== Mock Regions with Data
+
+While implementing a fully capable GemFire/Geode Region would defeat the purpose of Mocking and Unit Testing in general,
+it is desirable to sometimes perform basic Region data access operations, such as `get` and `put`, with small quantities
+of data and emulate the same effects.
+
+As such, with STDG it is currently possible to perform the following Region data access operations:
+
+* `containsKey(key)`
+* `get(key)`,
+* `getEntry(key)`,
+* `invalidate(key)`,
+* `put(key, value)`
+* `size()`,
+
+The "mock" Region will function and behave similarly to an actual GemFire/Geode Region involving these
+data access operations.
+
+By way of example, this means you can do things like the following in a Unit Test with a "mock" Region:
+
+.Basic data access operations on a mocked Region
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class MyGeodeMockRegionUnitTests {
+
+  @Resource(name = "Example")
+  private Region<?, ?>  mockRegion;
+
+  @Test
+  public void simpleGetAndPutRegionOpsWork() {
+
+      mockRegion.put(1, "test");
+
+      assertThat(mockRegion).containsKey(1);
+      assertThat(mockRegion.get(1)).isEqualTo("test");
+  }
+
+  @ClientCacheApplication
+  @EnableGemFireMockObjects
+  static class TestConfiguration {
+
+    @Bean("Example")
+    ClienRegionFactoryBean mockRegion(GemFireCache gemfireCache) {
+
+        ClientRegionFactoryBean mockRegion = new ClientRegionFactoryBean();
+
+        mockRegion.setCache(gemfireCache);
+
+        return mockRegion;
+    }
+  }
+}
+----
+
+Of course, you can also perform similar Region data access operations using the _Spring Data Repository_ abstraction
+instead. The benefit of _Spring Data's_ _Repository_ abstraction is that it insulates your application from Apache Geode
+and hides the fact that you are interfacing with an Region under-the-hood by using the proper _Data Access Object_ (DAO)
+pattern.
+
+For example, you can "mock" a Region and `put`/`get` data using a _Spring Data Repository_ for the Region
+as demonstrated by the following code.
+
+Given a `Customer` application domain object annotated with the `@Region` mapping annotation:
+
+.Customer
+[source,java]
+----
+@Region("Customers")
+class Customer {
+
+    @Id
+    private Long id;
+
+    ...
+}
+----
+
+Along with a SD _Repository_ for `Customers`:
+
+.CustomerRepository
+[source,java]
+----
+interface CustomerRepository extends CrudRepository<Customer, Long> { ... }
+----
+
+Then you can write a test class like the following, still using a "mock" Region to `put` and `get` actual data:
+
+.Spring Data Repository on a mocked Region
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class MySpringDataRepositoryWithMockRegionUnitTests {
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Test
+    public void simpleRepositoryCrudOpsWork() {
+
+        Customer jonDoe = ...;
+
+        customerRepository.save(jonDoe);
+
+        assertThat(customerRepository.existsById(jonDoe.getId()).isTrue();
+        assertThat(customerRepository.findById(jonDoe.getId()).orElse(null)).isEqualTo(jonDoe);
+    }
+
+    @ClientCacheApplication
+    @EnableEntityDefinedRegions(basePackageClasses = Customer.class)
+    @EnableGemfireRepositories(basePackageClasses = CustomerRepository.class)
+    static class TestConfiguration { ... }
+
+}
+----
+
+Even though you are using _Spring Data Repositories_ and the `@EnableEntityDefinedRegions` annotation (perhaps;
+yes these components still work with Mocks and mock data), you can still autowire/inject the Region and access
+it directly in the same test class:
+
+.Accessing the mock Region directly in the SD Repository test
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class MySpringDataRepositoryWithMockRegionUnitTests {
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Resource
+    Region<Long, Customer> customers;
+
+    @Test
+    public void simpleRepositoryCrudOpsWork() { ... }
+
+    @Test
+    public void customerRegionOpsWorkToo() {
+
+        Customer janeDoe = ...;
+
+        customers.put(janeDoe.getId(), janeDoe);
+
+        assertThat(customers).containsKey(janeDoe.getId());
+        assertThat(customers.get(janeDoe.getId())).isEqualTo(janeDoe);
+        assertThat(customerRepository.findById(janeDoe.getId()).orElse(null)).isEqualTo(janeDoe);
+    }
+}
+----
+
+For clarification, obviously many of the Region functions and behaviors are not implemented, like persistence,
+or overflow to disk, distribution, replication, eviction, expiration, etc.  If you find you need to test your
+application with these behaviors and functions, then it would clearly be better suited as an actual Integration Test
+at that point.
+
+[[unit-tests-mock-region-callbacks]]
+==== Mock Region Callbacks
+
+A relatively *new* feature in STDG is the ability to register and invoke cache (Region) callbacks, such as
+`CacheListeners`, or a `CacheLoader` or a `CacheWriter`.
+
+Cache callbacks like `CacheListeners` or `CacheLoader/Writers` are user-defined, application objects that can be
+registered with a Region to listen for events, load data on cache misses, or write the Region's data to a backend,
+external data source.
+
+It is sometimes useful when testing to partially mock some dependencies (a.k.a. collaborators; e.g. Regions)
+while using live objects for others (e.g. cache callbacks like a `CacheListener`).
+
+The reason behind this testing strategy is that some objects are mostly infrastructure related (e.g. a Region),
+and not the primary focus of the test, while other objects are still very much tied to the application's function
+and behavior (e.g. a `CacheListener` or a `CacheLoader`), i.e. they are part of the application's workflow.
+
+As such, STDG not only allows you to register `CacheListeners` and `CacheLoaders/Writers` (you could do so before
+as well), but will now additionally invoke the Listeners, Loader and Writer at the appropriate point in the Region
+operation's process flow.
+
+For example, a registered `CacheWriter` is invoked before the object (value) is put into the Region using the
+`Region.put(key, value)` operation.  This is exactly what GemFire/Geode does in order to ensure consistency with
+the backend, external data source.  If the `CacheWriter` throws an exception during 1 of it's event handler callbacks
+(e.g. `beforeCreate(:EntryEvent<K, V>)` then it will prevent the object from being inserted into the Region.
+The same behavior is true for a STDG mock Region.
+
+By way of example, let's demonstrate with a `CacheLoader`:
+
+.Application `CacheLoader` on mock Region
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class MyMockRegionWithCacheLoaderUnitTests {
+
+  @Resource(name = "Example")
+  private Region example;
+
+  @Test
+  public void cacheLoaderWorks() {
+
+    assertThat(example.get("one")).isEqualTo(1);
+    assertThat(example.get("two")).isEqualTo(2);
+    ...
+  }
+
+  @ClientCacheApplication
+  @EnableGemFireMockObjects
+  static class TestConfiguration {
+
+    @Bean
+    ClienRegionFactoryBean exampleRegion(GemFireCache gemfireCache) {
+
+      ClientRegionFactoryBean exampleRegion = new ClientRegionFactoryBean();
+
+      exampleRegion.setCache(gemfireCache);
+      exampleRegion.setCacheLoader(counterCacheLoader());
+
+      return exampleRegion;
+    }
+  }
+
+  @Bean
+  CacheLoader<Object, Object> counterCacheLoader() {
+
+    AtomicInteger counter = new AtomicInteger(0);
+
+    return new CacheLoader<>() {
+
+      @Override
+      public Object load(LoaderHelper<Object, Object> helper) {
+        return counter.incrementAndGet();
+      }
+    };
+  }
+}
+----
+
+As seen in the test above, performing a `Region.get(key)` for keys "one" and "two" on an initially empty Region
+will result in cache misses, which will then invoke the registered, application "counter" `CacheLoader` to supply
+the value for the requested keys.
+
+You can register a `CacheWriter` along with 1 or more `CacheListeners` and they will be invoked, too.
 
 [[integration-testing]]
 === Integration Testing with STDG
