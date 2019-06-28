@@ -11,7 +11,7 @@
 
     <appender name="nop" class="ch.qos.logback.core.helpers.NOPAppender"/>
 
-    <appender name="testAppender" class="org.springframework.data.gemfire.test.logging.slf4j.logback.TestAppender">
+    <appender name="testAppender" class="org.springframework.data.gemfire.tests.logging.slf4j.logback.TestAppender">
         <encoder>
             <pattern>TEST - %m%n</pattern>
         </encoder>
@@ -21,13 +21,9 @@
 
     <logger name="org.springframework" level="${logback.log.level:-ERROR}"/>
 
-    <logger name="org.springframework.data.gemfire.config.annotation.support.RegionDataAccessTracingAspect" level="trace" additivity="false">
+    <logger name="org.springframework.data.gemfire.tests.logging.slf4j.logback.TestAppenderUnitTests" level="WARN">
         <appender-ref ref="testAppender"/>
     </logger>
-
-    <logger name="org.springframework.data.gemfire.listener.adapter.ContinuousQueryListenerAdapter" level="off" additivity="false"/>
-
-    <logger name="org.springframework.data.gemfire.support.SpringContextBootstrappingInitializer" level="off" additivity="false"/>
 
     <root level="${logback.log.level:-ERROR}">
         <appender-ref ref="console"/>
