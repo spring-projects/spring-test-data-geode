@@ -31,11 +31,13 @@ https://github.com/spring-projects/spring-boot-data-geode/tree/master/spring-geo
 and the https://github.com/spring-projects/spring-session-data-geode/tree/master/spring-session-data-geode/src/test/java/org/springframework/session/data/gemfire[test suite for SSDG]
 to get a sense of how this project is used and works.
 
+
 [[nutshell]]
 == STDG in a Nutshell
 
 Until proper documentation has been provided, this very short and simple tutorial will hopefully give you a better idea
 of how this project is used.
+
 
 [[unit-tests]]
 === Unit Testing with STDG
@@ -344,6 +346,7 @@ the value for the requested keys.
 
 You can register a `CacheWriter` along with 1 or more `CacheListeners` and they will be invoked, too.
 
+
 [[integration-testing]]
 === Integration Testing with STDG
 
@@ -437,6 +440,131 @@ that much easier.  See https://github.com/spring-projects/spring-test-data-geode
 This feature would be loosely based on, and similar to,
 _Spring Boot_ https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html[Testing]
 with _Test Slices_.
+
+
+[[testing-logging-behavior]]
+=== Asserting Logging Behavior
+
+It is sometimes necessary or useful to write tests to assert an application's logging behavior.
+
+For instance, if your application needs to log an event that occurred, output configuration meta-data on startup,
+alert a user to some system event such as low memory, out of disk space, or a temporary network outage, or whatever
+the case might be, it is useful to assert that your application logs an appropriate message.
+
+But, how do you assert that certain log events with an appropriate log message has been made by the application
+when the conditions constituting the log event have been arranged?
+
+Now, STDG provides the capability to 1) assert that your application, or an application component, made a log event
+at the appropriate moment and 2) that the log message communicates enough contextual-based information to be useful
+to the user of your application.
+
+To do this, STDG provides the `org.springframework.data.geode.tests.logging.slf4j.logback.TestAppender` class.
+
+This Log Appender can be used when your application logging framework is configured with _Logback_ as the provider.
+
+You declare the `TestAppender` in a `logback.xml` configuration file as follows:
+
+.logback.xml configuration file
+[source,xml]
+----
+<appender name="testAppender" class="org.springframework.data.gemfire.tests.logging.slf4j.logback.TestAppender">
+    <encoder>
+        <pattern>TEST - %m%n</pattern>
+    </encoder>
+</appender>
+----
+
+Then, the `TestAppender` can be used by registering it with a `Logger`:
+
+.Logger using the TestAppender
+[source,xml]
+----
+<logger name="example.app.net.service.NetworkService" level="WARN">
+    <appender-ref ref="testAppender"/>
+</logger>
+----
+
+For example, assume your application's `NetworkService` class uses the named `Logger` to log network events,
+e.g. a DDoS attack:
+
+.Application component with logging
+[source,java]
+----
+@Service
+class NetworkService {
+
+    private final Logger logger = LoggerFactory.getLogger(NetworkService.class);
+
+    void processDenialOfServiceAttack(NetworkEvent event) {
+
+        logger.warn("A DDoS attack occured at {} from IP Address {}", event.getTime(), event.getIpAddress());
+
+        // process the network event
+
+        logger.warn("Another log message");
+    }
+
+    void processLoginRequest(LoginRequest request) {
+
+        logger.info("User {} is attepting to login", request.getUser().getName());
+
+        // process login request
+    }
+}
+----
+
+Then, it is a simple matter to test the logging behavior of your application by doing:
+
+.Test logging behavior of the NetworkService class
+[source,java]
+----
+class NetworkServiceUnitTests {
+
+  private static TestAppender testAppender = TestAppender.getInstance();
+
+  private NetworkService service;
+
+  @Before
+  public void setup() {
+    this.service = new NetworkService();
+  }
+
+  @Test
+  public void processDenialOfServiceAttackLogsNetworkEvent() {
+
+    NetworkEvent event = ...;
+
+    this.service.processDenialOfServiceAttack(event);
+
+    assertThat(testAppender.lastLogMessage())
+      .isEqualTo("A DDoS attack occured at 2019-07-02 19:39:15 from IP Address 10.22.101.16");
+
+    assertThat(testAppender.lastLogMessage())
+      .isEqualTo("Another log message");
+
+    assertThat(testAppender.lastLogMessage()).isNull();
+  }
+
+  @Test
+  public void processLoginRequestDoesNotLogAnyMessageWithLogLevelSetToWarn() {
+
+      LoginRequest request = ...;
+
+      this.service.processLoginRequest(request);
+
+      assertThat(testAppender.lastLogMessage()).isNull();
+  }
+}
+----
+
+You may also clear any remaining, pending log messages from the in-memory queue (`Stack`)
+by calling `TestAppender.clear()`.
+
+All log message recorded by the `TestAppender` are stored from the most recent log event to the earliest log event.
+Successively calling `TestAppender.lastLogMessage()` gets the most recent, last log message recorded first, then
+the next log message recorded before the last, most recent log message and so on until no more log messages
+for the operation under test exists, in which case `null` is returned from `lastLogMessage()` thereafter.
+
 
 [[conclusion]]
 === Conclusion
