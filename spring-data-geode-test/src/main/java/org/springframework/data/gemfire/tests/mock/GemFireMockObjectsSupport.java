@@ -65,6 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.mockito.ArgumentMatchers;
@@ -2903,8 +2904,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		CacheFactory cacheFactorySpy = spy(cacheFactory);
 
-		Cache resolvedMockCache = GemFireMockObjectsSupport.<Cache>resolveMockedGemFireCache(useSingletonCache)
-			.orElseGet(() -> {
+		Supplier<Cache> resolvedMockCache = () ->
+			GemFireMockObjectsSupport.<Cache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
 
 				Cache mockCache = mockPeerCache();
 
@@ -2941,7 +2942,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(cacheFactory);
-			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockCache), useSingletonCache);
+			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockCache.get()), useSingletonCache);
 		}).when(cacheFactorySpy).create();
 
 		return cacheFactorySpy;
@@ -2955,7 +2956,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		ClientCacheFactory clientCacheFactorySpy = spy(clientCacheFactory);
 
-		ClientCache resolvedMockedClientCache =
+		Supplier<ClientCache> resolvedMockedClientCache = () ->
 			GemFireMockObjectsSupport.<ClientCache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
 
 				ClientCache mockClientCache = mockClientCache();
@@ -3108,7 +3109,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(invocation -> {
 			storeConfiguration(clientCacheFactory);
-			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockedClientCache), useSingletonCache);
+			return rememberMockedGemFireCache(constructGemFireObjects(resolvedMockedClientCache.get()), useSingletonCache);
 		}).when(clientCacheFactorySpy).create();
 
 		return clientCacheFactorySpy;
