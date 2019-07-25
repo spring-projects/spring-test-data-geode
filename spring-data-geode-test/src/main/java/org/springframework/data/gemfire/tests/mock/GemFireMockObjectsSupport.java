@@ -138,6 +138,7 @@ import org.apache.geode.cache.wan.GatewayTransportFilter;
 import org.apache.geode.compression.Compressor;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.DistributedSystem;
+import org.apache.geode.distributed.internal.DistributionConfig;
 import org.apache.geode.internal.cache.PoolManagerImpl;
 import org.apache.geode.pdx.PdxSerializer;
 import org.apache.lucene.analysis.Analyzer;
@@ -626,6 +627,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockGemFireCache.getCopyOnRead()).thenAnswer(newGetter(copyOnRead));
 
 		when(mockGemFireCache.getDistributedSystem()).thenReturn(mockDistributedSystem);
+
+		when(mockGemFireCache.getName()).thenAnswer(invocation -> Optional.ofNullable(gemfireProperties)
+			.map(AtomicReference::get)
+			.map(properties -> properties.getProperty(DistributionConfig.NAME_NAME))
+			.filter(StringUtils::hasText)
+			.orElse(null));
 
 		when(mockGemFireCache.getRegionAttributes(anyString()))
 			.thenAnswer(invocation -> regionAttributes.get(invocation.<String>getArgument(0)));
