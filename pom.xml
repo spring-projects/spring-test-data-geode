@@ -90,7 +90,7 @@
 		<mockito.version>3.0.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<spring.version>5.1.9.RELEASE</spring.version>
-		<spring-boot.version>2.1.6.RELEASE</spring-boot.version>
+		<spring-boot.version>2.1.7.RELEASE</spring-boot.version>
 		<spring-data-releasetrain.version>Lovelace-SR10</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
