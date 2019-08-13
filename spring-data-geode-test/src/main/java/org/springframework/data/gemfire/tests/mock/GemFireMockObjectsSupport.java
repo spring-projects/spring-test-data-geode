@@ -2909,34 +2909,34 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	public static CacheFactory spyOn(CacheFactory cacheFactory, boolean useSingletonCache) {
 
+		AtomicBoolean pdxIgnoreUnreadFields = new AtomicBoolean(false);
+		AtomicBoolean pdxPersistent = new AtomicBoolean(false);
+		AtomicBoolean pdxReadSerialized = new AtomicBoolean(false);
+
+		AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
+		AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
+
 		CacheFactory cacheFactorySpy = spy(cacheFactory);
+
+		doAnswer(newSetter(pdxDiskStoreName, () -> cacheFactorySpy))
+			.when(cacheFactorySpy).setPdxDiskStore(anyString());
+
+		doAnswer(newSetter(pdxIgnoreUnreadFields, cacheFactorySpy))
+			.when(cacheFactorySpy).setPdxIgnoreUnreadFields(anyBoolean());
+
+		doAnswer(newSetter(pdxPersistent, cacheFactorySpy))
+			.when(cacheFactorySpy).setPdxPersistent(anyBoolean());
+
+		doAnswer(newSetter(pdxReadSerialized, cacheFactorySpy))
+			.when(cacheFactorySpy).setPdxReadSerialized(anyBoolean());
+
+		doAnswer(newSetter(pdxSerializer, () -> cacheFactorySpy))
+			.when(cacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
 
 		Supplier<Cache> resolvedMockCache = () ->
 			GemFireMockObjectsSupport.<Cache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
 
 				Cache mockCache = mockPeerCache();
-
-				AtomicBoolean pdxIgnoreUnreadFields = new AtomicBoolean(false);
-				AtomicBoolean pdxPersistent = new AtomicBoolean(false);
-				AtomicBoolean pdxReadSerialized = new AtomicBoolean(false);
-
-				AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
-				AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
-
-				doAnswer(newSetter(pdxDiskStoreName, () -> cacheFactorySpy))
-					.when(cacheFactorySpy).setPdxDiskStore(anyString());
-
-				doAnswer(newSetter(pdxIgnoreUnreadFields, cacheFactorySpy))
-					.when(cacheFactorySpy).setPdxIgnoreUnreadFields(anyBoolean());
-
-				doAnswer(newSetter(pdxPersistent, cacheFactorySpy))
-					.when(cacheFactorySpy).setPdxPersistent(anyBoolean());
-
-				doAnswer(newSetter(pdxReadSerialized, cacheFactorySpy))
-					.when(cacheFactorySpy).setPdxReadSerialized(anyBoolean());
-
-				doAnswer(newSetter(pdxSerializer, () -> cacheFactorySpy))
-					.when(cacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
 
 				when(mockCache.getPdxDiskStore()).thenAnswer(newGetter(pdxDiskStoreName));
 				when(mockCache.getPdxIgnoreUnreadFields()).thenAnswer(newGetter(pdxIgnoreUnreadFields));
@@ -2961,137 +2961,137 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	public static ClientCacheFactory spyOn(ClientCacheFactory clientCacheFactory, boolean useSingletonCache) {
 
+		AtomicBoolean pdxIgnoreUnreadFields = new AtomicBoolean(false);
+		AtomicBoolean pdxPersistent = new AtomicBoolean(false);
+		AtomicBoolean pdxReadSerialized = new AtomicBoolean(false);
+
+		AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
+		AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
+		AtomicReference<Pool> defaultPool = new AtomicReference<>(null);
+
 		ClientCacheFactory clientCacheFactorySpy = spy(clientCacheFactory);
+
+		doAnswer(newSetter(pdxDiskStoreName, () -> clientCacheFactorySpy))
+			.when(clientCacheFactorySpy).setPdxDiskStore(anyString());
+
+		doAnswer(newSetter(pdxIgnoreUnreadFields, clientCacheFactorySpy))
+			.when(clientCacheFactorySpy).setPdxIgnoreUnreadFields(anyBoolean());
+
+		doAnswer(newSetter(pdxPersistent, clientCacheFactorySpy))
+			.when(clientCacheFactorySpy).setPdxPersistent(anyBoolean());
+
+		doAnswer(newSetter(pdxReadSerialized, clientCacheFactorySpy))
+			.when(clientCacheFactorySpy).setPdxReadSerialized(anyBoolean());
+
+		doAnswer(newSetter(pdxSerializer, () -> clientCacheFactorySpy))
+			.when(clientCacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
+
+		PoolFactory mockPoolFactory = mockPoolFactory();
+
+		doAnswer(invocation -> {
+			mockPoolFactory.addLocator(invocation.getArgument(0), invocation.getArgument(1));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).addPoolLocator(anyString(), anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.addServer(invocation.getArgument(0), invocation.getArgument(1));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).addPoolServer(anyString(), anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setFreeConnectionTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolFreeConnectionTimeout(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setIdleTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolIdleTimeout(anyLong());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setLoadConditioningInterval(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolLoadConditioningInterval(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setMaxConnections(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolMaxConnections(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setMinConnections(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolMinConnections(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setMultiuserAuthentication(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolMultiuserAuthentication(anyBoolean());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setPingInterval(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolPingInterval(anyLong());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setPRSingleHopEnabled(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolPRSingleHopEnabled(anyBoolean());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setReadTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolReadTimeout(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setRetryAttempts(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolRetryAttempts(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setServerGroup(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolServerGroup(anyString());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSocketBufferSize(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSocketBufferSize(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setStatisticInterval(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolStatisticInterval(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSubscriptionAckInterval(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSubscriptionAckInterval(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSubscriptionEnabled(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSubscriptionEnabled(anyBoolean());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSubscriptionMessageTrackingTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSubscriptionMessageTrackingTimeout(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSubscriptionRedundancy(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSubscriptionRedundancy(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setThreadLocalConnections(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolThreadLocalConnections(anyBoolean());
 
 		Supplier<ClientCache> resolvedMockedClientCache = () ->
 			GemFireMockObjectsSupport.<ClientCache>resolveMockedGemFireCache(useSingletonCache).orElseGet(() -> {
 
 				ClientCache mockClientCache = mockClientCache();
-
-				AtomicBoolean pdxIgnoreUnreadFields = new AtomicBoolean(false);
-				AtomicBoolean pdxPersistent = new AtomicBoolean(false);
-				AtomicBoolean pdxReadSerialized = new AtomicBoolean(false);
-
-				AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
-				AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
-				AtomicReference<Pool> defaultPool = new AtomicReference<>(null);
-
-				doAnswer(newSetter(pdxDiskStoreName, () -> clientCacheFactorySpy))
-					.when(clientCacheFactorySpy).setPdxDiskStore(anyString());
-
-				doAnswer(newSetter(pdxIgnoreUnreadFields, clientCacheFactorySpy))
-					.when(clientCacheFactorySpy).setPdxIgnoreUnreadFields(anyBoolean());
-
-				doAnswer(newSetter(pdxPersistent, clientCacheFactorySpy))
-					.when(clientCacheFactorySpy).setPdxPersistent(anyBoolean());
-
-				doAnswer(newSetter(pdxReadSerialized, clientCacheFactorySpy))
-					.when(clientCacheFactorySpy).setPdxReadSerialized(anyBoolean());
-
-				doAnswer(newSetter(pdxSerializer, () -> clientCacheFactorySpy))
-					.when(clientCacheFactorySpy).setPdxSerializer(any(PdxSerializer.class));
-
-				PoolFactory mockPoolFactory = mockPoolFactory();
-
-				doAnswer(invocation -> {
-					mockPoolFactory.addLocator(invocation.getArgument(0), invocation.getArgument(1));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).addPoolLocator(anyString(), anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.addServer(invocation.getArgument(0), invocation.getArgument(1));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).addPoolServer(anyString(), anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setFreeConnectionTimeout(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolFreeConnectionTimeout(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setIdleTimeout(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolIdleTimeout(anyLong());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setLoadConditioningInterval(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolLoadConditioningInterval(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setMaxConnections(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolMaxConnections(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setMinConnections(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolMinConnections(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setMultiuserAuthentication(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolMultiuserAuthentication(anyBoolean());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setPingInterval(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolPingInterval(anyLong());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setPRSingleHopEnabled(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolPRSingleHopEnabled(anyBoolean());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setReadTimeout(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolReadTimeout(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setRetryAttempts(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolRetryAttempts(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setServerGroup(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolServerGroup(anyString());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setSocketBufferSize(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolSocketBufferSize(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setStatisticInterval(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolStatisticInterval(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setSubscriptionAckInterval(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolSubscriptionAckInterval(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setSubscriptionEnabled(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolSubscriptionEnabled(anyBoolean());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setSubscriptionMessageTrackingTimeout(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolSubscriptionMessageTrackingTimeout(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setSubscriptionRedundancy(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolSubscriptionRedundancy(anyInt());
-
-				doAnswer(invocation -> {
-					mockPoolFactory.setThreadLocalConnections(invocation.getArgument(0));
-					return clientCacheFactorySpy;
-				}).when(clientCacheFactorySpy).setPoolThreadLocalConnections(anyBoolean());
 
 				when(mockClientCache.getCurrentServers()).thenAnswer(invocation ->
 					Collections.unmodifiableSet(new HashSet<>(mockClientCache.getDefaultPool().getServers())));
