@@ -24,6 +24,9 @@ import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.server.CacheServer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
@@ -40,9 +43,6 @@ import org.springframework.data.gemfire.config.annotation.EnableLogging;
 import org.springframework.data.gemfire.config.annotation.EnableManager;
 import org.springframework.data.gemfire.support.ConnectionEndpoint;
 import org.springframework.util.ClassUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class that registers
