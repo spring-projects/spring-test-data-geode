@@ -30,15 +30,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
 import org.apache.geode.internal.net.SocketCreatorFactory;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
@@ -116,6 +117,11 @@ public abstract class IntegrationTestsSupport {
 		//SSLConfigurationFactory.close();
 	}
 
+	@BeforeClass
+	public static void stopAnyExistingGemFireLocatorBeforeTestExecution() {
+		stopGemFireLocatorWaitOnStopEvent();
+	}
+
 	@Before
 	public void configureQueryDebugging() {
 
@@ -170,9 +176,46 @@ public abstract class IntegrationTestsSupport {
 
 		return Optional.ofNullable(cache)
 			.map(it -> {
-				cache.close();
-				return cache;
+				it.close();
+				return it;
 			}).orElse(cache);
+	}
+
+	public static void stopGemFireLocatorWaitOnStopEvent() {
+		stopGemFireLocatorWaitOnStopEvent(DEFAULT_WAIT_DURATION);
+	}
+
+	public static void stopGemFireLocatorWaitOnStopEvent(long duration) {
+
+		AtomicBoolean locatorStopped = new AtomicBoolean(false);
+
+		waitOn(() -> {
+			try {
+				return Optional.ofNullable(Locator.getLocator())
+					.filter(it -> !locatorStopped.get())
+					.map(IntegrationTestsSupport::stop)
+					.map(it -> {
+						locatorStopped.set(!Locator.hasLocator());
+						return it;
+					})
+					.map(it -> locatorStopped.get())
+					.orElse(true);
+			}
+			catch (Exception ignore) {
+				locatorStopped.set(true);
+				return true;
+			}
+		}, duration);
+	}
+
+	private static Locator stop(Locator locator) {
+
+		return Optional.ofNullable(locator)
+			.map(it -> {
+				it.stop();
+				return it;
+			})
+			.orElse(locator);
 	}
 
 	protected static String asApplicationName(Class<?> type) {
