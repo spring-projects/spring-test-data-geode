@@ -68,9 +68,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.mockito.ArgumentMatchers;
-import org.mockito.stubbing.Answer;
-
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
@@ -141,7 +138,10 @@ import org.apache.geode.distributed.DistributedSystem;
 import org.apache.geode.distributed.internal.DistributionConfig;
 import org.apache.geode.internal.cache.PoolManagerImpl;
 import org.apache.geode.pdx.PdxSerializer;
+
 import org.apache.lucene.analysis.Analyzer;
+import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
@@ -161,8 +161,9 @@ import org.springframework.util.StringUtils;
  *
  * @author John Blum
  * @see java.io.File
+ * @see java.io.InputStream
  * @see java.net.InetAddress
- * @see java.net.InetSocketAddress
+ * @see java.util.Objects
  * @see java.util.Properties
  * @see java.util.UUID
  * @see org.apache.geode.cache.AttributesMutator
@@ -172,6 +173,7 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.CacheLoader
  * @see org.apache.geode.cache.CacheWriter
  * @see org.apache.geode.cache.CustomExpiry
+ * @see org.apache.geode.cache.DataPolicy
  * @see org.apache.geode.cache.DiskStore
  * @see org.apache.geode.cache.DiskStoreFactory
  * @see org.apache.geode.cache.EvictionAttributes
@@ -184,12 +186,14 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.RegionFactory
  * @see org.apache.geode.cache.RegionService
  * @see org.apache.geode.cache.Scope
+ * @see org.apache.geode.cache.SubscriptionAttributes
  * @see org.apache.geode.cache.asyncqueue.AsyncEventListener
  * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
  * @see org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.apache.geode.cache.client.ClientCacheFactory
  * @see org.apache.geode.cache.client.ClientRegionFactory
+ * @see org.apache.geode.cache.client.ClientRegionShortcut
  * @see org.apache.geode.cache.client.Pool
  * @see org.apache.geode.cache.client.PoolFactory
  * @see org.apache.geode.cache.client.PoolManager
@@ -223,7 +227,9 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.distributed.DistributedMember
  * @see org.apache.geode.distributed.DistributedSystem
  * @see org.apache.geode.pdx.PdxSerializer
+ * @see org.apache.lucene.analysis.Analyzer
  * @see org.mockito.Mockito
+ * @see org.springframework.beans.factory.DisposableBean
  * @see org.springframework.data.gemfire.tests.mock.MockObjectsSupport
  * @since 0.0.1
  */
@@ -292,7 +298,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	/**
 	 * Destroys all {@link DisposableBean} based {@link Object GemFire objects}.
 	 */
-	static void destroyGemFireObjects() {
+	static synchronized void destroyGemFireObjects() {
 
 		cachedGemFireObjects.stream()
 			.filter(gemfireObject -> gemfireObject instanceof DisposableBean)
@@ -312,7 +318,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 *
 	 * @param gemfireObject {@link Object GemFire object} to cache.
 	 */
-	private static void cacheGemFireObject(Object gemfireObject) {
+	private static synchronized void cacheGemFireObject(Object gemfireObject) {
 
 		Optional.ofNullable(gemfireObject).
 			ifPresent(cachedGemFireObjects::add);
