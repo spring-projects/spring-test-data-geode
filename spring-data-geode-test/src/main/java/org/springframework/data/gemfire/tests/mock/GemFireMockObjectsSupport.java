@@ -57,6 +57,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
@@ -150,6 +151,7 @@ import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationE
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.data.gemfire.util.CollectionUtils;
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -157,7 +159,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
- * Mock GemFire Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
+ * Apache Geode or Pivotal GemFire Mock Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
  *
  * @author John Blum
  * @see java.io.File
@@ -249,6 +251,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
 
+	private static final Set<String> registeredPoolNames = new ConcurrentSkipListSet<>();
+
 	private static final String CACHE_FACTORY_DS_PROPS_FIELD_NAME = "dsProps";
 	private static final String CACHE_FACTORY_INTERNAL_CACHE_BUILDER_FIELD_NAME = "internalCacheBuilder";
 	private static final String CLIENT_CACHE_FACTORY_DS_PROPS_FIELD_NAME = "dsProps";
@@ -276,6 +280,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		regions.clear();
 		regionAttributes.clear();
 
+		unregisterManagedPools();
 		closePools();
 		destroyGemFireObjects();
 	}
@@ -311,6 +316,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			});
 
 		cachedGemFireObjects.clear();
+	}
+
+	static synchronized void unregisterManagedPools() {
+
+		CollectionUtils.nullSafeMap(PoolManager.getAll()).values().stream()
+			.filter(Objects::nonNull)
+			.filter(pool -> registeredPoolNames.contains(pool.getName()))
+			.forEach(GemFireMockObjectsSupport::unregister);
+
+		registeredPoolNames.clear();
 	}
 
 	/**
@@ -1707,7 +1722,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getSubscriptionRedundancy()).thenReturn(subscriptionRedundancy.get());
 			when(mockPool.getThreadLocalConnections()).thenReturn(threadLocalConnections.get());
 
-			//register(mockPool);
+			register(mockPool);
 
 			return mockPool;
 		});
@@ -1717,7 +1732,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static Pool register(Pool pool) {
 
-		PoolManagerImpl.getPMI().register(pool);
+		if (registeredPoolNames.add(pool.getName())) {
+			PoolManagerImpl.getPMI().register(pool);
+		}
+
+		return pool;
+	}
+
+	private static Pool unregister(Pool pool) {
+
+		PoolManagerImpl.getPMI().unregister(pool);
 
 		return pool;
 	}

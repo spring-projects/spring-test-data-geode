@@ -17,19 +17,21 @@ package org.springframework.data.gemfire;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.config.annotation.EnablePool;
+import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.mock.annotation.EnableGemFireMockObjects;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,11 +58,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 
 	@Autowired
+	@Qualifier("DEFAULT")
 	private Pool defaultPool;
+
+	@Autowired
+	@Qualifier("MOCK")
+	private Pool mockPool;
 
 	@AfterClass
 	public static void tearDown() {
-		//assertThat(PoolManager.find("DEFAULT")).isNull();
+
+		GemFireMockObjectsSupport.destroy();
+
+		assertThat(PoolManager.find("DEFAULT")).isNull();
+		assertThat(PoolManager.find("MOCK")).isNull();
 	}
 
 	@Before
@@ -68,11 +79,14 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 
 		assertThat(this.defaultPool).isNotNull();
 		assertThat(this.defaultPool.getName()).isEqualTo("DEFAULT");
+
+		assertThat(this.mockPool).isNotNull();
+		assertThat(this.mockPool.getName()).isEqualTo("MOCK");
 	}
 
 	@Test
 	@DirtiesContext
-	@Ignore("Apache Geode/Pivotal GemFire does not support Mock Pools")
+	//@Ignore("Apache Geode/Pivotal GemFire does not support Mock Pools")
 	public void defaultPoolRegisteredWithPoolManager() {
 
 		Pool geodeDefaultPool = PoolManager.find("DEFAULT");
@@ -82,9 +96,24 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 		assertThat(geodeDefaultPool).isSameAs(this.defaultPool);
 	}
 
+	@Test
+	public void mockPoolRegisteredWithPoolManager() {
+
+		Pool mockGeodePool = PoolManager.find("MOCK");
+
+		assertThat(mockGeodePool).isNotNull();
+		assertThat(mockGeodePool.getName()).isEqualTo("MOCK");
+		assertThat(mockGeodePool).isSameAs(this.mockPool);
+	}
+
 	@ClientCacheApplication
 	@EnableGemFireMockObjects
 	@EnablePool(name = "DEFAULT")
-	static class TestConfiguration { }
+	static class TestConfiguration {
 
+		@Bean("MOCK")
+		Pool mockPool() {
+			return GemFireMockObjectsSupport.mockPoolFactory().create("MOCK");
+		}
+	}
 }
