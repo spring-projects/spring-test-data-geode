@@ -21,6 +21,7 @@ import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
+import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
 
 import org.junit.AfterClass;
@@ -46,6 +48,7 @@ import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
@@ -55,7 +58,11 @@ import org.springframework.data.gemfire.util.CollectionUtils;
  * @see java.io.File
  * @see java.time.LocalDateTime
  * @see java.util.concurrent.TimeUnit
+ * @see java.util.concurrent.atomic.AtomicBoolean
+ * @see java.util.function.Predicate
+ * @see org.apache.geode.DataSerializer
  * @see org.apache.geode.cache.GemFireCache
+ * @see org.apache.geode.distributed.Locator
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 1.0.0
  */
@@ -114,7 +121,31 @@ public abstract class IntegrationTestsSupport {
 	@BeforeClass
 	public static void closeAnyExistingSocketConfigurationBeforeTestExecution() {
 		SocketCreatorFactory.close();
+	}
+
+	@BeforeClass
+	// TODO: Remove once GEODE-7157 (https://issues.apache.org/jira/browse/GEODE-7157) is fixed!
+	//  Do the job of Apache Geode & Pivotal GemFire since it cannot do its own damn job!
+	public static void closeAnyExistingSslConfigurationBeforeTestExecution() {
+
 		//SSLConfigurationFactory.close();
+
+		synchronized (SSLConfigurationFactory.class) {
+			try {
+
+				Field instance = ReflectionUtils.findField(SSLConfigurationFactory.class, "instance",
+					SSLConfigurationFactory.class);
+
+				Optional.ofNullable(instance)
+					.ifPresent(field -> {
+						ReflectionUtils.makeAccessible(field);
+						ReflectionUtils.setField(field, null, null);
+					});
+			}
+			catch (Throwable ignore) {
+				// Not much we can do about it now!
+			}
+		}
 	}
 
 	@BeforeClass
