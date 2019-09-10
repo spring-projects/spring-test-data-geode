@@ -59,7 +59,7 @@ public class SslConfigurationIntegrationTests {
 		assertThat(sslConfigurationFactoryOne).isNotNull();
 		assertThat(getInstance()).isSameAs(sslConfigurationFactoryOne);
 
-		IntegrationTestsSupport.closeAnyExistingSslConfigurationBeforeTestExecution();
+		IntegrationTestsSupport.closeAnySslConfigurationBeforeTestExecution();
 
 		SSLConfigurationFactory sslConfigurationFactoryTwo = getInstance();
 

@@ -114,19 +114,19 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	@BeforeClass
-	public static void closeAnyExistingGemFireCacheInstanceBeforeTestExecution() {
+	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
 		closeGemFireCacheWaitOnCloseEvent();
 	}
 
 	@BeforeClass
-	public static void closeAnyExistingSocketConfigurationBeforeTestExecution() {
+	public static void closeAnySocketConfigurationBeforeTestExecution() {
 		SocketCreatorFactory.close();
 	}
 
-	@BeforeClass
 	// TODO: Remove once GEODE-7157 (https://issues.apache.org/jira/browse/GEODE-7157) is fixed!
 	//  Do the job of Apache Geode & Pivotal GemFire since it cannot do its own damn job!
-	public static void closeAnyExistingSslConfigurationBeforeTestExecution() {
+	@BeforeClass
+	public static void closeAnySslConfigurationBeforeTestExecution() {
 
 		//SSLConfigurationFactory.close();
 
@@ -149,7 +149,7 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	@BeforeClass
-	public static void stopAnyExistingGemFireLocatorBeforeTestExecution() {
+	public static void stopAnyGemFireLocatorBeforeTestExecution() {
 		stopGemFireLocatorWaitOnStopEvent();
 	}
 
