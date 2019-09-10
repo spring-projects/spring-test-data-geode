@@ -104,16 +104,6 @@ public abstract class IntegrationTestsSupport {
 			.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
 
 	@BeforeClass
-	public static void clearAllJavaGemFireGeodeAndSpringDotPrefixedSystemProperties() {
-
-		List<String> allSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
-			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
-			.collect(Collectors.toList());
-
-		allSystemPropertyNames.forEach(System::clearProperty);
-	}
-
-	@BeforeClass
 	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
 		closeGemFireCacheWaitOnCloseEvent();
 	}
@@ -164,6 +154,16 @@ public abstract class IntegrationTestsSupport {
 	@AfterClass
 	public static void clearAllBeanFactoryLocators() {
 		GemfireBeanFactoryLocator.clear();
+	}
+
+	@AfterClass
+	public static void clearAllJavaGemFireGeodeAndSpringDotPrefixedSystemProperties() {
+
+		List<String> allSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
+			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
+			.collect(Collectors.toList());
+
+		allSystemPropertyNames.forEach(System::clearProperty);
 	}
 
 	@AfterClass
