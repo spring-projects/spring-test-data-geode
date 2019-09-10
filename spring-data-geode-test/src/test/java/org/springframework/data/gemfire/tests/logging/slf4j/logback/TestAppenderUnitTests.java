@@ -18,7 +18,6 @@ package org.springframework.data.gemfire.tests.logging.slf4j.logback;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
  * @author John Blum
  * @see org.junit.Test
  * @see org.slf4j.Logger
+ * @see org.slf4j.LoggerFactory
  * @see org.springframework.data.gemfire.tests.logging.slf4j.logback.TestAppender
  * @since 0.0.5.RELEASE
  */

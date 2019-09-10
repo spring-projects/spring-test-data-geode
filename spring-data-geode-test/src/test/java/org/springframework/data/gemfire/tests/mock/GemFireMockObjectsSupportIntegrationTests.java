@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,8 +22,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
+
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport;
 import org.springframework.data.gemfire.tests.support.AbstractSecurityManager;
@@ -39,6 +40,7 @@ import org.springframework.data.gemfire.tests.support.AbstractSecurityManager;
  * @see org.apache.geode.cache.CacheFactory
  * @see org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
+ * @see org.springframework.data.gemfire.tests.support.AbstractSecurityManager
  * @since 1.0.0
  */
 public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsSupport {

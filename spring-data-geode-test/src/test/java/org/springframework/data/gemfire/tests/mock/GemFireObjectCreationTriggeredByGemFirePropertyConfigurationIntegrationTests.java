@@ -20,8 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Properties;
 
 import org.apache.geode.cache.GemFireCache;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.gemfire.config.annotation.EnableSecurity;
 import org.springframework.data.gemfire.config.annotation.PeerCacheApplication;
@@ -32,8 +34,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration tests for GemFire/Geode {@link Object} creation when the GemFire/Geode {@link Object} configuration
- * and {@link Class} type is expressed in GemFire/Geode {@link Properties}.
+ * Integration Tests for Apache Geode & Pivotal GemFire {@link Object} creation when the {@link Object} configuration
+ * and {@link Class} type is expressed in {@link Properties}.
  *
  * @author John Blum
  * @see org.junit.Test

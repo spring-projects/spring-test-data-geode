@@ -21,14 +21,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.junit.After;
-import org.junit.Test;
-
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
 import org.apache.geode.cache.RegionService;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
+
+import org.junit.After;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link GemFireMockObjectsSupport}.
