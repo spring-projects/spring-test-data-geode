@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
@@ -40,6 +39,9 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
  * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @author Udo Kohlmeyer
+ * @author Patrick Johnson
+ *
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
@@ -53,7 +55,7 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 @SuppressWarnings("unused")
 public abstract class ForkingClientServerIntegrationTestsSupport extends ClientServerIntegrationTestsSupport {
 
-	private static ProcessWrapper gemfireServer;
+	private static List<ProcessWrapper> processes = new ArrayList<>();
 
 	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
@@ -64,7 +66,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
 
-		setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		addProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
 
 		waitForServerToStart("localhost", availablePort);
 	}
@@ -84,9 +86,9 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	}
 
 	@AfterClass
-	public static void stopGemFireServer() {
-		getGemFireServerProcess().ifPresent(ForkingClientServerIntegrationTestsSupport::stop);
-		setGemFireServerProcess(null);
+	public static synchronized void stopGemFireServer() {
+		getProcesses().forEach(ForkingClientServerIntegrationTestsSupport::stop);
+		getProcesses().clear();
 	}
 
 	@AfterClass
@@ -95,12 +97,12 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		System.clearProperty(GEMFIRE_POOL_SERVERS_PROPERTY);
 	}
 
-	protected static synchronized void setGemFireServerProcess(ProcessWrapper gemfireServerProcess) {
-		gemfireServer = gemfireServerProcess;
+	protected static synchronized void addProcess(ProcessWrapper process) {
+		processes.add(process);
 	}
 
-	protected static synchronized Optional<ProcessWrapper> getGemFireServerProcess() {
-		return Optional.ofNullable(gemfireServer);
+	protected static synchronized List<ProcessWrapper> getProcesses() {
+		return processes;
 	}
 
 	@EnablePdx
