@@ -81,6 +81,7 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 
 		assertThat(PoolManager.find("DEFAULT")).isNull();
 		assertThat(PoolManager.find("MOCK")).isNull();
+		assertThat(PoolManager.find("TEST")).isNull();
 	}
 
 	@Before
