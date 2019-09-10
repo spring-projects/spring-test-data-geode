@@ -1604,6 +1604,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicInteger readTimeout = new AtomicInteger(PoolFactory.DEFAULT_READ_TIMEOUT);
 		AtomicInteger retryAttempts = new AtomicInteger(PoolFactory.DEFAULT_RETRY_ATTEMPTS);
 		AtomicInteger socketBufferSize = new AtomicInteger(PoolFactory.DEFAULT_SOCKET_BUFFER_SIZE);
+		AtomicInteger socketConnectTimeout = new AtomicInteger(PoolFactory.DEFAULT_SOCKET_CONNECT_TIMEOUT);
 		AtomicInteger statisticInterval = new AtomicInteger(PoolFactory.DEFAULT_STATISTIC_INTERVAL);
 		AtomicInteger subscriptionAckInterval = new AtomicInteger(PoolFactory.DEFAULT_SUBSCRIPTION_ACK_INTERVAL);
 		AtomicInteger subscriptionMessageTrackingTimeout = new AtomicInteger(PoolFactory.DEFAULT_SUBSCRIPTION_MESSAGE_TRACKING_TIMEOUT);
@@ -1663,6 +1664,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockPoolFactory.setSocketBufferSize(anyInt()))
 			.thenAnswer(newSetter(socketBufferSize, mockPoolFactory));
 
+		when(mockPoolFactory.setSocketConnectTimeout(anyInt()))
+			.thenAnswer(newSetter(socketConnectTimeout, mockPoolFactory));
+
 		when(mockPoolFactory.setStatisticInterval(anyInt()))
 			.thenAnswer(newSetter(statisticInterval, mockPoolFactory));
 
@@ -1715,6 +1719,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getServerGroup()).thenReturn(serverGroup.get());
 			when(mockPool.getServers()).thenReturn(servers);
 			when(mockPool.getSocketBufferSize()).thenReturn(socketBufferSize.get());
+			when(mockPool.getSocketConnectTimeout()).thenReturn(socketConnectTimeout.get());
 			when(mockPool.getStatisticInterval()).thenReturn(statisticInterval.get());
 			when(mockPool.getSubscriptionAckInterval()).thenReturn(subscriptionAckInterval.get());
 			when(mockPool.getSubscriptionEnabled()).thenReturn(subscriptionEnabled.get());
@@ -2997,7 +3002,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		AtomicReference<String> pdxDiskStoreName = new AtomicReference<>(null);
 		AtomicReference<PdxSerializer> pdxSerializer = new AtomicReference<>(null);
-		AtomicReference<Pool> defaultPool = new AtomicReference<>(null);
 
 		ClientCacheFactory clientCacheFactorySpy = spy(clientCacheFactory);
 
@@ -3089,6 +3093,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		}).when(clientCacheFactorySpy).setPoolSocketBufferSize(anyInt());
 
 		doAnswer(invocation -> {
+			mockPoolFactory.setSocketConnectTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSocketConnectTimeout(anyInt());
+
+		doAnswer(invocation -> {
 			mockPoolFactory.setStatisticInterval(invocation.getArgument(0));
 			return clientCacheFactorySpy;
 		}).when(clientCacheFactorySpy).setPoolStatisticInterval(anyInt());
@@ -3123,17 +3132,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 				ClientCache mockClientCache = mockClientCache();
 
+				Pool mockDefaultPool = mockPoolFactory.create("DEFAULT");
+
 				when(mockClientCache.getCurrentServers()).thenAnswer(invocation ->
 					Collections.unmodifiableSet(new HashSet<>(mockClientCache.getDefaultPool().getServers())));
 
-				when(mockClientCache.getDefaultPool()).thenAnswer(invocation -> {
-
-					if (defaultPool.get() == null) {
-						defaultPool.set(mockPoolFactory.create("DEFAULT"));
-					}
-
-					return defaultPool.get();
-				});
+				when(mockClientCache.getDefaultPool()).thenReturn(mockDefaultPool);
 
 				when(mockClientCache.getPdxDiskStore()).thenAnswer(newGetter(pdxDiskStoreName));
 				when(mockClientCache.getPdxIgnoreUnreadFields()).thenAnswer(newGetter(pdxIgnoreUnreadFields));

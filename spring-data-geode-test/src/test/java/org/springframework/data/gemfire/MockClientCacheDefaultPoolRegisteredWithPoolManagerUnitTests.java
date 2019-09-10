@@ -17,6 +17,9 @@ package org.springframework.data.gemfire;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.InetSocketAddress;
+import java.util.Collections;
+
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
@@ -29,8 +32,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.gemfire.client.PoolFactoryBean;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.config.annotation.EnablePool;
+import org.springframework.data.gemfire.support.ConnectionEndpoint;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.mock.annotation.EnableGemFireMockObjects;
 import org.springframework.test.annotation.DirtiesContext;
@@ -65,6 +70,10 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 	@Qualifier("MOCK")
 	private Pool mockPool;
 
+	@Autowired
+	@Qualifier("TEST")
+	private Pool testPool;
+
 	@AfterClass
 	public static void tearDown() {
 
@@ -89,21 +98,32 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 	//@Ignore("Apache Geode/Pivotal GemFire does not support Mock Pools")
 	public void defaultPoolRegisteredWithPoolManager() {
 
-		Pool geodeDefaultPool = PoolManager.find("DEFAULT");
+		Pool defaultPool = PoolManager.find("DEFAULT");
 
-		assertThat(geodeDefaultPool).isNotNull();
-		assertThat(geodeDefaultPool.getName()).isEqualTo("DEFAULT");
-		assertThat(geodeDefaultPool).isSameAs(this.defaultPool);
+		assertThat(defaultPool).isNotNull();
+		assertThat(defaultPool.getName()).isEqualTo("DEFAULT");
+		assertThat(defaultPool).isSameAs(this.defaultPool);
 	}
 
 	@Test
 	public void mockPoolRegisteredWithPoolManager() {
 
-		Pool mockGeodePool = PoolManager.find("MOCK");
+		Pool mockPool = PoolManager.find("MOCK");
 
-		assertThat(mockGeodePool).isNotNull();
-		assertThat(mockGeodePool.getName()).isEqualTo("MOCK");
-		assertThat(mockGeodePool).isSameAs(this.mockPool);
+		assertThat(mockPool).isNotNull();
+		assertThat(mockPool.getName()).isEqualTo("MOCK");
+		assertThat(mockPool).isSameAs(this.mockPool);
+	}
+
+	@Test
+	public void testPoolRegisteredWithPoolManager() {
+
+		Pool testPool = PoolManager.find("TEST");
+
+		assertThat(testPool).isNotNull();
+		assertThat(testPool.getName()).isEqualTo("TEST");
+		assertThat(testPool.getLocators()).containsExactly(new InetSocketAddress("skullbox", 12345));
+		assertThat(testPool).isSameAs(this.testPool);
 	}
 
 	@ClientCacheApplication
@@ -114,6 +134,17 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 		@Bean("MOCK")
 		Pool mockPool() {
 			return GemFireMockObjectsSupport.mockPoolFactory().create("MOCK");
+		}
+
+		@Bean("TEST")
+		PoolFactoryBean testPool() {
+
+			PoolFactoryBean testPool = new PoolFactoryBean();
+
+			testPool.setName("TEST");
+			testPool.setLocators(Collections.singleton(new ConnectionEndpoint("skullbox", 12345)));
+
+			return testPool;
 		}
 	}
 }
