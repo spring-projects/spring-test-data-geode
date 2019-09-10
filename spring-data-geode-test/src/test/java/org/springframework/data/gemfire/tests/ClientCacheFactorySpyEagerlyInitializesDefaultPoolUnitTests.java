@@ -22,6 +22,7 @@ import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
@@ -39,6 +40,11 @@ import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
  * @since 0.0.8
  */
 public class ClientCacheFactorySpyEagerlyInitializesDefaultPoolUnitTests {
+
+	@After
+	public void tearDown() {
+		GemFireMockObjectsSupport.destroy();
+	}
 
 	@Test
 	public void clientCacheFactorySpyEagerlyInitializesDefaultPool() {

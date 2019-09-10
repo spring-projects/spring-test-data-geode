@@ -26,6 +26,7 @@ import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.distributed.internal.DistributionConfig;
 import org.apache.geode.internal.cache.GemFireCacheImpl;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
@@ -45,6 +46,11 @@ import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
  * @since 0.0.6
  */
 public class CacheAndClientCacheFactorySpiesConfiguresMockCacheNameUnitTests {
+
+	@After
+	public void tearDown() {
+		GemFireMockObjectsSupport.destroy();
+	}
 
 	@Test
 	public void cacheFactorySpyConfiguresMockCacheName() {
