@@ -85,6 +85,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<assertj.version>3.13.2</assertj.version>
 		<junit.version>4.12</junit.version>
+		<log4j.version>2.12.1</log4j.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.10</lombok.version>
 		<mockito.version>3.1.0</mockito.version>
@@ -179,10 +180,24 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-geode</artifactId>
 		</dependency>
+		<!-- Spring Shell and Logging (Log4j and Logback) dependencies only required for Testing -->
 		<dependency>
 			<groupId>org.springframework.shell</groupId>
 			<artifactId>spring-shell</artifactId>
 			<version>${spring-shell.version}</version>
+			<optional>true</optional>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-to-slf4j</artifactId>
+			<version>${log4j.version}</version>
+			<optional>true</optional>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 			<optional>true</optional>
 			<scope>runtime</scope>
 		</dependency>
