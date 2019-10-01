@@ -19,6 +19,8 @@
 
     <logger name="ch.qos.logback" level="${logback.log.level:-ERROR}"/>
 
+    <logger name="org.apache.geode" level="${logback.log.level:-ERROR}"/>
+
     <logger name="org.springframework" level="${logback.log.level:-ERROR}"/>
 
     <logger name="org.springframework.data.gemfire.tests.logging.slf4j.logback.TestAppenderUnitTests" level="WARN">
