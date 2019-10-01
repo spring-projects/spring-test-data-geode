@@ -15,6 +15,7 @@ group = 'org.springframework.data'
 description = 'Spring Test Framework for Apache Geode and Pivotal GemFire using Spring Data.'
 
 ext['spring.version'] = "$springVersion"
+ext['spring-framework.version'] = "$springVersion"
 ext['spring-data-releasetrain.version'] = "$springDataReleaseTrainVersion"
 
 ext.releaseBuild = version.endsWith('RELEASE')
