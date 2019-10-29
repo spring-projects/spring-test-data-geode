@@ -69,6 +69,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.Answer;
+
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
@@ -141,8 +144,6 @@ import org.apache.geode.internal.cache.PoolManagerImpl;
 import org.apache.geode.pdx.PdxSerializer;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.mockito.ArgumentMatchers;
-import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
@@ -797,6 +798,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicBoolean diskSynchronous = new AtomicBoolean(true);
 		AtomicBoolean forwardExpirationDestroy = new AtomicBoolean(false);
 		AtomicBoolean parallel = new AtomicBoolean(false);
+		AtomicBoolean pauseEventDispatching = new AtomicBoolean(false);
 		AtomicBoolean persistent = new AtomicBoolean(false);
 
 		AtomicInteger batchSize = new AtomicInteger(100);
@@ -854,6 +856,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockAsyncEventQueueFactory;
 		});
 
+		when(mockAsyncEventQueueFactory.pauseEventDispatching())
+			.thenAnswer(newSetter(pauseEventDispatching, true, mockAsyncEventQueueFactory));
+
 		when(mockAsyncEventQueueFactory.removeGatewayEventFilter(any(GatewayEventFilter.class))).thenAnswer(invocation -> {
 
 			gatewayEventFilters.remove(invocation.<GatewayEventFilter>getArgument(0));
@@ -886,6 +891,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockAsyncEventQueue.getId()).thenReturn(asyncEventQueueId);
 			when(mockAsyncEventQueue.getMaximumQueueMemory()).thenAnswer(newGetter(maximumQueueMemory));
 			when(mockAsyncEventQueue.getOrderPolicy()).thenAnswer(newGetter(orderPolicy));
+
+			doAnswer(newGetter(pauseEventDispatching)).when(mockAsyncEventQueue).resumeEventDispatching();
 
 			when(mockAsyncEventQueue.size()).thenReturn(0);
 
