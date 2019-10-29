@@ -10,5 +10,9 @@ dependencyManagement {
 		dependency "org.mockito:mockito-core:$mockitoVersion"
 		dependency "org.projectlombok:lombok:$lombokVersion"
 		dependency "org.springframework.shell:spring-shell:$springShellVersion"
+		dependency "org.apache.geode:geode-core:$apacheGeodeVersion"
+		dependency "org.apache.geode:geode-cq:$apacheGeodeVersion"
+		dependency "org.apache.geode:geode-lucene:$apacheGeodeVersion"
+		dependency "org.apache.geode:geode-wan:$apacheGeodeVersion"
 	}
 }
