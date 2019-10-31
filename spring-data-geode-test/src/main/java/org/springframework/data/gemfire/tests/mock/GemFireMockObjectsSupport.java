@@ -876,6 +876,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			when(mockAsyncEventQueue.isBatchConflationEnabled()).thenAnswer(newGetter(batchConflationEnabled));
 			when(mockAsyncEventQueue.isDiskSynchronous()).thenAnswer(newGetter(diskSynchronous));
+			when(mockAsyncEventQueue.isDispatchingPaused()).thenAnswer(newGetter(pauseEventDispatching));
 			when(mockAsyncEventQueue.isForwardExpirationDestroy()).thenAnswer(newGetter(forwardExpirationDestroy));
 			when(mockAsyncEventQueue.isParallel()).thenAnswer(newGetter(parallel));
 			when(mockAsyncEventQueue.isPersistent()).thenAnswer(newGetter(persistent));
@@ -892,7 +893,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockAsyncEventQueue.getMaximumQueueMemory()).thenAnswer(newGetter(maximumQueueMemory));
 			when(mockAsyncEventQueue.getOrderPolicy()).thenAnswer(newGetter(orderPolicy));
 
-			doAnswer(newGetter(pauseEventDispatching)).when(mockAsyncEventQueue).resumeEventDispatching();
+			doAnswer(newSetter(pauseEventDispatching, false, null))
+				.when(mockAsyncEventQueue).resumeEventDispatching();
 
 			when(mockAsyncEventQueue.size()).thenReturn(0);
 
