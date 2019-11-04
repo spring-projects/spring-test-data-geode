@@ -21,14 +21,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.junit.After;
+import org.junit.Test;
+
 import org.apache.geode.cache.AttributesMutator;
+import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
 import org.apache.geode.cache.RegionService;
+import org.apache.geode.cache.asyncqueue.AsyncEventListener;
+import org.apache.geode.cache.asyncqueue.AsyncEventQueue;
+import org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
-
-import org.junit.After;
-import org.junit.Test;
 
 /**
  * Unit tests for {@link GemFireMockObjectsSupport}.
@@ -47,20 +51,72 @@ public class GemFireMockObjectsSupportUnitTests {
 	}
 
 	@Test
-	public void regionCloningEnabledReturnsFalseByDefault() {
+	public void mockAsyncEventQueueEventDispatchingIsNotPausedByDefault() {
 
-		RegionService mockRegionService = mock(RegionService.class);
+		Cache mockCache = GemFireMockObjectsSupport.mockPeerCache();
 
-		RegionAttributes<?, ?> mockRegionAttributes = mock(RegionAttributes.class);
+		assertThat(mockCache).isNotNull();
 
-		Region<?, ?> mockRegion =
-			GemFireMockObjectsSupport.mockRegion(mockRegionService, "MockRegion", mockRegionAttributes);
+		AsyncEventQueueFactory asyncEventQueueFactory = mockCache.createAsyncEventQueueFactory();
 
-		assertThat(mockRegion).isNotNull();
-		assertThat(mockRegion.getName()).isEqualTo("MockRegion");
-		assertThat(mockRegion.getAttributes()).isNotNull();
-		assertThat(mockRegion.getAttributes()).isNotSameAs(mockRegionAttributes);
-		assertThat(mockRegion.getAttributes().getCloningEnabled()).isFalse();
+		assertThat(asyncEventQueueFactory).isNotNull();
+
+		AsyncEventListener mockAsyncEventListener = mock(AsyncEventListener.class);
+
+		AsyncEventQueue asyncEventQueue =
+			asyncEventQueueFactory.create("mockAsyncEventQueueEventDispatchingIsAutoByDefault",
+				mockAsyncEventListener);
+
+		assertThat(asyncEventQueue).isNotNull();
+		assertThat(asyncEventQueue.isDispatchingPaused()).isFalse();
+
+		asyncEventQueue.resumeEventDispatching();
+
+		assertThat(asyncEventQueue.isDispatchingPaused()).isFalse();
+	}
+
+	@Test
+	public void mockAsyncEventQueuePauseAndResumeEventDispatchingIsCorrect() {
+
+		Cache mockCache = GemFireMockObjectsSupport.mockPeerCache();
+
+		assertThat(mockCache).isNotNull();
+
+		AsyncEventQueueFactory asyncEventQueueFactory = mockCache.createAsyncEventQueueFactory();
+
+		assertThat(asyncEventQueueFactory).isNotNull();
+
+		asyncEventQueueFactory.pauseEventDispatching();
+
+		AsyncEventListener mockAsyncEventListener = mock(AsyncEventListener.class);
+
+		AsyncEventQueue asyncEventQueue =
+			asyncEventQueueFactory.create("mockAsyncEventQueuePauseAndResumeEventDispatchingIsCorrect",
+				mockAsyncEventListener);
+
+		assertThat(asyncEventQueue).isNotNull();
+		assertThat(asyncEventQueue.isDispatchingPaused()).isTrue();
+
+		asyncEventQueue.resumeEventDispatching();
+
+		assertThat(asyncEventQueue.isDispatchingPaused()).isFalse();
+	}
+
+	@Test
+	public void mockClientSubscriptionConfigIsCorrect() {
+
+		ClientSubscriptionConfig mockClientSubscriptionConfig =
+			GemFireMockObjectsSupport.mockClientSubscriptionConfig();
+
+		assertThat(mockClientSubscriptionConfig).isNotNull();
+
+		mockClientSubscriptionConfig.setCapacity(1024);
+		mockClientSubscriptionConfig.setDiskStoreName("TestDiskStore");
+		mockClientSubscriptionConfig.setEvictionPolicy("ENTRY");
+
+		assertThat(mockClientSubscriptionConfig.getCapacity()).isEqualTo(1024);
+		assertThat(mockClientSubscriptionConfig.getDiskStoreName()).isEqualTo("TestDiskStore");
+		assertThat(mockClientSubscriptionConfig.getEvictionPolicy()).isEqualTo("entry");
 	}
 
 	@Test
@@ -111,19 +167,19 @@ public class GemFireMockObjectsSupportUnitTests {
 	}
 
 	@Test
-	public void mockClientSubscriptionConfigIsCorrect() {
+	public void regionCloningEnabledReturnsFalseByDefault() {
 
-		ClientSubscriptionConfig mockClientSubscriptionConfig =
-			GemFireMockObjectsSupport.mockClientSubscriptionConfig();
+		RegionService mockRegionService = mock(RegionService.class);
 
-		assertThat(mockClientSubscriptionConfig).isNotNull();
+		RegionAttributes<?, ?> mockRegionAttributes = mock(RegionAttributes.class);
 
-		mockClientSubscriptionConfig.setCapacity(1024);
-		mockClientSubscriptionConfig.setDiskStoreName("TestDiskStore");
-		mockClientSubscriptionConfig.setEvictionPolicy("ENTRY");
+		Region<?, ?> mockRegion =
+			GemFireMockObjectsSupport.mockRegion(mockRegionService, "MockRegion", mockRegionAttributes);
 
-		assertThat(mockClientSubscriptionConfig.getCapacity()).isEqualTo(1024);
-		assertThat(mockClientSubscriptionConfig.getDiskStoreName()).isEqualTo("TestDiskStore");
-		assertThat(mockClientSubscriptionConfig.getEvictionPolicy()).isEqualTo("entry");
+		assertThat(mockRegion).isNotNull();
+		assertThat(mockRegion.getName()).isEqualTo("MockRegion");
+		assertThat(mockRegion.getAttributes()).isNotNull();
+		assertThat(mockRegion.getAttributes()).isNotSameAs(mockRegionAttributes);
+		assertThat(mockRegion.getAttributes().getCloningEnabled()).isFalse();
 	}
 }
