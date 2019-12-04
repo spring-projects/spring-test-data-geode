@@ -92,7 +92,7 @@
 		<mockito.version>3.1.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<spring.version>5.2.2.RELEASE</spring.version>
-		<spring-boot.version>2.2.0.RELEASE</spring-boot.version>
+		<spring-boot.version>2.2.1.RELEASE</spring-boot.version>
 		<spring-data-releasetrain.version>Moore-SR1</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
