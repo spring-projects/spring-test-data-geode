@@ -89,7 +89,7 @@
 		<log4j.version>2.12.1</log4j.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.10</lombok.version>
-		<mockito.version>3.1.0</mockito.version>
+		<mockito.version>3.2.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<spring.version>5.2.2.RELEASE</spring.version>
 		<spring-boot.version>2.2.2.RELEASE</spring-boot.version>
