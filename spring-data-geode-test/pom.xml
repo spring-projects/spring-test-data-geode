@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.data</groupId>
 		<artifactId>spring-test-data-geode-build</artifactId>
-		<version>0.0.11.RELEASE</version>
+		<version>0.0.12.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-data-geode-test</artifactId>
