@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 the original author or authors.
+ *  Copyright 2020 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
  * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @author Patrick Johnson
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
@@ -55,7 +56,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	private static ProcessWrapper gemfireServer;
 
-	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
+	public static int startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
 
 		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAvailablePort()));
@@ -67,6 +68,8 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
 
 		waitForServerToStart("localhost", availablePort);
+
+		return availablePort;
 	}
 
 	protected static int setAndGetCacheServerPortProperty(int port) {
