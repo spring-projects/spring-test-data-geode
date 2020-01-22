@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 the original author or authors.
+ *  Copyright 2020 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
@@ -40,6 +41,7 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
  * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @author Patrick Johnson
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
@@ -81,6 +83,10 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		System.setProperty(GEMFIRE_POOL_SERVERS_PROPERTY, String.format(GEMFIRE_LOCALHOST_PORT, port));
 
 		return port;
+	}
+
+	public static void block() {
+		new Scanner(System.in).nextLine();
 	}
 
 	@AfterClass
