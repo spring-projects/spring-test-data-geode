@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.util;
 
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalArgumentException;
@@ -22,7 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.apache.shiro.util.Assert;
+import org.springframework.util.Assert;
 
 /**
  * The ObjectToByteArrayComparator class...

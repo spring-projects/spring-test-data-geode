@@ -13,12 +13,11 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.util;
 
 import java.util.Comparator;
 
-import org.apache.shiro.util.Assert;
+import org.springframework.util.Assert;
 
 /**
  * The ByteArrayComparator class...
