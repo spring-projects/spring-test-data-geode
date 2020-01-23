@@ -33,7 +33,6 @@ public class GemFireMockObjectsApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	@Override
-	@SuppressWarnings("all")
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 		applicationContext.getBeanFactory().addBeanPostProcessor(GemFireMockObjectsBeanPostProcessor.newInstance());
 	}
