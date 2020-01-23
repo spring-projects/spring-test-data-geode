@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.logging.slf4j.logback;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

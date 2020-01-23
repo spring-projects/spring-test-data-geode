@@ -17,13 +17,13 @@ package org.springframework.data.gemfire.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.After;
+import org.junit.Test;
+
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolManager;
-
-import org.junit.After;
-import org.junit.Test;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 

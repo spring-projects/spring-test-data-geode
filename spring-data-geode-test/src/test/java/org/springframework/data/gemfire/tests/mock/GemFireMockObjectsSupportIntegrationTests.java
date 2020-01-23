@@ -20,11 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.geode.cache.Cache;
-import org.apache.geode.cache.CacheFactory;
-
 import org.junit.After;
 import org.junit.Test;
+
+import org.apache.geode.cache.Cache;
+import org.apache.geode.cache.CacheFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport;

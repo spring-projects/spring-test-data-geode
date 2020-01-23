@@ -19,15 +19,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Properties;
 
+import org.junit.After;
+import org.junit.Test;
+
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.distributed.internal.DistributionConfig;
 import org.apache.geode.internal.cache.GemFireCacheImpl;
-
-import org.junit.After;
-import org.junit.Test;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 

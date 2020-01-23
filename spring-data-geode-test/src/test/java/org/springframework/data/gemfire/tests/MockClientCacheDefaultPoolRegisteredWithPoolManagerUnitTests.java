@@ -20,14 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 
-import org.apache.geode.cache.client.ClientCache;
-import org.apache.geode.cache.client.Pool;
-import org.apache.geode.cache.client.PoolManager;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.Pool;
+import org.apache.geode.cache.client.PoolManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
