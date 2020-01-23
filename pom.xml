@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.data.build</groupId>
 		<artifactId>spring-data-parent</artifactId>
-		<version>2.2.3.RELEASE</version>
+		<version>2.2.4.RELEASE</version>
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
@@ -85,15 +85,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<apache-geode.version>1.9.2</apache-geode.version>
 		<assertj.version>3.14.0</assertj.version>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13</junit.version>
 		<log4j.version>2.12.1</log4j.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.10</lombok.version>
-		<mockito.version>3.2.0</mockito.version>
+		<mockito.version>3.2.4</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<spring.version>5.2.2.RELEASE</spring.version>
-		<spring-boot.version>2.2.2.RELEASE</spring-boot.version>
-		<spring-data-releasetrain.version>Moore-SR3</spring-data-releasetrain.version>
+		<spring.version>5.2.3.RELEASE</spring.version>
+		<spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+		<spring-data-releasetrain.version>Moore-SR4</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
