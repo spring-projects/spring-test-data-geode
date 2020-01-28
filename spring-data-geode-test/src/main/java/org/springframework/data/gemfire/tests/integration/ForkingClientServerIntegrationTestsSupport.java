@@ -69,6 +69,10 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		waitForServerToStart("localhost", availablePort);
 	}
 
+	public static void signalServer() {
+		getGemFireServerProcess().ifPresent(ProcessWrapper::signal);
+	}
+
 	protected static int setAndGetCacheServerPortProperty(int port) {
 
 		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(port));
