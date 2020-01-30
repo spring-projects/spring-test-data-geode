@@ -17,6 +17,7 @@ package org.springframework.data.gemfire.tests.integration;
 
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
  * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @author Patrick Johnson
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
@@ -58,13 +60,31 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	public static void startGemFireServer(Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
 
+		startGemFireServer(null, null, gemfireServerConfigurationClass, arguments);
+	}
+
+	public static void startGemFireServer(File workingDirectory, Class<?> gemfireServerConfigurationClass, String... arguments)
+			throws IOException {
+		startGemFireServer(workingDirectory, null, gemfireServerConfigurationClass, arguments);
+	}
+
+	public static void startGemFireServer(File workingDirectory, String classpath, Class<?> gemfireServerConfigurationClass, String... arguments)
+			throws IOException {
 		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAvailablePort()));
 
 		List<String> argumentList = new ArrayList<>(Arrays.asList(nullSafeArray(arguments, String.class)));
 
 		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
 
-		setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		if(workingDirectory == null && classpath == null) {
+			setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		} else if(workingDirectory == null) {
+			setGemFireServerProcess(run(classpath, gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		} else if (classpath == null) {
+			setGemFireServerProcess(run(workingDirectory, gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		} else {
+			setGemFireServerProcess(run(workingDirectory, classpath, gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		}
 
 		waitForServerToStart("localhost", availablePort);
 	}
