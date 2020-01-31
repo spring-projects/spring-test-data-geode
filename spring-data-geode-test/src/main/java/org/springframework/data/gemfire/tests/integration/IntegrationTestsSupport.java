@@ -31,6 +31,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
@@ -38,10 +42,6 @@ import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
-
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
@@ -265,7 +265,7 @@ public abstract class IntegrationTestsSupport {
 	protected static File createDirectory(File directory) {
 
 		assertThat(directory.isDirectory() || directory.mkdirs())
-			.as(String.format("Failed to create directory [%s]", directory)).isTrue();
+			.describedAs(String.format("Failed to create directory [%s]", directory)).isTrue();
 
 		if (isDeleteDirectoryOnExit()) {
 			directory.deleteOnExit();
@@ -275,13 +275,15 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	protected static boolean isDeleteDirectoryOnExit() {
-		return Boolean.valueOf(System.getProperty(DIRECTORY_DELETE_ON_EXIT_PROPERTY, Boolean.TRUE.toString()));
+		return !System.getProperties().containsKey(DIRECTORY_DELETE_ON_EXIT_PROPERTY)
+			|| Boolean.getBoolean(DIRECTORY_DELETE_ON_EXIT_PROPERTY);
 	}
 
 	protected boolean isQueryDebuggingEnabled() {
 		return DEBUG_GEMFIRE_QUERIES || withQueryDebugging();
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected static String getClassNameAsPath(Class type) {
 		return type.getName().replaceAll("\\.", "/");
 	}
@@ -290,6 +292,7 @@ public abstract class IntegrationTestsSupport {
 		return getClassNameAsPath(obj.getClass());
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected static String getPackageNameAsPath(Class type) {
 		return type.getPackage().getName().replaceAll("\\.", "/");
 	}
@@ -298,10 +301,12 @@ public abstract class IntegrationTestsSupport {
 		return getPackageNameAsPath(obj.getClass());
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected static String getContextXmlFileLocation(Class type) {
 		return getClassNameAsPath(type).concat("-context.xml");
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected static String getServerContextXmlFileLocation(Class type) {
 		return getClassNameAsPath(type).concat("-server-context.xml");
 	}
