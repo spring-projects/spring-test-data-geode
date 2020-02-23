@@ -1,4 +1,4 @@
-image:https://api.travis-ci.org/spring-projects/spring-boot-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-boot-data-geode"]
+image:https://api.travis-ci.org/spring-projects/spring-test-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-test-data-geode"]
 
 [[about]]
 == Spring Test Framework for Apache Geode & Pivotal GemFire
