@@ -13,13 +13,13 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.support;
 
 import java.util.Properties;
 
 import org.apache.geode.security.AuthenticationFailedException;
 import org.apache.geode.security.ResourcePermission;
+
 import org.apache.shiro.authz.AuthorizationException;
 
 /**

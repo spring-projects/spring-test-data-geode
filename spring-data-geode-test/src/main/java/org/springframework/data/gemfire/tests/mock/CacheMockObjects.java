@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.mock;
 
 import static org.apache.geode.internal.util.CollectionUtils.asSet;
@@ -34,6 +33,7 @@ import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.control.ResourceManager;
 import org.apache.geode.distributed.DistributedMember;
 import org.apache.geode.distributed.DistributedSystem;
+
 import org.springframework.data.gemfire.util.RegionUtils;
 
 /**
