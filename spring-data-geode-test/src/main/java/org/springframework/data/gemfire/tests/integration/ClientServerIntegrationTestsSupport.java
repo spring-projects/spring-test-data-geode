@@ -24,8 +24,12 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.junit.AfterClass;
 
 import org.apache.geode.cache.server.CacheServer;
 
@@ -66,6 +70,13 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 	protected static final String DEBUGGING_ENABLED_PROPERTY = "spring.data.gemfire.test.debugging.enabled";
 	protected static final String PROCESS_RUN_MANUAL_PROPERTY = "spring.data.gemfire.test.process.run-manual";
 
+	private static final Set<Integer> allocatedPorts = new ConcurrentSkipListSet<>();
+
+	@AfterClass
+	public static void deallocatePorts() {
+		allocatedPorts.clear();
+	}
+
 	protected static int findAvailablePort() throws IOException {
 
 		ServerSocket serverSocket = null;
@@ -80,6 +91,18 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		finally {
 			SocketUtils.close(serverSocket);
 		}
+	}
+
+	protected static int findAndReserveAvailablePort() throws IOException {
+
+		int availablePort = 0;
+
+		do {
+			availablePort = findAvailablePort();
+		}
+		while (!allocatedPorts.add(availablePort));
+
+		return availablePort;
 	}
 
 	protected static int intValue(Number number) {
