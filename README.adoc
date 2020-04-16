@@ -31,6 +31,22 @@ https://github.com/spring-projects/spring-boot-data-geode/tree/master/spring-geo
 and the https://github.com/spring-projects/spring-session-data-geode/tree/master/spring-session-data-geode/src/test/java/org/springframework/session/data/gemfire[test suite for SSDG]
 to get a sense of how this project is used and works.
 
+[[code-of-conduct]]
+== Code of Conduct
+
+Please see our https://github.com/spring-projects/.github/blob/master/CODE_OF_CONDUCT.md[code of conduct]
+
+[[report-security-vulnerability]]
+== Reporting Security Vulnerabilities
+
+Please see our https://github.com/spring-projects/spring-test-data-geode/security/policy[Security policy].
+
+[[license]]
+== License
+
+_Spring Test for Apache Geode_ and _Spring Test for Pivotal GemFire_ is Open Source Software
+released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
+
 
 [[nutshell]]
 == STDG in a Nutshell
