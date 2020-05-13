@@ -2,6 +2,7 @@
 def customizePom(gradleProject, pom) {
 
 	pom.whenConfigured { generatedPom ->
+
 		generatedPom.project {
 			developers {
 				developer {
@@ -15,6 +16,10 @@ def customizePom(gradleProject, pom) {
 				developerConnection = 'scm:git:git@github.com:spring-projects/spring-test-data-geode.git'
 				url = 'https://github.com/spring-projects/spring-test-data-geode'
 			}
+		}
+
+		generatedPom.dependencies = generatedPom.dependencies.findAll {
+			dependency -> dependency.groupId != 'org.springframework.boot'
 		}
 	}
 }
