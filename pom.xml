@@ -93,7 +93,7 @@
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 <!--		<pivotal-gemfire.version>9.8.7</pivotal-gemfire.version>-->
 		<spring.version>5.2.6.RELEASE</spring.version>
-		<spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+		<spring-boot.version>2.3.0.RC1</spring-boot.version>
 		<spring-data-releasetrain.version>Moore-BUILD-SNAPSHOT</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
