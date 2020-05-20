@@ -47,6 +47,18 @@ import org.springframework.context.annotation.Import;
 public @interface EnableGemFireMockObjects {
 
 	/**
+	 * Configures whether the {@link org.springframework.context.event.ContextClosedEvent} Spring
+	 * {@link org.springframework.context.ApplicationEvent} listener and handler for GemFire/Geode
+	 * {@link Object Mock Objects} is suppressed from taking action.
+	 *
+	 * Defaults to {@literal false}.
+	 *
+	 * @return a boolean value indicating whether the {@link org.springframework.context.event.ContextClosedEvent}
+	 * listener and handler for GemFire/Geode {@link Object Mock Objects} is suppressed from taking action.
+	 */
+	boolean suppressOnContextClosedEventHandler() default false;
+
+	/**
 	 * Configures whether the mock {@link GemFireCache} created for Unit Testing is a Singleton.
 	 *
 	 * Defaults to {@literal false}.

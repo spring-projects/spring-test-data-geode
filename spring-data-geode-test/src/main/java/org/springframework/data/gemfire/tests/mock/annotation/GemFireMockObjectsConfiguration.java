@@ -53,6 +53,8 @@ import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBean
 @SuppressWarnings("unused")
 public class GemFireMockObjectsConfiguration implements ApplicationListener<ContextClosedEvent>, ImportAware {
 
+	private boolean suppressContextClosedEventHandler = false;
+
 	private boolean useSingletonCache = false;
 
 	@Override @SuppressWarnings("all")
@@ -61,8 +63,14 @@ public class GemFireMockObjectsConfiguration implements ApplicationListener<Cont
 		Optional.of(importingClassMetadata)
 			.filter(this::isAnnotationPresent)
 			.map(this::getAnnotationAttributes)
-			.ifPresent(enableGemFireMockObjectsAttributes ->
-				this.useSingletonCache = enableGemFireMockObjectsAttributes.getBoolean("useSingletonCache"));
+			.ifPresent(enableGemFireMockObjectsAttributes -> {
+
+				this.suppressContextClosedEventHandler =
+					enableGemFireMockObjectsAttributes.getBoolean("suppressOnContextClosedEventHandler");
+
+				this.useSingletonCache =
+					enableGemFireMockObjectsAttributes.getBoolean("useSingletonCache");
+			});
 	}
 
 	private Class<? extends Annotation> getAnnotationType() {
@@ -89,18 +97,37 @@ public class GemFireMockObjectsConfiguration implements ApplicationListener<Cont
 		return AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(annotationType.getName()));
 	}
 
+	protected boolean isNotSuppressOnContextClosedEvent() {
+		return !isSuppressOnContextClosedEvent();
+	}
+
+	protected boolean isSuppressOnContextClosedEvent() {
+		return this.suppressContextClosedEventHandler;
+	}
+
+	protected boolean isUseSingletonCacheConfigured() {
+		return this.useSingletonCache;
+	}
+
 	@Bean
 	public BeanPostProcessor gemfireMockObjectsBeanPostProcessor() {
-		return GemFireMockObjectsBeanPostProcessor.newInstance(this.useSingletonCache);
+		return GemFireMockObjectsBeanPostProcessor.newInstance(isUseSingletonCacheConfigured());
 	}
 
 	@EventListener
 	public void releaseMockObjectResources(ContextClosedEvent event) {
-		GemFireMockObjectsSupport.destroy();
+
+		if (isNotSuppressOnContextClosedEvent()) {
+			destroyGemFireMockObjects();
+		}
 	}
 
 	@Override @SuppressWarnings("all")
 	public void onApplicationEvent(ContextClosedEvent event) {
 		releaseMockObjectResources(event);
+	}
+
+	void destroyGemFireMockObjects() {
+		GemFireMockObjectsSupport.destroy();
 	}
 }
