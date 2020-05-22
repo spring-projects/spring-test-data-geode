@@ -19,16 +19,16 @@ import java.lang.annotation.Annotation;
 import java.util.Optional;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
-import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor;
+import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
+import org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener;
+import org.springframework.lang.NonNull;
 
 /**
  * The {@link GemFireMockObjectsConfiguration} class is a Spring {@link Configuration @Configuration} class
@@ -46,63 +46,61 @@ import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBean
  * @see org.springframework.core.annotation.AnnotationAttributes
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
- * @see org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor
+ * @see GemFireMockObjectsBeanPostProcessor
  * @since 0.0.1
  */
 @Configuration
 @SuppressWarnings("unused")
-public class GemFireMockObjectsConfiguration implements ApplicationListener<ContextClosedEvent>, ImportAware {
-
-	private boolean suppressContextClosedEventHandler = false;
+public class GemFireMockObjectsConfiguration implements ImportAware {
 
 	private boolean useSingletonCache = false;
 
-	@Override @SuppressWarnings("all")
-	public void setImportMetadata(AnnotationMetadata importingClassMetadata) {
+	@SuppressWarnings("unchecked")
+	private Class<? extends ApplicationEvent>[] destroyEventTypes = new Class[0];
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void setImportMetadata(@NonNull AnnotationMetadata importingClassMetadata) {
 
 		Optional.of(importingClassMetadata)
 			.filter(this::isAnnotationPresent)
 			.map(this::getAnnotationAttributes)
 			.ifPresent(enableGemFireMockObjectsAttributes -> {
 
-				this.suppressContextClosedEventHandler =
-					enableGemFireMockObjectsAttributes.getBoolean("suppressOnContextClosedEventHandler");
+				this.destroyEventTypes = (Class<? extends ApplicationEvent>[])
+					enableGemFireMockObjectsAttributes.getClassArray("destroyOnEvent");
 
 				this.useSingletonCache =
 					enableGemFireMockObjectsAttributes.getBoolean("useSingletonCache");
 			});
 	}
 
-	private Class<? extends Annotation> getAnnotationType() {
+	private @NonNull Class<? extends Annotation> getAnnotationType() {
 		return EnableGemFireMockObjects.class;
 	}
 
-	private boolean isAnnotationPresent(AnnotationMetadata importingClassMetadata) {
+	private boolean isAnnotationPresent(@NonNull AnnotationMetadata importingClassMetadata) {
 		return isAnnotationPresent(importingClassMetadata, getAnnotationType());
 	}
 
-	private boolean isAnnotationPresent(AnnotationMetadata importingClassMetadata,
-			Class<? extends Annotation> annotationType) {
+	private boolean isAnnotationPresent(@NonNull AnnotationMetadata importingClassMetadata,
+			@NonNull Class<? extends Annotation> annotationType) {
 
 		return importingClassMetadata.hasAnnotation(annotationType.getName());
 	}
 
-	private AnnotationAttributes getAnnotationAttributes(AnnotationMetadata importingClassMetadata) {
+	private AnnotationAttributes getAnnotationAttributes(@NonNull AnnotationMetadata importingClassMetadata) {
 		return getAnnotationAttributes(importingClassMetadata, getAnnotationType());
 	}
 
-	private AnnotationAttributes getAnnotationAttributes(AnnotationMetadata importingClassMetadata,
-			Class<? extends Annotation> annotationType) {
+	private AnnotationAttributes getAnnotationAttributes(@NonNull AnnotationMetadata importingClassMetadata,
+			@NonNull Class<? extends Annotation> annotationType) {
 
 		return AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(annotationType.getName()));
 	}
 
-	protected boolean isNotSuppressOnContextClosedEvent() {
-		return !isSuppressOnContextClosedEvent();
-	}
-
-	protected boolean isSuppressOnContextClosedEvent() {
-		return this.suppressContextClosedEventHandler;
+	protected Class<? extends ApplicationEvent>[] getConfiguredDestroyEventTypes() {
+		return this.destroyEventTypes;
 	}
 
 	protected boolean isUseSingletonCacheConfigured() {
@@ -114,20 +112,8 @@ public class GemFireMockObjectsConfiguration implements ApplicationListener<Cont
 		return GemFireMockObjectsBeanPostProcessor.newInstance(isUseSingletonCacheConfigured());
 	}
 
-	@EventListener
-	public void releaseMockObjectResources(ContextClosedEvent event) {
-
-		if (isNotSuppressOnContextClosedEvent()) {
-			destroyGemFireMockObjects();
-		}
-	}
-
-	@Override @SuppressWarnings("all")
-	public void onApplicationEvent(ContextClosedEvent event) {
-		releaseMockObjectResources(event);
-	}
-
-	void destroyGemFireMockObjects() {
-		GemFireMockObjectsSupport.destroy();
+	@Bean
+	public ApplicationListener<ApplicationEvent> destroyGemFireMockObjectsApplicationListener() {
+		return DestroyGemFireMockObjectsApplicationListener.newInstance(getConfiguredDestroyEventTypes());
 	}
 }

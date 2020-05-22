@@ -17,11 +17,8 @@ package org.springframework.data.gemfire.tests.mock.annotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -47,16 +44,16 @@ import org.springframework.core.type.AnnotationMetadata;
 public class GemFireMockObjectsConfigurationUnitTests {
 
 	@Test
-	public void setImportMetadataConfiguresSingletonCacheAndSuppressContextClosedEvents() {
+	public void setImportMetadataConfiguresSingletonCacheAndDestroysMockObjectsOnConfiguredEvents() {
 
 		GemFireMockObjectsConfiguration configuration = new GemFireMockObjectsConfiguration();
 
-		assertThat(configuration.isSuppressOnContextClosedEvent()).isFalse();
+		assertThat(configuration.getConfiguredDestroyEventTypes()).isEmpty();
 		assertThat(configuration.isUseSingletonCacheConfigured()).isFalse();
 
 		Map<String, Object> enableGemFireMockObjectsAttributes = new HashMap<>();
 
-		enableGemFireMockObjectsAttributes.put("suppressOnContextClosedEventHandler", true);
+		enableGemFireMockObjectsAttributes.put("destroyOnEvent", new Class[] { ContextClosedEvent.class });
 		enableGemFireMockObjectsAttributes.put("useSingletonCache", true);
 
 		AnnotationMetadata mockAnnotationMetadata = mock(AnnotationMetadata.class);
@@ -69,44 +66,12 @@ public class GemFireMockObjectsConfigurationUnitTests {
 
 		configuration.setImportMetadata(mockAnnotationMetadata);
 
-		assertThat(configuration.isSuppressOnContextClosedEvent()).isTrue();
+		assertThat(configuration.getConfiguredDestroyEventTypes()).containsExactly(ContextClosedEvent.class);
 		assertThat(configuration.isUseSingletonCacheConfigured()).isTrue();
 
 		verify(mockAnnotationMetadata, times(1))
 			.hasAnnotation(eq(EnableGemFireMockObjects.class.getName()));
 		verify(mockAnnotationMetadata, times(1))
 			.getAnnotationAttributes(eq(EnableGemFireMockObjects.class.getName()));
-	}
-
-	@Test
-	public void destroysGemFireMockObjectsWhenSuppressOnContextClosedEventIsFalse() {
-
-		ContextClosedEvent mockEvent = mock(ContextClosedEvent.class);
-
-		GemFireMockObjectsConfiguration configuration = spy(new GemFireMockObjectsConfiguration());
-
-		doReturn(false).when(configuration).isSuppressOnContextClosedEvent();
-		doNothing().when(configuration).destroyGemFireMockObjects();
-
-		configuration.onApplicationEvent(mockEvent);
-
-		verify(configuration, times(1)).destroyGemFireMockObjects();
-		verify(configuration, times(1)).releaseMockObjectResources(eq(mockEvent));
-	}
-
-	@Test
-	public void doesNotDestroyGemFireMockObjectsWhenSuppressOnContextClosedEventIsTrue() {
-
-		ContextClosedEvent mockEvent = mock(ContextClosedEvent.class);
-
-		GemFireMockObjectsConfiguration configuration = spy(new GemFireMockObjectsConfiguration());
-
-		doReturn(true).when(configuration).isSuppressOnContextClosedEvent();
-		doNothing().when(configuration).destroyGemFireMockObjects();
-
-		configuration.onApplicationEvent(mockEvent);
-
-		verify(configuration, never()).destroyGemFireMockObjects();
-		verify(configuration, times(1)).releaseMockObjectResources(eq(mockEvent));
 	}
 }

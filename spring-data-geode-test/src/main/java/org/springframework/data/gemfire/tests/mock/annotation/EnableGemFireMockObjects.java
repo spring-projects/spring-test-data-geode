@@ -24,7 +24,9 @@ import java.lang.annotation.Target;
 
 import org.apache.geode.cache.GemFireCache;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
  * The {@link EnableGemFireMockObjects} annotation enables mocking of GemFire Objects in Unit Tests.
@@ -47,16 +49,15 @@ import org.springframework.context.annotation.Import;
 public @interface EnableGemFireMockObjects {
 
 	/**
-	 * Configures whether the {@link org.springframework.context.event.ContextClosedEvent} Spring
-	 * {@link org.springframework.context.ApplicationEvent} listener and handler for GemFire/Geode
-	 * {@link Object Mock Objects} is suppressed from taking action.
+	 * Configures the {@link Class type} of {@link ApplicationEvent ApplicationEvents} that will trigger all currently
+	 * allocated GemFire/Geode {@link Object Mock Objects} to be destroyed.
 	 *
-	 * Defaults to {@literal false}.
-	 *
-	 * @return a boolean value indicating whether the {@link org.springframework.context.event.ContextClosedEvent}
-	 * listener and handler for GemFire/Geode {@link Object Mock Objects} is suppressed from taking action.
+	 * @return an array of {@link ApplicationEvent} {@link Class types} that will trigger all currently allocated
+	 * GemFire/Geode {@link Object Mock Objects} to be destroyed.
+	 * @see org.springframework.context.ApplicationEvent
+	 * @see java.lang.Class
 	 */
-	boolean suppressOnContextClosedEventHandler() default false;
+	Class<? extends ApplicationEvent>[] destroyOnEvent() default { AfterTestClassEvent.class };
 
 	/**
 	 * Configures whether the mock {@link GemFireCache} created for Unit Testing is a Singleton.
