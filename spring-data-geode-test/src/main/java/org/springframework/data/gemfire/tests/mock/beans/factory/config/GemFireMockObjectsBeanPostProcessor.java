@@ -13,9 +13,9 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.mock.config;
+package org.springframework.data.gemfire.tests.mock.beans.factory.config;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,6 +24,7 @@ import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.PoolFactory;
+import org.apache.geode.distributed.DistributedSystem;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -31,14 +32,16 @@ import org.springframework.data.gemfire.CacheFactoryBean;
 import org.springframework.data.gemfire.client.ClientCacheFactoryBean;
 import org.springframework.data.gemfire.client.PoolFactoryBean;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * The {@link GemFireMockObjectsBeanPostProcessor} class is a Spring {@link BeanPostProcessor} that applies
- * mocks and spies to Spring Data GemFire / Spring Data Geode and Pivotal GemFire / Apache Geode objects
- * and components.
+ * A Spring {@link BeanPostProcessor} implementation that applies mocks and spies to
+ * Spring Data GemFire / Spring Data Geode (SDG) and Apache Geode / VMware GemFire
+ * {@link Object objects}.
  *
  * @author John Blum
+ * @see java.util.Properties
  * @see org.apache.geode.cache.CacheFactory
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.client.ClientCacheFactory
@@ -50,12 +53,11 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 0.0.1
  */
-@SuppressWarnings("all")
 public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 
-	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
+	protected static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
 
-	private static final String GEMFIRE_PROPERTIES_BEAN_NAME = "gemfireProperties";
+	protected static final String GEMFIRE_PROPERTIES_BEAN_NAME = "gemfireProperties";
 
 	private volatile boolean useSingletonCache;
 
@@ -75,22 +77,24 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	@Nullable @Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(@NonNull Object bean, String beanName) throws BeansException {
 
 		return isGemFireProperties(bean, beanName) ? set((Properties) bean)
-			: bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, this.useSingletonCache)
+			: bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, isUsingSingletonCache())
 			: bean instanceof PoolFactoryBean ? mockThePoolFactoryBean((PoolFactoryBean) bean)
 			: bean;
 	}
 
 	@Nullable @Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
 
 		if (bean instanceof GemFireCache) {
 
 			GemFireCache gemfireCache = (GemFireCache) bean;
 
-			when(gemfireCache.getDistributedSystem().getProperties()).thenReturn(this.gemfireProperties.get());
+			DistributedSystem distributedSystem = gemfireCache.getDistributedSystem();
+
+			doReturn(getGemFireProperties()).when(distributedSystem).getProperties();
 		}
 
 		return bean;
@@ -100,11 +104,19 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 		return bean instanceof Properties && GEMFIRE_PROPERTIES_BEAN_NAME.equals(beanName);
 	}
 
+	protected boolean isUsingSingletonCache() {
+		return this.useSingletonCache;
+	}
+
 	private Object set(Properties gemfireProperties) {
 
 		this.gemfireProperties.set(gemfireProperties);
 
 		return gemfireProperties;
+	}
+
+	protected Properties getGemFireProperties() {
+		return this.gemfireProperties.get();
 	}
 
 	private Object spyOnCacheFactoryBean(CacheFactoryBean bean, boolean useSingletonCache) {
