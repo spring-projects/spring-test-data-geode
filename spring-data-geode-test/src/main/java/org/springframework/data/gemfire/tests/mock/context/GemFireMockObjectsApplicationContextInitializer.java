@@ -17,16 +17,21 @@ package org.springframework.data.gemfire.tests.mock.context;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor;
+import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
 
 /**
- * The {@link GemFireMockObjectsApplicationContextInitializer} class is a Spring {@link ApplicationContextInitializer}
- * used to initialize the Spring {@link ConfigurableApplicationContext} with GemFire Object mocking.
+ * A Spring {@link ApplicationContextInitializer} implementation used to initialize the Spring
+ * {@link ConfigurableApplicationContext} with GemFire/Geode {@link Object Mock Objects}.
+ *
+ * {@link Object Mock Objects} will be created for caches, {@literal Regions}, {@literal Indexes}, {@literal DiskStores}
+ * OQL query objects, and so on.
  *
  * @author John Blum
+ * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
  * @see org.springframework.context.ApplicationContextInitializer
  * @see org.springframework.context.ConfigurableApplicationContext
- * @see org.springframework.data.gemfire.tests.mock.config.GemFireMockObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor
  * @since 0.0.1
  */
 public class GemFireMockObjectsApplicationContextInitializer
