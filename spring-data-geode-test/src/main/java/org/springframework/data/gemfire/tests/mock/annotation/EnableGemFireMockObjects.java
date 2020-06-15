@@ -32,11 +32,12 @@ import org.springframework.test.context.event.AfterTestClassEvent;
  * The {@link EnableGemFireMockObjects} annotation enables mocking of GemFire Objects in Unit Tests.
  *
  * @author John Blum
- * @see Documented
- * @see Inherited
- * @see Retention
- * @see Target
+ * @see java.lang.annotation.Documented
+ * @see java.lang.annotation.Inherited
+ * @see java.lang.annotation.Retention
+ * @see java.lang.annotation.Target
  * @see org.apache.geode.cache.GemFireCache
+ * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.annotation.Import
  * @since 0.0.1
  */
