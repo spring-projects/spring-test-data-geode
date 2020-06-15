@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.util;
 
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
@@ -89,7 +88,7 @@ public abstract class FileSystemUtils extends FileUtils {
 		Assert.isTrue(isDirectory(directory),
 			String.format("File [%s] does not refer to a valid directory", directory));
 
-		List<File> results = new ArrayList<File>();
+		List<File> results = new ArrayList<>();
 
 		for (File file : safeListFiles(directory, fileFilter)) {
 			if (isDirectory(file)) {
@@ -100,7 +99,7 @@ public abstract class FileSystemUtils extends FileUtils {
 			}
 		}
 
-		return results.toArray(new File[results.size()]);
+		return results.toArray(new File[0]);
 	}
 
 	public static File[] safeListFiles(File directory) {
@@ -171,6 +170,7 @@ public abstract class FileSystemUtils extends FileUtils {
 
 		@Override
 		public boolean accept(File pathname) {
+
 			switch (this.logicalOperator) {
 				case AND:
 					return (fileFilterOne.accept(pathname) && fileFilterTwo.accept(pathname));
@@ -183,7 +183,7 @@ public abstract class FileSystemUtils extends FileUtils {
 		}
 
 		enum LogicalOperator {
-			AND, OR;
+			AND, OR
 		}
 	}
 
@@ -212,7 +212,7 @@ public abstract class FileSystemUtils extends FileUtils {
 
 		@Override
 		public boolean accept(File pathname) {
-			return (super.accept(pathname) && pathname.getAbsolutePath().toLowerCase().endsWith(this.fileExtension));
+			return super.accept(pathname) && pathname.getAbsolutePath().toLowerCase().endsWith(this.fileExtension);
 		}
 	}
 
