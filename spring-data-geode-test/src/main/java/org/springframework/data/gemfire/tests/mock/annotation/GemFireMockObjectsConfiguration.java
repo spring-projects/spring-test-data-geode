@@ -24,8 +24,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport;
 import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
 import org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener;
 import org.springframework.lang.NonNull;
@@ -37,21 +37,21 @@ import org.springframework.lang.NonNull;
  * @author John Blum
  * @see java.lang.annotation.Annotation
  * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationListener
  * @see org.springframework.context.annotation.Bean
  * @see org.springframework.context.annotation.Configuration
  * @see org.springframework.context.annotation.ImportAware
- * @see org.springframework.context.event.ContextClosedEvent
- * @see org.springframework.context.event.EventListener
- * @see org.springframework.core.annotation.AnnotationAttributes
  * @see org.springframework.core.type.AnnotationMetadata
+ * @see org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
- * @see GemFireMockObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener
  * @since 0.0.1
  */
 @Configuration
 @SuppressWarnings("unused")
-public class GemFireMockObjectsConfiguration implements ImportAware {
+public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSupport implements ImportAware {
 
 	private boolean useSingletonCache = false;
 
@@ -75,28 +75,8 @@ public class GemFireMockObjectsConfiguration implements ImportAware {
 			});
 	}
 
-	private @NonNull Class<? extends Annotation> getAnnotationType() {
+	protected @NonNull Class<? extends Annotation> getAnnotationType() {
 		return EnableGemFireMockObjects.class;
-	}
-
-	private boolean isAnnotationPresent(@NonNull AnnotationMetadata importingClassMetadata) {
-		return isAnnotationPresent(importingClassMetadata, getAnnotationType());
-	}
-
-	private boolean isAnnotationPresent(@NonNull AnnotationMetadata importingClassMetadata,
-			@NonNull Class<? extends Annotation> annotationType) {
-
-		return importingClassMetadata.hasAnnotation(annotationType.getName());
-	}
-
-	private AnnotationAttributes getAnnotationAttributes(@NonNull AnnotationMetadata importingClassMetadata) {
-		return getAnnotationAttributes(importingClassMetadata, getAnnotationType());
-	}
-
-	private AnnotationAttributes getAnnotationAttributes(@NonNull AnnotationMetadata importingClassMetadata,
-			@NonNull Class<? extends Annotation> annotationType) {
-
-		return AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(annotationType.getName()));
 	}
 
 	protected Class<? extends ApplicationEvent>[] getConfiguredDestroyEventTypes() {
