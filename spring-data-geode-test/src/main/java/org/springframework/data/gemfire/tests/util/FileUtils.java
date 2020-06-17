@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.util;
 
 import java.io.BufferedReader;
@@ -59,7 +58,10 @@ public abstract class FileUtils extends IOUtils {
 		return new File(parent, pathname);
 	}
 
-	@SuppressWarnings("all")
+	public static long nullSafeLength(File path) {
+		return path != null ? path.length() : 0L;
+	}
+
 	public static String read(File file) throws IOException {
 
 		Assert.isTrue(isFile(file), String.format("The File [%s] to read the contents from is not a valid file", file));
@@ -82,7 +84,6 @@ public abstract class FileUtils extends IOUtils {
 		}
 	}
 
-	/* (non-Javadoc) */
 	public static void write(File file, String contents) throws IOException {
 
 		Assert.notNull(file, "File is required");
