@@ -25,8 +25,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport;
-import org.springframework.data.gemfire.tests.mock.context.event.GemFireGarbageCollectorApplicationListener;
+import org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener;
+import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.lang.NonNull;
+import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
  * Spring {@link Configuration} class used to register beans that collect garbage irresponsibly left behind by
@@ -41,7 +43,7 @@ import org.springframework.lang.NonNull;
  * @see org.springframework.context.annotation.ImportAware
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport
- * @see org.springframework.data.gemfire.tests.mock.context.event.GemFireGarbageCollectorApplicationListener
+ * @see GemFireGarbageCollectorApplicationListener
  * @since 0.0.17
  */
 @Configuration
@@ -53,7 +55,8 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 	private boolean tryCleanDiskStoreFiles = DEFAULT_CLEAN_DISK_STORE_FILES;
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationEvent>[] gemfireGarbageCollectorEventTypes = new Class[0];
+	private Class<? extends ApplicationEvent>[] gemfireGarbageCollectorEventTypes =
+		new Class[] { AfterTestClassEvent.class };
 
 	@Override
 	protected Class<? extends Annotation> getAnnotationType() {
@@ -77,9 +80,18 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 			});
 	}
 
+	@SuppressWarnings("unchecked")
+	protected @NonNull Class<? extends ApplicationEvent>[] getGemFireGarbageCollectorEventTypes() {
+		return ArrayUtils.nullSafeArray(this.gemfireGarbageCollectorEventTypes, Class.class);
+	}
+
+	protected boolean isTryCleanDiskStoreFiles() {
+		return this.tryCleanDiskStoreFiles;
+	}
+
 	@Bean
 	ApplicationListener<ApplicationEvent> gemfireGarbageCollectorApplicationListener() {
-		return GemFireGarbageCollectorApplicationListener.create(this.gemfireGarbageCollectorEventTypes)
-			.tryCleanDiskStoreFiles(this.tryCleanDiskStoreFiles);
+		return GemFireGarbageCollectorApplicationListener.create(getGemFireGarbageCollectorEventTypes())
+			.tryCleanDiskStoreFiles(isTryCleanDiskStoreFiles());
 	}
 }
