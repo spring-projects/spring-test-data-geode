@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -65,12 +68,12 @@ public abstract class FileSystemUtils extends FileUtils {
 		return ((!exists(path) || path.delete()) && success);
 	}
 
-	public static boolean exists(File path) {
+	public static boolean exists(@Nullable File path) {
 		return path != null && path.exists();
 	}
 
 	// returns sub-directory just below working directory
-	public static File getRootRelativeToWorkingDirectoryOrPath(File path) {
+	public static @Nullable File getRootRelativeToWorkingDirectoryOrPath(@Nullable File path) {
 
 		File localPath = path;
 
@@ -80,10 +83,19 @@ public abstract class FileSystemUtils extends FileUtils {
 			}
 		}
 
-		return (localPath != null ? localPath : path);
+		return localPath != null
+			? localPath
+			: path;
 	}
 
-	public static File[] listFiles(File directory, FileFilter fileFilter) {
+	public static boolean isEmpty(File path) {
+
+		return isDirectory(path)
+			? ArrayUtils.isEmpty(path.listFiles())
+			: nullSafeLength(path) == 0;
+	}
+
+	public static @NonNull File[] listFiles(@NonNull File directory, @NonNull FileFilter fileFilter) {
 
 		Assert.isTrue(isDirectory(directory),
 			String.format("File [%s] does not refer to a valid directory", directory));
@@ -102,14 +114,23 @@ public abstract class FileSystemUtils extends FileUtils {
 		return results.toArray(new File[0]);
 	}
 
-	public static File[] safeListFiles(File directory) {
+	public static @NonNull File[] safeListFiles(@Nullable File directory) {
 		return safeListFiles(directory, AllFilesFilter.INSTANCE);
 	}
 
-	public static File[] safeListFiles(File directory, FileFilter fileFilter) {
-		FileFilter resolvedFileFilter = (fileFilter != null ? fileFilter : AllFilesFilter.INSTANCE);
-		File[] files = (isDirectory(directory) ? directory.listFiles(resolvedFileFilter) : null);
-		return (files != null ? files : NO_FILES);
+	public static @NonNull File[] safeListFiles(@Nullable File directory, @Nullable FileFilter fileFilter) {
+
+		FileFilter resolvedFileFilter = fileFilter != null
+			? fileFilter
+			: AllFilesFilter.INSTANCE;
+
+		File[] files = isDirectory(directory)
+			? directory.listFiles(resolvedFileFilter)
+			: null;
+
+		return files != null
+			? files
+			: NO_FILES;
 	}
 
 	public static class AllFilesFilter implements FileFilter {
