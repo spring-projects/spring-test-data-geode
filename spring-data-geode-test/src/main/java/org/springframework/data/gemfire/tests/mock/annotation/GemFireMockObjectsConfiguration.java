@@ -53,7 +53,9 @@ import org.springframework.lang.NonNull;
 @SuppressWarnings("unused")
 public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSupport implements ImportAware {
 
-	private boolean useSingletonCache = false;
+	public static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
+
+	private boolean useSingletonCache = DEFAULT_USE_SINGLETON_CACHE;
 
 	@SuppressWarnings("unchecked")
 	private Class<? extends ApplicationEvent>[] destroyEventTypes = new Class[0];
@@ -68,7 +70,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 			.ifPresent(enableGemFireMockObjectsAttributes -> {
 
 				this.destroyEventTypes = (Class<? extends ApplicationEvent>[])
-					enableGemFireMockObjectsAttributes.getClassArray("destroyOnEvent");
+					enableGemFireMockObjectsAttributes.getClassArray("destroyOnEvents");
 
 				this.useSingletonCache =
 					enableGemFireMockObjectsAttributes.getBoolean("useSingletonCache");

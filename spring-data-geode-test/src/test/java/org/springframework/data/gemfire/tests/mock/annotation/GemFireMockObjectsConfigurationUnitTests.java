@@ -19,16 +19,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
+import org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener;
+import org.springframework.data.gemfire.tests.util.ReflectionUtils;
 
 /**
  * Unit Tests for {@link GemFireMockObjectsConfiguration}.
@@ -36,9 +43,9 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author John Blum
  * @see org.junit.Test
  * @see org.mockito.Mockito
- * @see org.springframework.context.event.ContextClosedEvent
- * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.tests.mock.annotation.GemFireMockObjectsConfiguration
+ * @see org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor
+ * @see org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener
  * @since 0.0.16
  */
 public class GemFireMockObjectsConfigurationUnitTests {
@@ -53,7 +60,7 @@ public class GemFireMockObjectsConfigurationUnitTests {
 
 		Map<String, Object> enableGemFireMockObjectsAttributes = new HashMap<>();
 
-		enableGemFireMockObjectsAttributes.put("destroyOnEvent", new Class[] { ContextClosedEvent.class });
+		enableGemFireMockObjectsAttributes.put("destroyOnEvents", new Class[] { ContextClosedEvent.class });
 		enableGemFireMockObjectsAttributes.put("useSingletonCache", true);
 
 		AnnotationMetadata mockAnnotationMetadata = mock(AnnotationMetadata.class);
@@ -73,5 +80,42 @@ public class GemFireMockObjectsConfigurationUnitTests {
 			.hasAnnotation(eq(EnableGemFireMockObjects.class.getName()));
 		verify(mockAnnotationMetadata, times(1))
 			.getAnnotationAttributes(eq(EnableGemFireMockObjects.class.getName()));
+	}
+
+	@Test
+	public void configuresGemFireMockObjectsBeanPostProcessor() throws NoSuchFieldException {
+
+		GemFireMockObjectsConfiguration configuration = spy(new GemFireMockObjectsConfiguration());
+
+		doReturn(true).when(configuration).isUseSingletonCacheConfigured();
+
+		GemFireMockObjectsBeanPostProcessor beanPostProcessor =
+			(GemFireMockObjectsBeanPostProcessor) configuration.gemfireMockObjectsBeanPostProcessor();
+
+		assertThat(beanPostProcessor).isNotNull();
+		assertThat(ReflectionUtils.<Boolean>getFieldValue(beanPostProcessor, "useSingletonCache")).isTrue();
+
+		verify(configuration, times(1)).isUseSingletonCacheConfigured();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void configuresDestroyGemFireMockObjectsApplicationListener() throws NoSuchFieldException {
+
+		GemFireMockObjectsConfiguration configuration = spy(new GemFireMockObjectsConfiguration());
+
+		Class<? extends ApplicationEvent>[] destroyEventTypes =
+			new Class[] { ContextRefreshedEvent.class, ContextClosedEvent.class };
+
+		doReturn(destroyEventTypes).when(configuration).getConfiguredDestroyEventTypes();
+
+		DestroyGemFireMockObjectsApplicationListener applicationListener =
+			(DestroyGemFireMockObjectsApplicationListener) configuration.destroyGemFireMockObjectsApplicationListener();
+
+		assertThat(applicationListener).isNotNull();
+		assertThat(ReflectionUtils.<Set<Class<? extends ApplicationEvent>>>getFieldValue(applicationListener, "configuredDestroyEventTypes"))
+			.containsExactlyInAnyOrder(destroyEventTypes);
+
+		verify(configuration, times(1)).getConfiguredDestroyEventTypes();
 	}
 }

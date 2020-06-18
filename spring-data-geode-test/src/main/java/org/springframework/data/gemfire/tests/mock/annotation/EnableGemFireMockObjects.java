@@ -58,7 +58,7 @@ public @interface EnableGemFireMockObjects {
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Class
 	 */
-	Class<? extends ApplicationEvent>[] destroyOnEvent() default { AfterTestClassEvent.class };
+	Class<? extends ApplicationEvent>[] destroyOnEvents() default { AfterTestClassEvent.class };
 
 	/**
 	 * Configures whether the mock {@link GemFireCache} created for Unit Testing is a Singleton.
@@ -68,6 +68,6 @@ public @interface EnableGemFireMockObjects {
 	 * @return a boolean value indicating whether the mock {@link GemFireCache} created for Unit Testing
 	 * is a Singleton.
 	 */
-	boolean useSingletonCache() default false;
+	boolean useSingletonCache() default GemFireMockObjectsConfiguration.DEFAULT_USE_SINGLETON_CACHE;
 
 }
