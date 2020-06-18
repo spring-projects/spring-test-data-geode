@@ -31,8 +31,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
- * Spring {@link Configuration} class used to register beans that collect garbage irresponsibly left behind by
- * Apache Geode when its processes shutdown, even in a test context.
+ * Spring {@link Configuration} class used to register beans that collect garbage and other resources irresponsibly
+ * left behind by Apache Geode when its processes shutdown, even in a test context.
  *
  * @author John Blum
  * @see java.lang.annotation.Annotation
@@ -43,7 +43,7 @@ import org.springframework.test.context.event.AfterTestClassEvent;
  * @see org.springframework.context.annotation.ImportAware
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport
- * @see GemFireGarbageCollectorApplicationListener
+ * @see org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener
  * @since 0.0.17
  */
 @Configuration
@@ -57,11 +57,6 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 	@SuppressWarnings("unchecked")
 	private Class<? extends ApplicationEvent>[] gemfireGarbageCollectorEventTypes =
 		new Class[] { AfterTestClassEvent.class };
-
-	@Override
-	protected Class<? extends Annotation> getAnnotationType() {
-		return EnableGemFireGarbageCollector.class;
-	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -78,6 +73,11 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 				this.tryCleanDiskStoreFiles =
 					enableGemFireGarbageCollectorAttributes.getBoolean("tryCleanDiskStoreFiles");
 			});
+	}
+
+	@Override
+	protected Class<? extends Annotation> getAnnotationType() {
+		return EnableGemFireGarbageCollector.class;
 	}
 
 	@SuppressWarnings("unchecked")

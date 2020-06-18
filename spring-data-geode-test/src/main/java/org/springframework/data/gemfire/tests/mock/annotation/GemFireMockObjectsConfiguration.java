@@ -82,7 +82,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 		return EnableGemFireMockObjects.class;
 	}
 
-	protected Class<? extends ApplicationEvent>[] getConfiguredDestroyEventTypes() {
+	protected @NonNull Class<? extends ApplicationEvent>[] getConfiguredDestroyEventTypes() {
 		return this.destroyEventTypes;
 	}
 
