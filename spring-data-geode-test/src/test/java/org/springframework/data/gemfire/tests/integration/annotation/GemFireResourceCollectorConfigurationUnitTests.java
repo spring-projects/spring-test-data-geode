@@ -29,7 +29,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener;
+import org.springframework.data.gemfire.tests.integration.context.event.GemFireResourceCollectorApplicationListener;
 import org.springframework.data.gemfire.tests.support.MapBuilder;
 import org.springframework.data.gemfire.tests.util.ReflectionUtils;
 import org.springframework.test.context.event.AfterTestClassEvent;
@@ -37,15 +37,15 @@ import org.springframework.test.context.event.AfterTestExecutionEvent;
 import org.springframework.test.context.event.AfterTestMethodEvent;
 
 /**
- * Unit Tests for {@link GemFireGarbageCollectorConfiguration}.
+ * Unit Tests for {@link GemFireResourceCollectorConfiguration}.
  *
  * @author John Blum
  * @see org.junit.Test
  * @see org.mockito.Mockito
- * @see org.springframework.data.gemfire.tests.integration.annotation.GemFireGarbageCollectorConfiguration
+ * @see GemFireResourceCollectorConfiguration
  * @since 0.0.17
  */
-public class GemFireGarbageCollectorConfigurationUnitTests {
+public class GemFireResourceCollectorConfigurationUnitTests {
 
 	@Test
 	public void setImportMetadataParsesConfiguration() {
@@ -58,40 +58,40 @@ public class GemFireGarbageCollectorConfigurationUnitTests {
 		AnnotationMetadata mockAnnotationMetadata = mock(AnnotationMetadata.class);
 
 		doReturn(true).when(mockAnnotationMetadata)
-			.hasAnnotation(EnableGemFireGarbageCollector.class.getName());
+			.hasAnnotation(EnableGemFireResourceCollector.class.getName());
 		doReturn(annotationAttributes).when(mockAnnotationMetadata)
-			.getAnnotationAttributes(EnableGemFireGarbageCollector.class.getName());
+			.getAnnotationAttributes(EnableGemFireResourceCollector.class.getName());
 
-		GemFireGarbageCollectorConfiguration configuration = new GemFireGarbageCollectorConfiguration();
+		GemFireResourceCollectorConfiguration configuration = new GemFireResourceCollectorConfiguration();
 
-		assertThat(configuration.getGemFireGarbageCollectorEventTypes()).containsExactly(AfterTestClassEvent.class);
+		assertThat(configuration.getConfiguredCollectorEventTypes()).containsExactly(AfterTestClassEvent.class);
 		assertThat(configuration.isTryCleanDiskStoreFiles()).isFalse();
 
 		configuration.setImportMetadata(mockAnnotationMetadata);
 
-		assertThat(configuration.getGemFireGarbageCollectorEventTypes())
+		assertThat(configuration.getConfiguredCollectorEventTypes())
 			.containsExactly(AfterTestMethodEvent.class, AfterTestExecutionEvent.class);
 		assertThat(configuration.isTryCleanDiskStoreFiles()).isTrue();
 
 		verify(mockAnnotationMetadata, times(1))
-			.hasAnnotation(eq(EnableGemFireGarbageCollector.class.getName()));
+			.hasAnnotation(eq(EnableGemFireResourceCollector.class.getName()));
 		verify(mockAnnotationMetadata, times(1))
-			.getAnnotationAttributes(eq(EnableGemFireGarbageCollector.class.getName()));
+			.getAnnotationAttributes(eq(EnableGemFireResourceCollector.class.getName()));
 	}
 
 	@Test
-	public void createsGemFireGarbageCollectorApplicationListenerWithDefaultConfiguration()
+	public void createsGemFireResourceCollectorApplicationListenerWithDefaultConfiguration()
 			throws NoSuchFieldException {
 
-		GemFireGarbageCollectorConfiguration configuration = new GemFireGarbageCollectorConfiguration();
+		GemFireResourceCollectorConfiguration configuration = new GemFireResourceCollectorConfiguration();
 
-		assertThat(configuration.getGemFireGarbageCollectorEventTypes()).containsExactly(AfterTestClassEvent.class);
+		assertThat(configuration.getConfiguredCollectorEventTypes()).containsExactly(AfterTestClassEvent.class);
 		assertThat(configuration.isTryCleanDiskStoreFiles()).isFalse();
 
-		GemFireGarbageCollectorApplicationListener listener =
-			(GemFireGarbageCollectorApplicationListener) configuration.gemfireGarbageCollectorApplicationListener();
+		GemFireResourceCollectorApplicationListener listener =
+			(GemFireResourceCollectorApplicationListener) configuration.gemfireResourceCollectorApplicationListener();
 
-		assertThat(ReflectionUtils.<Set<Class<?>>>getFieldValue(listener, "gemfireGarbageCollectorEventTypes"))
+		assertThat(ReflectionUtils.<Set<Class<?>>>getFieldValue(listener, "gemfireResourceCollectorEventTypes"))
 			.containsExactly(AfterTestClassEvent.class);
 
 		assertThat(ReflectionUtils.<Boolean>getFieldValue(listener, "tryCleanDiskStoreFilesEnabled"))
@@ -99,23 +99,23 @@ public class GemFireGarbageCollectorConfigurationUnitTests {
 	}
 
 	@Test
-	public void createsGemFireGarbageCollectorApplicationListenerWithCustomConfiguration()
+	public void createsGemFireResourceCollectorApplicationListenerWithCustomConfiguration()
 			throws NoSuchFieldException {
 
-		GemFireGarbageCollectorConfiguration configuration = spy(new GemFireGarbageCollectorConfiguration());
+		GemFireResourceCollectorConfiguration configuration = spy(new GemFireResourceCollectorConfiguration());
 
 		doReturn(new Class<?>[] { AfterTestMethodEvent.class, AfterTestExecutionEvent.class })
-			.when(configuration).getGemFireGarbageCollectorEventTypes();
+			.when(configuration).getConfiguredCollectorEventTypes();
 		doReturn(true).when(configuration).isTryCleanDiskStoreFiles();
 
-		assertThat(configuration.getGemFireGarbageCollectorEventTypes())
+		assertThat(configuration.getConfiguredCollectorEventTypes())
 			.containsExactly(AfterTestMethodEvent.class, AfterTestExecutionEvent.class);
 		assertThat(configuration.isTryCleanDiskStoreFiles()).isTrue();
 
-		GemFireGarbageCollectorApplicationListener listener =
-			(GemFireGarbageCollectorApplicationListener) configuration.gemfireGarbageCollectorApplicationListener();
+		GemFireResourceCollectorApplicationListener listener =
+			(GemFireResourceCollectorApplicationListener) configuration.gemfireResourceCollectorApplicationListener();
 
-		assertThat(ReflectionUtils.<Set<Class<?>>>getFieldValue(listener, "gemfireGarbageCollectorEventTypes"))
+		assertThat(ReflectionUtils.<Set<Class<?>>>getFieldValue(listener, "gemfireResourceCollectorEventTypes"))
 			.containsExactlyInAnyOrder(AfterTestMethodEvent.class, AfterTestExecutionEvent.class);
 
 		assertThat(ReflectionUtils.<Boolean>getFieldValue(listener, "tryCleanDiskStoreFilesEnabled"))

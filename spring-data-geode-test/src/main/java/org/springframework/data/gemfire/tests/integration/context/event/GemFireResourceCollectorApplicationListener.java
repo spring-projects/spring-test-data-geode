@@ -34,7 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.gemfire.tests.integration.annotation.GemFireGarbageCollectorConfiguration;
+import org.springframework.data.gemfire.tests.integration.annotation.GemFireResourceCollectorConfiguration;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
@@ -47,111 +47,114 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Spring {@link ApplicationListener} implementation used to listen for and trigger the GemFire/Geode garbage collection
- * process.
+ * Spring {@link ApplicationListener} implementation used to listen for and trigger the GemFire/Geode
+ * resource collection algorithm.
  *
  * @author John Blum
  * @see java.io.File
  * @see java.io.FileFilter
+ * @see java.util.function.Predicate
  * @see org.apache.geode.cache.DiskStore
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationListener
- * @see org.springframework.data.gemfire.tests.integration.annotation.GemFireGarbageCollectorConfiguration
+ * @see org.springframework.data.gemfire.tests.integration.annotation.GemFireResourceCollectorConfiguration
  * @see org.springframework.test.context.event.AfterTestClassEvent
  * @since 0.0.17
  */
-public class GemFireGarbageCollectorApplicationListener
+public class GemFireResourceCollectorApplicationListener
 		implements ApplicationContextAware, ApplicationListener<ApplicationEvent> {
 
 	protected static final File DEFAULT_SEARCH_DIRECTORY = FileSystemUtils.WORKING_DIRECTORY;
 
 	/**
-	 * Factory method used to construct a new instance of {@link GemFireGarbageCollectorApplicationListener}
-	 * initialized with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode garbage collection process.
+	 * Factory method used to construct a new instance of {@link GemFireResourceCollectorApplicationListener}
+	 * initialized with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode
+	 * resource collection algorithm.
 	 *
 	 * By default, the search will begin in the application working directory.
 	 *
-	 * @param gemfireGarbageCollectorEventTypes array of {@link ApplicationEvent} objects triggering the GemFire/Geode
-	 * garbage collection process.
-	 * @return a new instance of {@link GemFireGarbageCollectorApplicationListener}.
-	 * @see #GemFireGarbageCollectorApplicationListener(File, Iterable)
+	 * @param gemfireResourceCollectorEventTypes array of {@link ApplicationEvent} objects triggering the GemFire/Geode
+	 * resource collection algorithm.
+	 * @return a new instance of {@link GemFireResourceCollectorApplicationListener}.
+	 * @see #GemFireResourceCollectorApplicationListener(File, Iterable)
 	 * @see org.springframework.context.ApplicationEvent
 	 */
 	@SuppressWarnings("unchecked")
-	public static GemFireGarbageCollectorApplicationListener create(
-			@Nullable Class<? extends ApplicationEvent>... gemfireGarbageCollectorEventTypes) {
+	public static GemFireResourceCollectorApplicationListener create(
+			@Nullable Class<? extends ApplicationEvent>... gemfireResourceCollectorEventTypes) {
 
 		return create(DEFAULT_SEARCH_DIRECTORY,
-			Arrays.asList(ArrayUtils.nullSafeArray(gemfireGarbageCollectorEventTypes, Class.class)));
+			Arrays.asList(ArrayUtils.nullSafeArray(gemfireResourceCollectorEventTypes, Class.class)));
 	}
 
 	/**
-	 * Factory method used to construct a new instance of {@link GemFireGarbageCollectorApplicationListener}
+	 * Factory method used to construct a new instance of {@link GemFireResourceCollectorApplicationListener}
 	 * initialized with the {@link File filesystem directory location} used to begin the search and collection of
-	 * GemFire/Geode garbage along with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode garbage
-	 * collection process.
+	 * GemFire/Geode resources along with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode
+	 * resource collection algorithm.
 	 *
 	 * @param searchDirectory {@link File} referring to the filesystem directory location to begin the search;
 	 * defaults to the application working directory if {@link File} is {@literal null}.
-	 * @param gemfireGarbageCollectorEventTypes array of {@link ApplicationEvent} objects triggering the GemFire/Geode
-	 * garbage collection process.
-	 * @return a new instance of {@link GemFireGarbageCollectorApplicationListener}.
-	 * @see #GemFireGarbageCollectorApplicationListener(File, Iterable)
+	 * @param gemfireResourceCollectorEventTypes array of {@link ApplicationEvent} objects triggering the GemFire/Geode
+	 * resource collection algorithm.
+	 * @return a new instance of {@link GemFireResourceCollectorApplicationListener}.
+	 * @see #GemFireResourceCollectorApplicationListener(File, Iterable)
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Iterable
 	 * @see java.io.File
 	 */
 	@SuppressWarnings("unchecked")
-	public static GemFireGarbageCollectorApplicationListener create(@Nullable File searchDirectory,
-			@Nullable Class<? extends ApplicationEvent>... gemfireGarbageCollectorEventTypes) {
+	public static GemFireResourceCollectorApplicationListener create(@Nullable File searchDirectory,
+			@Nullable Class<? extends ApplicationEvent>... gemfireResourceCollectorEventTypes) {
 
-		return create(searchDirectory, Arrays.asList(ArrayUtils.nullSafeArray(gemfireGarbageCollectorEventTypes, Class.class)));
+		return create(searchDirectory, Arrays.asList(ArrayUtils.nullSafeArray(gemfireResourceCollectorEventTypes, Class.class)));
 	}
 
 	/**
-	 * Factory method used to construct a new instance of {@link GemFireGarbageCollectorApplicationListener}
-	 * initialized with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode garbage collection process.
+	 * Factory method used to construct a new instance of {@link GemFireResourceCollectorApplicationListener}
+	 * initialized with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode
+	 * resource collection algorithm.
 	 *
 	 * By default, the search will begin in the application working directory.
 	 *
-	 * @param gemfireGarbageCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects triggering
-	 * the GemFire/Geode garbage collection process.
-	 * @return a new instance of {@link GemFireGarbageCollectorApplicationListener}.
-	 * @see #GemFireGarbageCollectorApplicationListener(File, Iterable)
+	 * @param gemfireResourceCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects triggering
+	 * the GemFire/Geode resource collection algorithm.
+	 * @return a new instance of {@link GemFireResourceCollectorApplicationListener}.
+	 * @see #GemFireResourceCollectorApplicationListener(File, Iterable)
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Iterable
 	 */
-	public static GemFireGarbageCollectorApplicationListener create(
-			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireGarbageCollectorEventTypes) {
+	public static GemFireResourceCollectorApplicationListener create(
+			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes) {
 
-		return new GemFireGarbageCollectorApplicationListener(gemfireGarbageCollectorEventTypes);
+		return new GemFireResourceCollectorApplicationListener(gemfireResourceCollectorEventTypes);
 	}
 
 	/**
-	 * Factory method used to construct a new instance of {@link GemFireGarbageCollectorApplicationListener}
+	 * Factory method used to construct a new instance of {@link GemFireResourceCollectorApplicationListener}
 	 * initialized with the {@link File filesystem directory location} used to begin the search and collection of
-	 * GemFire/Geode garbage along with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode garbage
-	 * collection process.
+	 * GemFire/Geode resources along with the {@link ApplicationEvent} objects that trigger the Gemfire/Geode
+	 * resource collection algorithm.
 	 *
 	 * @param searchDirectory {@link File} referring to the filesystem directory location to begin the search;
 	 * defaults to the application working directory if {@link File} is {@literal null}.
-	 * @param gemfireGarbageCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects triggering
-	 * the GemFire/Geode garbage collection process.
-	 * @return a new instance of {@link GemFireGarbageCollectorApplicationListener}.
-	 * @see #GemFireGarbageCollectorApplicationListener(File, Iterable)
+	 * @param gemfireResourceCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects triggering
+	 * the GemFire/Geode resource collection algorithm.
+	 * @return a new instance of {@link GemFireResourceCollectorApplicationListener}.
+	 * @see #GemFireResourceCollectorApplicationListener(File, Iterable)
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Iterable
 	 * @see java.io.File
 	 */
-	public static GemFireGarbageCollectorApplicationListener create(File searchDirectory,
-			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireGarbageCollectorEventTypes) {
+	public static GemFireResourceCollectorApplicationListener create(File searchDirectory,
+			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes) {
 
-		return new GemFireGarbageCollectorApplicationListener(searchDirectory, gemfireGarbageCollectorEventTypes);
+		return new GemFireResourceCollectorApplicationListener(searchDirectory, gemfireResourceCollectorEventTypes);
 	}
 
-	private boolean tryCleanDiskStoreFilesEnabled = GemFireGarbageCollectorConfiguration.DEFAULT_CLEAN_DISK_STORE_FILES;
+	private boolean tryCleanDiskStoreFilesEnabled = GemFireResourceCollectorConfiguration.DEFAULT_CLEAN_DISK_STORE_FILES;
 
 	private ApplicationContext applicationContext;
 
@@ -159,51 +162,53 @@ public class GemFireGarbageCollectorApplicationListener
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final Set<Class<? extends ApplicationEvent>> gemfireGarbageCollectorEventTypes;
+	private final Set<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes;
 
 	/**
-	 * Constructs a new instance of {@link GemFireGarbageCollectorApplicationListener} initialized with
-	 * an {@link Iterable} of {@link ApplicationEvent} objects that trigger a GemFire/Geode garbage collection.
+	 * Constructs a new instance of {@link GemFireResourceCollectorApplicationListener} initialized with
+	 * an {@link Iterable} of {@link ApplicationEvent} objects triggering the GemFire/Geode
+	 * resource collection algorithm.
 	 *
 	 * The search will begin in the application working directory.
 	 *
-	 * @param gemfireGarbageCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects that trigger
-	 * GemFire/Geode garbage collection.
+	 * @param gemfireResourceCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects that trigger
+	 * GemFire/Geode resource collection.
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Iterable
 	 */
-	public GemFireGarbageCollectorApplicationListener(
-			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireGarbageCollectorEventTypes) {
+	public GemFireResourceCollectorApplicationListener(
+			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes) {
 
-		this(FileSystemUtils.WORKING_DIRECTORY, gemfireGarbageCollectorEventTypes);
+		this(FileSystemUtils.WORKING_DIRECTORY, gemfireResourceCollectorEventTypes);
 	}
 
 	/**
-	 * Constructs a new instance of {@link GemFireGarbageCollectorApplicationListener} initialized with
-	 * a {@link File} referring to the directory to begin the search for GemFire/Geode garbage along with
-	 * an {@link Iterable} of {@link ApplicationEvent} objects that trigger a GemFire/Geode garbage collection.
+	 * Constructs a new instance of {@link GemFireResourceCollectorApplicationListener} initialized with
+	 * a {@link File} referring to the directory to begin the search for GemFire/Geode resources along with
+	 * an {@link Iterable} of {@link ApplicationEvent} objects triggering the GemFire/Geode resource collection
+	 * algorithm.
 	 *
-	 * @param searchDirectory {@link File} referring to the directory begin collecting GemFire/Geode garbage.
-	 * @param gemfireGarbageCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects that trigger
-	 * GemFire/Geode garbage collection.
+	 * @param searchDirectory {@link File} referring to the directory begin collecting GemFire/Geode resources.
+	 * @param gemfireResourceCollectorEventTypes {@link Iterable} of {@link ApplicationEvent} objects that trigger
+	 * GemFire/Geode resource collection.
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Iterable
 	 */
-	public GemFireGarbageCollectorApplicationListener(@Nullable File searchDirectory,
-			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireGarbageCollectorEventTypes) {
+	public GemFireResourceCollectorApplicationListener(@Nullable File searchDirectory,
+			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes) {
 
 		this.searchDirectory = searchDirectory != null ? searchDirectory : DEFAULT_SEARCH_DIRECTORY;
 
-		Set<Class<? extends ApplicationEvent>> resolvedGemFireGarbageCollectorEventTypes =
-			StreamSupport.stream(CollectionUtils.nullSafeIterable(gemfireGarbageCollectorEventTypes).spliterator(), false)
+		Set<Class<? extends ApplicationEvent>> resolvedGemFireResourceCollectorEventTypes =
+			StreamSupport.stream(CollectionUtils.nullSafeIterable(gemfireResourceCollectorEventTypes).spliterator(), false)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 
-		resolvedGemFireGarbageCollectorEventTypes = !resolvedGemFireGarbageCollectorEventTypes.isEmpty()
-			? resolvedGemFireGarbageCollectorEventTypes
+		resolvedGemFireResourceCollectorEventTypes = !resolvedGemFireResourceCollectorEventTypes.isEmpty()
+			? resolvedGemFireResourceCollectorEventTypes
 			: Collections.singleton(AfterTestClassEvent.class);
 
-		this.gemfireGarbageCollectorEventTypes = Collections.unmodifiableSet(resolvedGemFireGarbageCollectorEventTypes);
+		this.gemfireResourceCollectorEventTypes = Collections.unmodifiableSet(resolvedGemFireResourceCollectorEventTypes);
 	}
 
 	/**
@@ -232,33 +237,33 @@ public class GemFireGarbageCollectorApplicationListener
 
 	/**
 	 * Returns a configured {@link Set} of {@link ApplicationEvent} {@link Class types} that trigger the GemFire/Geode
-	 * garbage collection process.
+	 * resource collection algorithm.
 	 *
 	 * @return a configured {@link Set} of {@link ApplicationEvent} {@link Class types} that trigger the GemFire/Geode
-	 * garbage collection process.
+	 * resource collection algorithm.
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.util.Set
 	 */
-	protected @NonNull Set<Class<? extends ApplicationEvent>> getConfiguredGemFireGarbageCollectorEventTypes() {
-		return this.gemfireGarbageCollectorEventTypes;
+	protected @NonNull Set<Class<? extends ApplicationEvent>> getConfiguredGemFireResourceCollectorEventTypes() {
+		return this.gemfireResourceCollectorEventTypes;
 	}
 
 	/**
 	 * Determines whether the given {@link ApplicationEvent} is a configured event for triggering the GemFire/Geode
-	 * garbage collection process.
+	 * resource collection algorithm.
 	 *
 	 * @param event {@link ApplicationEvent} to evaluate.
 	 * @return a boolean value determining whether the given {@link ApplicationEvent} is a configured event
-	 * for triggering the GemFire/Geode garbage collection process.
+	 * for triggering the GemFire/Geode resource collection algorithm.
 	 * @see org.springframework.context.ApplicationEvent
-	 * @see #getConfiguredGemFireGarbageCollectorEventTypes()
+	 * @see #getConfiguredGemFireResourceCollectorEventTypes()
 	 */
-	protected boolean isGemFireGarbageCollectorEvent(@Nullable ApplicationEvent event) {
+	protected boolean isGemFireResourceCollectorEvent(@Nullable ApplicationEvent event) {
 
-		for (Class<? extends ApplicationEvent> gemfireGarbageCollectorEventType
-			: getConfiguredGemFireGarbageCollectorEventTypes()) {
+		for (Class<? extends ApplicationEvent> gemfireResourceCollectorEventType
+			: getConfiguredGemFireResourceCollectorEventTypes()) {
 
-			if (gemfireGarbageCollectorEventType.isInstance(event)) {
+			if (gemfireResourceCollectorEventType.isInstance(event)) {
 				return true;
 			}
 		}
@@ -268,7 +273,7 @@ public class GemFireGarbageCollectorApplicationListener
 
 	/**
 	 * Returns the configured SLF4J {@link Logger} to log events and messages originating from this
-	 * {@link ApplicationListener} during the GemFire/Geode garbage collection process.
+	 * {@link ApplicationListener} during the GemFire/Geode resource collection algorithm.
 	 *
 	 * @return the configured SLF4 {@link Logger}.
 	 * @see org.slf4j.Logger
@@ -279,10 +284,10 @@ public class GemFireGarbageCollectorApplicationListener
 
 	/**
 	 * Returns the configured {@link File directory} referring to the filesystem location to begin the search for
-	 * GemFire/Geode garbage.
+	 * GemFire/Geode resources and other garbage.
 	 *
 	 * @return the configured {@link File directory} referring to the filesystem location to begin the search for
-	 * GemFire/Geode garbage.
+	 * GemFire/Geode resources and other garbage.
 	 * @see java.io.File
 	 */
 	protected @NonNull File getSearchDirectory() {
@@ -290,12 +295,12 @@ public class GemFireGarbageCollectorApplicationListener
 	}
 
 	/**
-	 * Determines whether this {@link ApplicationListener GemFire/Geode Garbage Collector} should try to cleanup all
+	 * Determines whether this {@link ApplicationListener GemFire/Geode Resource Collector} should try to cleanup all
 	 * {@link DiskStore} {@link File Files} as well.
 	 *
 	 * {@link DiskStore} {@link File Files} are maintained in {@link DiskStore#getDiskDirs()}.
 	 *
-	 * @return a boolean value indicating whether this {@link ApplicationListener GemFire/Geode Garbage Collector}
+	 * @return a boolean value indicating whether this {@link ApplicationListener GemFire/Geode Resource Collector}
 	 * should try to cleanup all {@link DiskStore} {@link File Files}.
 	 */
 	protected boolean isTryCleanDiskStoreFilesEnabled() {
@@ -304,18 +309,18 @@ public class GemFireGarbageCollectorApplicationListener
 
 	/**
 	 * Handles a Spring Container {@link ApplicationEvent} by determining whether the event is a configured event
-	 * for triggering the GemFire/Geode garbage collection.
+	 * for triggering the GemFire/Geode resource collection.
 	 *
 	 * @param event {@link ApplicationEvent} to evaluate.
-	 * @see #isGemFireGarbageCollectorEvent(ApplicationEvent)
-	 * @see #collectGemFireGarbage(File)
+	 * @see #isGemFireResourceCollectorEvent(ApplicationEvent)
+	 * @see #collectGemFireResources(File)
 	 * @see org.springframework.context.ApplicationEvent
 	 */
 	@Override
 	public void onApplicationEvent(@NonNull ApplicationEvent event) {
 
-		if (isGemFireGarbageCollectorEvent(event)) {
-			collectGemFireGarbage(getSearchDirectory());
+		if (isGemFireResourceCollectorEvent(event)) {
+			collectGemFireResources(getSearchDirectory());
 		}
 
 		if (isTryCleanDiskStoreFilesEnabled())
@@ -324,19 +329,19 @@ public class GemFireGarbageCollectorApplicationListener
 
 	/**
 	 * A {@link File} referring to the filesystem directory location to begin the search for and collection of
-	 * GemFire/Geode garbage.
+	 * GemFire/Geode resources and other garbage.
 	 *
 	 * @param directory {@link File} referring to the filesystem directory location to begin the search
-	 * and collection process; must not be {@literal null}.
+	 * and resource collection process; must not be {@literal null}.
 	 * @throws IllegalArgumentException if {@link File} is {@literal null} or not a directory.
 	 * @see java.io.File
 	 */
-	protected void collectGemFireGarbage(@NonNull File directory) {
+	protected void collectGemFireResources(@NonNull File directory) {
 
 		Assert.isTrue(FileSystemUtils.isDirectory(directory),
 			() -> String.format("File [%s] must be a directory", directory));
 
-		for (File file : FileSystemUtils.safeListFiles(directory, GemFireGarbageFileFilter.INSTANCE)) {
+		for (File file : FileSystemUtils.safeListFiles(directory, GemFireResourceFileFilter.INSTANCE)) {
 			if (FileSystemUtils.isDirectory(file)) {
 				FileSystemUtils.deleteRecursive(file);
 			}
@@ -377,19 +382,19 @@ public class GemFireGarbageCollectorApplicationListener
 	 * Configures whether to try and cleanup all {@link File Files} generated from managed {@link DiskStore DiskStores}.
 	 *
 	 * @param enable boolean value dis/enabling {@link DiskStore} {@link File} cleanup.
-	 * @return this {@link GemFireGarbageCollectorApplicationListener}.
+	 * @return this {@link GemFireResourceCollectorApplicationListener}.
 	 */
-	public GemFireGarbageCollectorApplicationListener tryCleanDiskStoreFiles(boolean enable) {
+	public GemFireResourceCollectorApplicationListener tryCleanDiskStoreFiles(boolean enable) {
 		this.tryCleanDiskStoreFilesEnabled = enable;
 		return this;
 	}
 
 	/**
-	 * {@link FileFilter} implementation matching {@link File directories} or GemFire/Geode garbage.
+	 * {@link FileFilter} implementation matching {@link File directories} or GemFire/Geode resources (e.g. files).
 	 */
-	protected static class GemFireGarbageFileFilter implements FileFilter {
+	protected static class GemFireResourceFileFilter implements FileFilter {
 
-		protected static final GemFireGarbageFileFilter INSTANCE = new GemFireGarbageFileFilter();
+		protected static final GemFireResourceFileFilter INSTANCE = new GemFireResourceFileFilter();
 
 		protected static final FileFilter DIRECTORY_FILE_FILTER = FileSystemUtils.DirectoryOnlyFilter.INSTANCE;
 
@@ -439,10 +444,10 @@ public class GemFireGarbageCollectorApplicationListener
 
 		@Override
 		public boolean accept(File pathname) {
-			return getDirectoryFileFilter().accept(pathname) || isGemFireGarbage(pathname);
+			return getDirectoryFileFilter().accept(pathname) || isGemFireResource(pathname);
 		}
 
-		protected boolean isGemFireGarbage(@Nullable File file) {
+		protected boolean isGemFireResource(@Nullable File file) {
 			return Objects.nonNull(file) && isFileExtensionOrFileNameMatch(file);
 		}
 

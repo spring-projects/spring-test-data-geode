@@ -32,14 +32,14 @@ import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener.GemFireGarbageFileFilter;
+import org.springframework.data.gemfire.tests.integration.context.event.GemFireResourceCollectorApplicationListener.GemFireResourceFileFilter;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.event.AfterTestClassEvent;
 import org.springframework.test.context.event.AfterTestExecutionEvent;
 import org.springframework.test.context.event.AfterTestMethodEvent;
 
 /**
- * Unit Tests for {@link GemFireGarbageCollectorApplicationListener}.
+ * Unit Tests for {@link GemFireResourceCollectorApplicationListener}.
  *
  * @author John Blum
  * @see java.io.File
@@ -47,11 +47,11 @@ import org.springframework.test.context.event.AfterTestMethodEvent;
  * @see org.mockito.Mockito
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ApplicationEvent
- * @see org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener
+ * @see GemFireResourceCollectorApplicationListener
  * @since 0.0.17
  */
 @SuppressWarnings("unchecked")
-public class GemFireGarbageCollectorApplicationListenerUnitTests {
+public class GemFireResourceCollectorApplicationListenerUnitTests {
 
 	private static File mockDirectory(String pathname) {
 
@@ -76,42 +76,42 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void constructNewGemFireGarbageCollectorApplicationListener() {
+	public void constructNewGemFireResourceCollectorApplicationListener() {
 
 		File searchDirectory = new File("/path/to/gemfire/junk");
 
 		Iterable<Class<? extends ApplicationEvent>> eventTypes = Collections.singleton(AfterTestMethodEvent.class);
 
-		GemFireGarbageCollectorApplicationListener listener =
-			new GemFireGarbageCollectorApplicationListener(searchDirectory, eventTypes);
+		GemFireResourceCollectorApplicationListener listener =
+			new GemFireResourceCollectorApplicationListener(searchDirectory, eventTypes);
 
 		assertThat(listener).isNotNull();
 		assertThat(listener.getApplicationContext().orElse(null)).isNull();
-		assertThat(listener.getConfiguredGemFireGarbageCollectorEventTypes())
+		assertThat(listener.getConfiguredGemFireResourceCollectorEventTypes())
 			.containsExactly(AfterTestMethodEvent.class);
 		assertThat(listener.getLogger()).isNotNull();
-		assertThat(listener.getLogger().getName()).isEqualTo(GemFireGarbageCollectorApplicationListener.class.getName());
+		assertThat(listener.getLogger().getName()).isEqualTo(GemFireResourceCollectorApplicationListener.class.getName());
 		assertThat(listener.isTryCleanDiskStoreFilesEnabled()).isFalse();
 		assertThat(listener.getSearchDirectory()).isEqualTo(searchDirectory);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void createNewGemFireGarbageCollectorApplicationListener() {
+	public void createNewGemFireResourceCollectorApplicationListener() {
 
-		GemFireGarbageCollectorApplicationListener listener =
-			GemFireGarbageCollectorApplicationListener.create(AfterTestExecutionEvent.class)
+		GemFireResourceCollectorApplicationListener listener =
+			GemFireResourceCollectorApplicationListener.create(AfterTestExecutionEvent.class)
 				.tryCleanDiskStoreFiles(true);
 
 		assertThat(listener).isNotNull();
 		assertThat(listener.getApplicationContext().orElse(null)).isNull();
-		assertThat(listener.getConfiguredGemFireGarbageCollectorEventTypes())
+		assertThat(listener.getConfiguredGemFireResourceCollectorEventTypes())
 			.containsExactly(AfterTestExecutionEvent.class);
 		assertThat(listener.getLogger()).isNotNull();
-		assertThat(listener.getLogger().getName()).isEqualTo(GemFireGarbageCollectorApplicationListener.class.getName());
+		assertThat(listener.getLogger().getName()).isEqualTo(GemFireResourceCollectorApplicationListener.class.getName());
 		assertThat(listener.isTryCleanDiskStoreFilesEnabled()).isTrue();
 		assertThat(listener.getSearchDirectory())
-			.isEqualTo(GemFireGarbageCollectorApplicationListener.DEFAULT_SEARCH_DIRECTORY);
+			.isEqualTo(GemFireResourceCollectorApplicationListener.DEFAULT_SEARCH_DIRECTORY);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 
 		ApplicationContext mockApplicationContext = mock(ApplicationContext.class);
 
-		GemFireGarbageCollectorApplicationListener listener = GemFireGarbageCollectorApplicationListener.create();
+		GemFireResourceCollectorApplicationListener listener = GemFireResourceCollectorApplicationListener.create();
 
 		assertThat(listener).isNotNull();
 		assertThat(listener.getApplicationContext().orElse(null)).isNull();
@@ -135,22 +135,22 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void onApplicationEventCallsCollectGemFireGarbageAndCollectGemFireDiskStoreFiles() {
+	public void onApplicationEventCallsCollectGemFireResourceAndCollectGemFireDiskStoreFiles() {
 
 		ApplicationEvent mockApplicationEvent = mock(ApplicationEvent.class);
 
-		GemFireGarbageCollectorApplicationListener listener = spy(GemFireGarbageCollectorApplicationListener.create());
+		GemFireResourceCollectorApplicationListener listener = spy(GemFireResourceCollectorApplicationListener.create());
 
-		doReturn(true).when(listener).isGemFireGarbageCollectorEvent(any());
+		doReturn(true).when(listener).isGemFireResourceCollectorEvent(any());
 		doReturn(true).when(listener).isTryCleanDiskStoreFilesEnabled();
 		doNothing().when(listener).collectGemFireDiskStoreFiles();
-		doNothing().when(listener).collectGemFireGarbage(any());
+		doNothing().when(listener).collectGemFireResources(any());
 
 		listener.onApplicationEvent(mockApplicationEvent);
 
-		verify(listener, times(1)).isGemFireGarbageCollectorEvent(eq(mockApplicationEvent));
+		verify(listener, times(1)).isGemFireResourceCollectorEvent(eq(mockApplicationEvent));
 		verify(listener, times(1))
-			.collectGemFireGarbage(eq(GemFireGarbageCollectorApplicationListener.DEFAULT_SEARCH_DIRECTORY));
+			.collectGemFireResources(eq(GemFireResourceCollectorApplicationListener.DEFAULT_SEARCH_DIRECTORY));
 		verify(listener, times(1)).isTryCleanDiskStoreFilesEnabled();
 		verify(listener, times(1)).collectGemFireDiskStoreFiles();
 	}
@@ -160,8 +160,8 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 
 		AfterTestClassEvent mockEvent = mock(AfterTestClassEvent.class);
 
-		assertThat(GemFireGarbageCollectorApplicationListener.create()
-			.isGemFireGarbageCollectorEvent(mockEvent)).isTrue();
+		assertThat(GemFireResourceCollectorApplicationListener.create()
+			.isGemFireResourceCollectorEvent(mockEvent)).isTrue();
 	}
 
 	@Test
@@ -169,8 +169,8 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 
 		ApplicationEvent mockEvent = mock(AfterTestMethodEventSubType.class);
 
-		assertThat(GemFireGarbageCollectorApplicationListener.create(AfterTestMethodEvent.class)
-			.isGemFireGarbageCollectorEvent(mockEvent)).isTrue();
+		assertThat(GemFireResourceCollectorApplicationListener.create(AfterTestMethodEvent.class)
+			.isGemFireResourceCollectorEvent(mockEvent)).isTrue();
 	}
 
 	@Test
@@ -178,19 +178,19 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 
 		ApplicationEvent mockEvent = mock(AfterTestClassEvent.class);
 
-		assertThat(GemFireGarbageCollectorApplicationListener.create(AfterTestMethodEvent.class)
-			.isGemFireGarbageCollectorEvent(mockEvent)).isFalse();
+		assertThat(GemFireResourceCollectorApplicationListener.create(AfterTestMethodEvent.class)
+			.isGemFireResourceCollectorEvent(mockEvent)).isFalse();
 	}
 
 	@Test
 	public void isGemFireCollectorEventWithNullIsNullSafeReturnsFalse() {
-		assertThat(GemFireGarbageCollectorApplicationListener.create().isGemFireGarbageCollectorEvent(null)).isFalse();
+		assertThat(GemFireResourceCollectorApplicationListener.create().isGemFireResourceCollectorEvent(null)).isFalse();
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterAcceptsAllDirectories() {
+	public void gemfireResourceFileFilterAcceptsAllDirectories() {
 
-		GemFireGarbageFileFilter fileFilter = GemFireGarbageFileFilter.INSTANCE;
+		GemFireResourceFileFilter fileFilter = GemFireResourceFileFilter.INSTANCE;
 
 		assertThat(fileFilter).isNotNull();
 		assertThat(fileFilter.accept(mockDirectory("GemFire"))).isTrue();
@@ -200,9 +200,9 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterAcceptsFilesWithMatchingExtension() {
+	public void gemfireResourceFileFilterAcceptsFilesWithMatchingExtension() {
 
-		GemFireGarbageFileFilter fileFilter = GemFireGarbageFileFilter.INSTANCE;
+		GemFireResourceFileFilter fileFilter = GemFireResourceFileFilter.INSTANCE;
 
 		assertThat(fileFilter).isNotNull();
 		assertThat(fileFilter.accept(mockFile("gem.dat"))).isTrue();
@@ -219,9 +219,9 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterAcceptsFilesWithMatchingName() {
+	public void gemfireResourceFileFilterAcceptsFilesWithMatchingName() {
 
-		GemFireGarbageFileFilter fileFilter = GemFireGarbageFileFilter.INSTANCE;
+		GemFireResourceFileFilter fileFilter = GemFireResourceFileFilter.INSTANCE;
 
 		assertThat(fileFilter).isNotNull();
 		assertThat(fileFilter.accept(mockFile("BACKUP123"))).isTrue();
@@ -237,9 +237,9 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterDeniesFilesWithNonMatchingExtension() {
+	public void gemfireResourceFileFilterDeniesFilesWithNonMatchingExtension() {
 
-		GemFireGarbageFileFilter fileFilter = GemFireGarbageFileFilter.INSTANCE;
+		GemFireResourceFileFilter fileFilter = GemFireResourceFileFilter.INSTANCE;
 
 		assertThat(fileFilter).isNotNull();
 		assertThat(fileFilter.accept(mockFile("gem.data"))).isFalse();
@@ -252,9 +252,9 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterDeniesFilesWithNonMatchingName() {
+	public void gemfireResourceFileFilterDeniesFilesWithNonMatchingName() {
 
-		GemFireGarbageFileFilter fileFilter = GemFireGarbageFileFilter.INSTANCE;
+		GemFireResourceFileFilter fileFilter = GemFireResourceFileFilter.INSTANCE;
 
 		assertThat(fileFilter).isNotNull();
 		assertThat(fileFilter.accept(mockFile("DAT.backup"))).isFalse();
@@ -263,10 +263,10 @@ public class GemFireGarbageCollectorApplicationListenerUnitTests {
 	}
 
 	@Test
-	public void gemfireGarbageFileFilterDeniesNullFiles() {
+	public void gemfireResourceFileFilterDeniesNullFiles() {
 
-		assertThat(GemFireGarbageFileFilter.INSTANCE).isNotNull();
-		assertThat(GemFireGarbageFileFilter.INSTANCE.accept(null)).isFalse();
+		assertThat(GemFireResourceFileFilter.INSTANCE).isNotNull();
+		assertThat(GemFireResourceFileFilter.INSTANCE.accept(null)).isFalse();
 	}
 
 	static class AfterTestMethodEventSubType extends AfterTestMethodEvent {

@@ -25,14 +25,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport;
-import org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener;
+import org.springframework.data.gemfire.tests.integration.context.event.GemFireResourceCollectorApplicationListener;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
- * Spring {@link Configuration} class used to register beans that collect garbage and other resources irresponsibly
- * left behind by Apache Geode when its processes shutdown, even in a test context.
+ * Spring {@link Configuration} class used to register beans that collect resources and other garbage irresponsibly
+ * left behind by Apache Geode when its processes shutdown, particularly in a test context in order to avoid conflicts
+ * and interference between test runs.
  *
  * @author John Blum
  * @see java.lang.annotation.Annotation
@@ -43,20 +44,19 @@ import org.springframework.test.context.event.AfterTestClassEvent;
  * @see org.springframework.context.annotation.ImportAware
  * @see org.springframework.core.type.AnnotationMetadata
  * @see org.springframework.data.gemfire.config.annotation.support.AbstractAnnotationConfigSupport
- * @see org.springframework.data.gemfire.tests.integration.context.event.GemFireGarbageCollectorApplicationListener
+ * @see org.springframework.data.gemfire.tests.integration.context.event.GemFireResourceCollectorApplicationListener
  * @since 0.0.17
  */
 @Configuration
 @SuppressWarnings("unused")
-public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConfigSupport implements ImportAware {
+public class GemFireResourceCollectorConfiguration extends AbstractAnnotationConfigSupport implements ImportAware {
 
 	public static final boolean DEFAULT_CLEAN_DISK_STORE_FILES = false;
 
 	private boolean tryCleanDiskStoreFiles = DEFAULT_CLEAN_DISK_STORE_FILES;
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationEvent>[] gemfireGarbageCollectorEventTypes =
-		new Class[] { AfterTestClassEvent.class };
+	private Class<? extends ApplicationEvent>[] collectorEventTypes = new Class[] { AfterTestClassEvent.class };
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -65,24 +65,24 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 		Optional.of(importMetadata)
 			.filter(this::isAnnotationPresent)
 			.map(this::getAnnotationAttributes)
-			.ifPresent(enableGemFireGarbageCollectorAttributes -> {
+			.ifPresent(enableGemFireResourceCollectorAttributes -> {
 
-				this.gemfireGarbageCollectorEventTypes = (Class<? extends ApplicationEvent>[])
-					enableGemFireGarbageCollectorAttributes.getClassArray("collectOnEvents");
+				this.collectorEventTypes = (Class<? extends ApplicationEvent>[])
+					enableGemFireResourceCollectorAttributes.getClassArray("collectOnEvents");
 
 				this.tryCleanDiskStoreFiles =
-					enableGemFireGarbageCollectorAttributes.getBoolean("tryCleanDiskStoreFiles");
+					enableGemFireResourceCollectorAttributes.getBoolean("tryCleanDiskStoreFiles");
 			});
 	}
 
 	@Override
 	protected Class<? extends Annotation> getAnnotationType() {
-		return EnableGemFireGarbageCollector.class;
+		return EnableGemFireResourceCollector.class;
 	}
 
 	@SuppressWarnings("unchecked")
-	protected @NonNull Class<? extends ApplicationEvent>[] getGemFireGarbageCollectorEventTypes() {
-		return ArrayUtils.nullSafeArray(this.gemfireGarbageCollectorEventTypes, Class.class);
+	protected @NonNull Class<? extends ApplicationEvent>[] getConfiguredCollectorEventTypes() {
+		return ArrayUtils.nullSafeArray(this.collectorEventTypes, Class.class);
 	}
 
 	protected boolean isTryCleanDiskStoreFiles() {
@@ -90,8 +90,8 @@ public class GemFireGarbageCollectorConfiguration extends AbstractAnnotationConf
 	}
 
 	@Bean
-	ApplicationListener<ApplicationEvent> gemfireGarbageCollectorApplicationListener() {
-		return GemFireGarbageCollectorApplicationListener.create(getGemFireGarbageCollectorEventTypes())
+	ApplicationListener<ApplicationEvent> gemfireResourceCollectorApplicationListener() {
+		return GemFireResourceCollectorApplicationListener.create(getConfiguredCollectorEventTypes())
 			.tryCleanDiskStoreFiles(isTryCleanDiskStoreFiles());
 	}
 }

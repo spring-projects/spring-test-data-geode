@@ -30,8 +30,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
- * The {@link EnableGemFireGarbageCollector} annotation enables the cleanup of resources (e.g. files) left behind
- * by Apache Geode (VMware GemFire) after the GemFire/Geode process shuts down, even in a test context.
+ * The {@link EnableGemFireResourceCollector} annotation enables the cleanup of resources (e.g. files) and other garbage
+ * left behind by Apache Geode (or VMware GemFire) after the GemFire/Geode process shuts down, especially in a test
+ * context to avoid conflicts between test runs.
  *
  * @author John Blum
  * @see java.lang.annotation.Documented
@@ -46,17 +47,17 @@ import org.springframework.test.context.event.AfterTestClassEvent;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@Import(GemFireGarbageCollectorConfiguration.class)
+@Import(GemFireResourceCollectorConfiguration.class)
 @SuppressWarnings("unused")
-public @interface EnableGemFireGarbageCollector {
+public @interface EnableGemFireResourceCollector {
 
 	/**
 	 * Determines the Spring {@link ApplicationEvent ApplicationEvents} that trigger the framework to cleanup after
 	 * Apache Geode / VMware GemFire given the junk it leaves behind after a process (e.g. CacheServer, Locator,
 	 * Manager, etc) terminates.
 	 *
-	 * @return an array of {@link ApplicationEvent ApplicationEvents} that trigger the GemFire/Geode garbage collection
-	 * algorithm.
+	 * @return an array of {@link ApplicationEvent ApplicationEvents} that trigger the GemFire/Geode resource
+	 * and garbage collection algorithm.
 	 * @see org.springframework.context.ApplicationEvent
 	 * @see java.lang.Class
 	 */
@@ -65,10 +66,10 @@ public @interface EnableGemFireGarbageCollector {
 	/**
 	 * Tries to cleanup all the {@link File Files} left behind by GemFire/Geode {@link DiskStore DiskStores}.
 	 *
-	 * @return a boolean value indicating whether the GemFire Garbage Collector should cleanup all {@link File Files}
+	 * @return a boolean value indicating whether the GemFire Resource Collector should cleanup all {@link File Files}
 	 * left behind by GemFire/Geode {@link DiskStore DiskStores}, whether for persistence or overflow;
 	 * defaults to {@literal false}.
 	 */
-	boolean tryCleanDiskStoreFiles() default GemFireGarbageCollectorConfiguration.DEFAULT_CLEAN_DISK_STORE_FILES;
+	boolean tryCleanDiskStoreFiles() default GemFireResourceCollectorConfiguration.DEFAULT_CLEAN_DISK_STORE_FILES;
 
 }
