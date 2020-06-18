@@ -36,6 +36,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
 import org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener;
 import org.springframework.data.gemfire.tests.util.ReflectionUtils;
+import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
  * Unit Tests for {@link GemFireMockObjectsConfiguration}.
@@ -55,12 +56,13 @@ public class GemFireMockObjectsConfigurationUnitTests {
 
 		GemFireMockObjectsConfiguration configuration = new GemFireMockObjectsConfiguration();
 
-		assertThat(configuration.getConfiguredDestroyEventTypes()).isEmpty();
+		assertThat(configuration.getConfiguredDestroyEventTypes()).containsExactly(AfterTestClassEvent.class);
 		assertThat(configuration.isUseSingletonCacheConfigured()).isFalse();
 
 		Map<String, Object> enableGemFireMockObjectsAttributes = new HashMap<>();
 
-		enableGemFireMockObjectsAttributes.put("destroyOnEvents", new Class[] { ContextClosedEvent.class });
+		enableGemFireMockObjectsAttributes.put("destroyOnEvents",
+			new Class[] { ContextClosedEvent.class, ContextRefreshedEvent.class });
 		enableGemFireMockObjectsAttributes.put("useSingletonCache", true);
 
 		AnnotationMetadata mockAnnotationMetadata = mock(AnnotationMetadata.class);
@@ -73,7 +75,8 @@ public class GemFireMockObjectsConfigurationUnitTests {
 
 		configuration.setImportMetadata(mockAnnotationMetadata);
 
-		assertThat(configuration.getConfiguredDestroyEventTypes()).containsExactly(ContextClosedEvent.class);
+		assertThat(configuration.getConfiguredDestroyEventTypes())
+			.containsExactly(ContextClosedEvent.class, ContextRefreshedEvent.class);
 		assertThat(configuration.isUseSingletonCacheConfigured()).isTrue();
 
 		verify(mockAnnotationMetadata, times(1))

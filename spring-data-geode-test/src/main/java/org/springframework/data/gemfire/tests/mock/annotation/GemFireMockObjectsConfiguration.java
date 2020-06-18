@@ -29,6 +29,7 @@ import org.springframework.data.gemfire.config.annotation.support.AbstractAnnota
 import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
 import org.springframework.data.gemfire.tests.mock.context.event.DestroyGemFireMockObjectsApplicationListener;
 import org.springframework.lang.NonNull;
+import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
  * The {@link GemFireMockObjectsConfiguration} class is a Spring {@link Configuration @Configuration} class
@@ -58,7 +59,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 	private boolean useSingletonCache = DEFAULT_USE_SINGLETON_CACHE;
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationEvent>[] destroyEventTypes = new Class[0];
+	private Class<? extends ApplicationEvent>[] destroyEventTypes = new Class[] { AfterTestClassEvent.class };
 
 	@Override
 	@SuppressWarnings("unchecked")
