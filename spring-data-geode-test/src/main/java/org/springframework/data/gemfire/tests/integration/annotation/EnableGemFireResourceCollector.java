@@ -31,8 +31,8 @@ import org.springframework.test.context.event.AfterTestClassEvent;
 
 /**
  * The {@link EnableGemFireResourceCollector} annotation enables the cleanup of resources (e.g. files) and other garbage
- * left behind by Apache Geode (or VMware GemFire) after the GemFire/Geode process shuts down, especially in a test
- * context to avoid conflicts between test runs.
+ * irresponsibly left behind by Apache Geode (or VMware GemFire) after the GemFire/Geode process shuts down, especially
+ * in a test context in order to avoid conflicts and interference between test runs.
  *
  * @author John Blum
  * @see java.lang.annotation.Documented
