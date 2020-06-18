@@ -83,7 +83,7 @@
 		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-<!--		<apache-geode.version>1.9.2</apache-geode.version>-->
+<!--		<apache-geode.version>1.12.0</apache-geode.version>-->
 		<assertj.version>3.16.1</assertj.version>
 		<junit.version>4.13</junit.version>
 		<log4j.version>2.12.1</log4j.version>
@@ -91,7 +91,7 @@
 		<lombok.version>1.18.12</lombok.version>
 		<mockito.version>3.3.3</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-<!--		<pivotal-gemfire.version>9.8.7</pivotal-gemfire.version>-->
+<!--		<pivotal-gemfire.version>9.10.1</pivotal-gemfire.version>-->
 		<spring.version>5.2.6.RELEASE</spring.version>
 		<spring-boot.version>2.3.0.RELEASE</spring-boot.version>
 		<spring-data-releasetrain.version>Neumann-RELEASE</spring-data-releasetrain.version>
