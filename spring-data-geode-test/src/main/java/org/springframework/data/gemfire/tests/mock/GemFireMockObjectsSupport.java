@@ -160,7 +160,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
- * Apache Geode or Pivotal GemFire Mock Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
+ * Apache Geode or VMware GemFire Mock Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
  *
  * @author John Blum
  * @see java.io.File
@@ -341,7 +341,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	/**
-	 * Instantiates all Apache Geode/Pivotal GemFire objects which have been declared
+	 * Instantiates all Apache Geode/VMware GemFire objects which have been declared
 	 * via {@link System#getProperties() System properties}.
 	 *
 	 * @param <T> {@link Class type} of the {@link GemFireCache}.
@@ -470,11 +470,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	/**
-	 * Normalizes the {@link String name} of the Apache Geode/Pivotal GemFire System property by stripping off
+	 * Normalizes the {@link String name} of the Apache Geode/VMware GemFire System property by stripping off
 	 * the {@literal gemfire.} prefix.
 	 *
 	 * @param propertyName {@link String name} of the property to normalize.
-	 * @return the {@link String normalized form} of the Apache Geode/Pivotal GemFire System property.
+	 * @return the {@link String normalized form} of the Apache Geode/VMware GemFire System property.
 	 * @see <a href="https://geode.apache.org/docs/guide/16/reference/topics/gemfire_properties.html">GemFire Properties</a>
 	 */
 	private static String normalizeGemFirePropertyName(String propertyName) {

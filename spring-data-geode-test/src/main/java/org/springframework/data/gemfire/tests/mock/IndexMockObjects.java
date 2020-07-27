@@ -27,7 +27,7 @@ import org.apache.geode.cache.query.IndexType;
 
 /**
  * The {@link IndexMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link Index} objects and related objects in the {@literal org.apache.geode.cache.query} package.
+ * or VMware GemFire {@link Index} objects and related objects in the {@literal org.apache.geode.cache.query} package.
  *
  * @author John Blum
  * @see org.apache.geode.cache.query.Index

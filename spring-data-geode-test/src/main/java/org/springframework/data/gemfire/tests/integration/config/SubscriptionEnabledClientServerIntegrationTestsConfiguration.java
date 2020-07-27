@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * The {@link SubscriptionEnabledClientServerIntegrationTestsConfiguration} class is a base Spring {@link Configuration}
- * class supporting Apache Geode or Pivotal GemFire client/server integration tests when subscriptions are enabled.
+ * class supporting Apache Geode or VMware GemFire client/server integration tests when subscriptions are enabled.
  *
  * Subscriptions must be enabled when {@literal Registering Interests} or {@literal Continuous Queries (CQ)}.
  *

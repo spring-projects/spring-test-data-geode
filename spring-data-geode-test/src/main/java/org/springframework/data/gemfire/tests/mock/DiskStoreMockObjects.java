@@ -27,7 +27,7 @@ import org.apache.geode.cache.DiskStore;
 
 /**
  * The {@link DiskStoreMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link DiskStore} objects and related objects in the {@literal org.apache.geode.cache} package.
+ * or VMware GemFire {@link DiskStore} objects and related objects in the {@literal org.apache.geode.cache} package.
  *
  * @author John Blum
  * @see org.apache.geode.cache.DiskStore

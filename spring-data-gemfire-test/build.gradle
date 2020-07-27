@@ -1,7 +1,7 @@
 apply plugin: 'io.spring.convention.spring-module'
 apply from: MAVEN_POM_EDITOR_GRADLE
 
-description = "Spring Test Framework for Pivotal GemFire"
+description = "Spring Test Framework for VMware GemFire"
 
 dependencies {
 

@@ -52,7 +52,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
- * with either Apache Geode or Pivotal GemFire in a Spring context.
+ * with either Apache Geode or VMware GemFire in a Spring context.
  *
  * @author John Blum
  * @see java.io.File
@@ -114,7 +114,7 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	// TODO: Remove once GEODE-7157 (https://issues.apache.org/jira/browse/GEODE-7157) is fixed!
-	//  Do the job of Apache Geode & Pivotal GemFire since it cannot do its own damn job!
+	//  Do the job of Apache Geode & VMware GemFire since it cannot do its own damn job!
 	@BeforeClass
 	public static void closeAnySslConfigurationBeforeTestExecution() {
 

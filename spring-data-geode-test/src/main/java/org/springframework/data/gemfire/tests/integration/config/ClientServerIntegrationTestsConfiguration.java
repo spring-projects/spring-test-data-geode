@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link ClientServerIntegrationTestsConfiguration} class is a Spring {@link Configuration} class that registers
  * a {@link ClientCacheConfigurer} used to configure the {@link ClientCache} {@literal DEFAULT} {@link Pool} port
- * to connect to the launched Apache Geode/Pivotal GemFire Server during integration testing.
+ * to connect to the launched Apache Geode/VMware GemFire Server during integration testing.
  *
  * Additionally, this class registers a {@link CacheServerConfigurer} to configure the {@link CacheServer} port.
  *

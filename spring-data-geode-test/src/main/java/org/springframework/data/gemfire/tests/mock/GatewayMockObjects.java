@@ -30,7 +30,7 @@ import org.apache.geode.cache.wan.GatewaySender;
 
 /**
  * The {@link GatewayMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link GatewayReceiver} and {@link GatewaySender} objects and related objects in
+ * or VMware GemFire {@link GatewayReceiver} and {@link GatewaySender} objects and related objects in
  * the {@literal org.apache.geode.cache.wan} package.
  *
  * @author John Blum

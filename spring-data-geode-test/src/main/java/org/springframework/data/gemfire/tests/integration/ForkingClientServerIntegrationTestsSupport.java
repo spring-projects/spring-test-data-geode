@@ -37,7 +37,7 @@ import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 
 /**
  * The {@link ForkingClientServerIntegrationTestsSupport} class is an abstract base class used to configure
- * and bootstrap Apache Geode or Pivotal GemFire Server {@link Cache} and {@link ClientCache} applications.
+ * and bootstrap Apache Geode or VMware GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
  * @see org.apache.geode.cache.Cache

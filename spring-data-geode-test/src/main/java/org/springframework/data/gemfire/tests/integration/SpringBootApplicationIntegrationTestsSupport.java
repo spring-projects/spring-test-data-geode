@@ -22,7 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * The {@link SpringBootApplicationIntegrationTestsSupport} class is an extension of Spring Test
- * for Apache Geode/Pivotal GemFire's {@link SpringApplicationContextIntegrationTestsSupport} class
+ * for Apache Geode/VMware GemFire's {@link SpringApplicationContextIntegrationTestsSupport} class
  * used to construct a new Spring {@link ConfigurableApplicationContext} using Spring Boot's
  * {@link SpringApplicationBuilder} class.
  *

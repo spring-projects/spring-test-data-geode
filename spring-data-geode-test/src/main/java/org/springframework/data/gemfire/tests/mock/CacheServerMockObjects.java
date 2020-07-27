@@ -32,7 +32,7 @@ import org.apache.geode.cache.server.ServerMetrics;
 
 /**
  * The {@link CacheServerMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link CacheServer} objects and related objects in the {@literal org.apache.geode.cache.server}
+ * or VMware GemFire {@link CacheServer} objects and related objects in the {@literal org.apache.geode.cache.server}
  * package.
  *
  * @author John Blum

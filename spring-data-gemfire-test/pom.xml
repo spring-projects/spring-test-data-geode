@@ -14,10 +14,10 @@
 	<artifactId>spring-data-gemfire-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Spring Test Framework for Pivotal GemFire</name>
+	<name>Spring Test Framework for VMware GemFire</name>
 	<description>
 		Module using Spring Framework's TestContext to write both Unit and Integration Tests
-		for Spring Data for Pivotal GemFire applications.
+		for Spring Data for VMware GemFire applications.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 

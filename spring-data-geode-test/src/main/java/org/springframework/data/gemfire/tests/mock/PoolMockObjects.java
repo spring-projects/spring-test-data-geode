@@ -31,7 +31,7 @@ import org.apache.geode.cache.query.QueryService;
 
 /**
  * The {@link PoolMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire client {@link Pool} objects and related objects in the {@literal org.apache.geode.cache.client}
+ * or VMware GemFire client {@link Pool} objects and related objects in the {@literal org.apache.geode.cache.client}
  * package.
  *
  * @author John Blum

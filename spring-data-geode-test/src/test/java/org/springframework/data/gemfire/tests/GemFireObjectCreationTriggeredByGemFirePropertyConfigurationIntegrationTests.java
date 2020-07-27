@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration Tests for Apache Geode & Pivotal GemFire {@link Object} creation when the {@link Object} configuration
+ * Integration Tests for Apache Geode & VMware GemFire {@link Object} creation when the {@link Object} configuration
  * and {@link Class} type is expressed in {@link Properties}.
  *
  * @author John Blum

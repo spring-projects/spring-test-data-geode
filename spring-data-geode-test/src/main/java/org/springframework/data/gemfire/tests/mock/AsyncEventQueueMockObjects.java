@@ -25,7 +25,7 @@ import org.apache.geode.cache.wan.GatewaySender;
 
 /**
  * The {@link AsyncEventQueueMockObjects} class is a mock objects class allowing users to manually mock Apache Geode
- * or Pivotal GemFire {@link AsyncEventQueue} objects and related objects in the
+ * or VMware GemFire {@link AsyncEventQueue} objects and related objects in the
  * {@literal org.apache.geode.cache.asyncqueue} package.
  *
  * @author John Blum

@@ -1,27 +1,27 @@
 image:https://api.travis-ci.org/spring-projects/spring-test-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-test-data-geode"]
 
 [[about]]
-== Spring Test Framework for Apache Geode & Pivotal GemFire
+== Spring Test Framework for Apache Geode & VMware GemFire
 
 The STDG project is a _Spring Data_ module, building on the core _Spring Framework's_ `TestContext`, used to write
 _Unit_ and _Integration Tests_ when building _Spring Data_ for https://geode.apache.org/[Apache Geode]
-& https://pivotal.io/pivotal-gemfire[Pivotal GemFire] (SDG) applications.
+& https://pivotal.io/pivotal-gemfire[VMware GemFire] (SDG) applications.
 
-This project was born from https://spring.io/projects/spring-data-gemfire[_Spring Data for Pivotal GemFire's_]
+This project was born from https://spring.io/projects/spring-data-gemfire[_Spring Data for VMware GemFire's_]
 (https://github.com/spring-projects/spring-data-gemfire[@GitHub])
 https://github.com/spring-projects/spring-data-gemfire/tree/2.1.6.RELEASE/src/test/java/org/springframework/data/gemfire/test[test framework].
-This _test framework_ is used in SDG's test suite to test the proper function of Apache Geode & Pivotal GemFire
+This _test framework_ is used in SDG's test suite to test the proper function of Apache Geode & VMware GemFire
 in a _Spring_ context.
 
-For several years now, users have asked for a way to test their Apache Geode & Pivotal GemFire based,
+For several years now, users have asked for a way to test their Apache Geode & VMware GemFire based,
 _Spring_ applications reliably and easily, when writing _Unit_ and _Integrations_ tests.
 
 Additionally, STDG was created to consolidate the testing efforts, lessons learned, and knowledge of effectively testing
-all Spring for Apache Geode/Pivotal GemFire projects: _Spring Boot for Apache Geode & Pivotal GemFire_ (SBDG)
-and _Spring Session for Apache Geode & Pivotal GemFire_ (SSDG).
+all Spring for Apache Geode/VMware GemFire projects: _Spring Boot for Apache Geode & VMware GemFire_ (SBDG)
+and _Spring Session for Apache Geode & VMware GemFire_ (SSDG).
 
 Eventually, STDG will replace the SDG test classes so that tests and testing efforts are consistent across all Spring
-projects for Apache Geode/Pivotal GemFire: SDG, SBDG and SSDG.
+projects for Apache Geode/VMware GemFire: SDG, SBDG and SSDG.
 
 This (relatively) **new** project is still under development and will have documentation, examples
 and an extensive test suite once complete.
@@ -44,7 +44,7 @@ Please see our https://github.com/spring-projects/spring-test-data-geode/securit
 [[license]]
 == License
 
-_Spring Test for Apache Geode_ and _Spring Test for Pivotal GemFire_ is Open Source Software
+_Spring Test for Apache Geode_ and _Spring Test for VMware GemFire_ is Open Source Software
 released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
 
 
@@ -70,7 +70,7 @@ the "_Subject Under Test_" (SUT), honors that contract and uses the external dep
 are asserting that the interactions between our application components and external dependencies is correct
 and the results lead to the desired outcome.
 
-Well, it is, or should be, no different when you are using Apache Geode or Pivotal GemFire.
+Well, it is, or should be, no different when you are using Apache Geode or VMware GemFire.
 
 For instance, you might want to mock that your _Data Access Object_ (DAO) performs the proper interactions on
 a GemFire/Geode Region, performing the right CRUD operations, making sure the right (OQL) Queries are executed
@@ -82,7 +82,7 @@ to make sure that our DAO interactions with the Region are correct, that it hand
 or other Error conditions, that it transforms values to/from the backend data store (i.e. Region), and so on. That is
 how you properly test the subject.
 
-To support _Unit Testing_ with Apache Geode or Pivotal GemFire in a Spring context, STDG provides the
+To support _Unit Testing_ with Apache Geode or VMware GemFire in a Spring context, STDG provides the
 `@EnableGemFireMockObjects` annotation.  If you want to use GemFire/Geode Mock Objects, e.g. a "mock" Region rather
 than a "live" Region, than you simply only need to annotate your test configuration with `@EnableGemFireMockObjects`.
 

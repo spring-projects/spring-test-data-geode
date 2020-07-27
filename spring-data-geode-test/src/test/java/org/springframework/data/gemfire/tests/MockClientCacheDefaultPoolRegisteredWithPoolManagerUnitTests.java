@@ -96,7 +96,7 @@ public class MockClientCacheDefaultPoolRegisteredWithPoolManagerUnitTests {
 
 	@Test
 	@DirtiesContext
-	//@Ignore("Apache Geode/Pivotal GemFire does not support Mock Pools")
+	//@Ignore("Apache Geode/VMware GemFire does not support Mock Pools")
 	public void defaultPoolRegisteredWithPoolManager() {
 
 		Pool defaultPool = PoolManager.find("DEFAULT");

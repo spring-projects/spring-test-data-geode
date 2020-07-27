@@ -37,7 +37,7 @@ import org.apache.geode.distributed.DistributedSystem;
 import org.springframework.data.gemfire.util.RegionUtils;
 
 /**
- * The {@link CacheMockObjects} class is a mock objects class allowing users to mock Apache Geode or Pivotal GemFire
+ * The {@link CacheMockObjects} class is a mock objects class allowing users to mock Apache Geode or VMware GemFire
  * {@link GemFireCache} objects and related objects (e.g. {@link DistributedSystem}, {@link ResourceManager},
  * {@link Region}, etc).
  *
