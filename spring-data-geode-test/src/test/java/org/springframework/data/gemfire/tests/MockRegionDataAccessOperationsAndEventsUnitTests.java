@@ -25,8 +25,8 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
@@ -335,7 +335,7 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 			assertThat(this.mockRegion).hasSize(0);
 
 			verify(mockCacheWriter, times(1)).beforeCreate(isA(EntryEvent.class));
-			verifyZeroInteractions(mockCacheListener);
+			verifyNoInteractions(mockCacheListener);
 		}
 	}
 
@@ -417,7 +417,7 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 			assertThat(this.mockRegion).hasSize(1);
 
 			verify(mockCacheWriter, times(1)).beforeDestroy(isA(EntryEvent.class));
-			verifyZeroInteractions(mockCacheListener);
+			verifyNoInteractions(mockCacheListener);
 		}
 	}
 }
