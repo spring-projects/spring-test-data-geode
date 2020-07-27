@@ -9,22 +9,23 @@ _Unit_ and _Integration Tests_ when building _Spring Data_ for https://geode.apa
 
 This project was born from https://spring.io/projects/spring-data-gemfire[_Spring Data for VMware GemFire's_]
 (https://github.com/spring-projects/spring-data-gemfire[@GitHub])
-https://github.com/spring-projects/spring-data-gemfire/tree/2.1.6.RELEASE/src/test/java/org/springframework/data/gemfire/test[test framework].
-This _test framework_ is used in SDG's test suite to test the proper function of Apache Geode & VMware GemFire
-in a _Spring_ context.
+https://github.com/spring-projects/spring-data-gemfire/tree/2.1.19.RELEASE/src/test/java/org/springframework/data/gemfire/test[test framework].
+This _test framework_ is used in SDG's test suite to test the proper function and behavior of Apache Geode
+& VMware GemFire in a _Spring_ context.
 
-For several years now, users have asked for a way to test their Apache Geode & VMware GemFire based,
-_Spring_ applications reliably and easily, when writing _Unit_ and _Integrations_ tests.
+For several years now, users have asked for a better way to test their Apache Geode & VMware GemFire based,
+_Spring_ applications reliably and easily, particularly when writing _Unit_ and _Integrations_ tests.
 
-Additionally, STDG was created to consolidate the testing efforts, lessons learned, and knowledge of effectively testing
-all Spring for Apache Geode/VMware GemFire projects: _Spring Boot for Apache Geode & VMware GemFire_ (SBDG)
-and _Spring Session for Apache Geode & VMware GemFire_ (SSDG).
+Additionally, STDG was created to consolidate the testing efforts, lessons learned, and knowledge and experience of
+effectively testing all Spring for Apache Geode/VMware GemFire projects: _Spring Boot for Apache Geode & VMware GemFire_
+(SBDG) and _Spring Session for Apache Geode & VMware GemFire_ (SSDG) in addition to
+_Spring Data for Apache Geode & VMware GemFire_ (SDG).
 
 Eventually, STDG will replace the SDG test classes so that tests and testing efforts are consistent across all Spring
-projects for Apache Geode/VMware GemFire: SDG, SBDG and SSDG.
+projects for Apache Geode/VMware GemFire: SDG, SSDG and SBDG.
 
-This (relatively) **new** project is still under development and will have documentation, examples
-and an extensive test suite once complete.
+This (relatively) **new** project is still under development and will have documentation, examples and an extensive test
+suite once completed.
 
 In the meantime, you can review the
 https://github.com/spring-projects/spring-boot-data-geode/tree/master/spring-geode-autoconfigure/src/test/java/org/springframework/geode/boot/autoconfigure[test suite for SBDG]
@@ -61,14 +62,15 @@ of how this project is used.
 We all write tests, right?  TDD style?  ;-)
 
 As we begin to write tests, we typically start with _Unit Tests_ since they are designed to test the subject
-in isolation, without dependencies, to get feedback quickly, i.e. "_Is my logic correct?_"
+in isolation without actual collaborators and dependencies in order to gather feedback quickly,
+i.e. "_Is my logic correct?_"
 
-It common when writing _Unit Tests_ to *mock* the dependencies since the test should assume that the dependencies
-"_work as designed_".  During _Unit Testing_, it does not matter whether or not the dependencies actually work
-as expected (that is the purpose of _Integration Tests_), just that they have a contract and our application components,
-the "_Subject Under Test_" (SUT), honors that contract and uses the external dependencies correctly. Essentially we
-are asserting that the interactions between our application components and external dependencies is correct
-and the results lead to the desired outcome.
+It common when writing _Unit Tests_ to *mock* the collaborators/dependencies since the test should assume that the
+dependencies "_work as designed_".  During _Unit Testing_, it does not matter whether or not the dependencies actually
+work as expected (that is the purpose of _Integration Tests_ or the _Unit Tests_ for the dependencies themselves), just
+that they have a contract and our application components, the "_Subject Under Test_" (SUT), honors that contract and
+uses the external dependencies correctly. Essentially we are asserting that the interactions between our application
+components and external collaborators/dependencies are correct and the results lead to the desired outcome.
 
 Well, it is, or should be, no different when you are using Apache Geode or VMware GemFire.
 
@@ -99,16 +101,17 @@ class ExampleUnitTestClass {
 
   @EnableGemFireMockObjects
   @ClientCacheApplication
-  @EnableEntityDefinedRegions(clientRegionShortcut = ClientRegionShortcut.LOCAL)
+  @EnableEntityDefinedRegions(basePackageClasses=ExampleEntity.class,
+      clientRegionShortcut = ClientRegionShortcut.LOCAL)
   static class TestConfiguration { }
 
 }
 ----
 
 
-In the example above, `@EnableGemFireMockObjects` creates "mocks" for the `ClientCache`, all the `Regions` identified
-and created by the `@EnableEntityDefinedRegions(..)` annotation, along with all the object GemFire/Geode object types.
-There are no "live" GemFire/Geode objects when "mocking" is enabled.
+In the example above, the `@EnableGemFireMockObjects` annotation creates "mocks" for the `ClientCache`, all the `Regions`
+identified and created by the `@EnableEntityDefinedRegions(..)` annotation, along with all the other GemFire/Geode
+object types. There are no "live" GemFire/Geode objects when "mocking" is enabled.
 
 Here is 1
 https://github.com/spring-projects/spring-test-data-geode/blob/master/spring-data-geode-test/src/test/java/org/springframework/data/gemfire/MockClientCacheApplicationIntegrationTests.java[example]
@@ -116,7 +119,7 @@ of a concrete _Unit Test_ in action, using STDG's `@EnableGemFireMockObjects` an
 
 It really is that simple!
 
-TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this guide
+TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this simple tutorial
 for the time being.
 
 [[unit-tests-mock-region-data]]
@@ -126,7 +129,7 @@ While implementing a fully capable GemFire/Geode Region would defeat the purpose
 it is desirable to sometimes perform basic Region data access operations, such as `get` and `put`, with small quantities
 of data and emulate the same effects.
 
-As such, with STDG it is currently possible to perform the following Region data access operations:
+As such, with STDG, it is currently possible to perform the following Region data access operations:
 
 * `containsKey(key)`
 * `get(key)`,
@@ -177,12 +180,12 @@ class MyGeodeMockRegionUnitTests {
 ----
 
 Of course, you can also perform similar Region data access operations using the _Spring Data Repository_ abstraction
-instead. The benefit of _Spring Data's_ _Repository_ abstraction is that it insulates your application from Apache Geode
+instead. The benefit of _Spring Data's_ _Repository_ abstraction is that it shields your application from Apache Geode
 and hides the fact that you are interfacing with an Region under-the-hood by using the proper _Data Access Object_ (DAO)
 pattern.
 
 For example, you can "mock" a Region and `put`/`get` data using a _Spring Data Repository_ for the Region
-as demonstrated by the following code.
+as demonstrated in the following code.
 
 Given a `Customer` application domain object annotated with the `@Region` mapping annotation:
 
@@ -195,7 +198,8 @@ class Customer {
     @Id
     private Long id;
 
-    ...
+    // ...
+
 }
 ----
 
@@ -204,12 +208,14 @@ Along with a SD _Repository_ for `Customers`:
 .CustomerRepository
 [source,java]
 ----
-interface CustomerRepository extends CrudRepository<Customer, Long> { ... }
+interface CustomerRepository extends CrudRepository<Customer, Long> {
+	//...
+}
 ----
 
 Then you can write a test class like the following, still using a "mock" Region to `put` and `get` actual data:
 
-.Spring Data Repository on a mocked Region
+.Spring Data _Repository_ on a mocked Region
 [source,java]
 ----
 @RunWith(SpringRunner.class)
@@ -222,27 +228,27 @@ class MySpringDataRepositoryWithMockRegionUnitTests {
     @Test
     public void simpleRepositoryCrudOpsWork() {
 
-        Customer jonDoe = ...;
+        Customer jonDoe = new Customer(1L, "Jon Doe");
 
         customerRepository.save(jonDoe);
 
-        assertThat(customerRepository.existsById(jonDoe.getId()).isTrue();
+        assertThat(customerRepository.existsById(jonDoe.getId())).isTrue();
         assertThat(customerRepository.findById(jonDoe.getId()).orElse(null)).isEqualTo(jonDoe);
     }
 
     @ClientCacheApplication
     @EnableEntityDefinedRegions(basePackageClasses = Customer.class)
     @EnableGemfireRepositories(basePackageClasses = CustomerRepository.class)
-    static class TestConfiguration { ... }
+    static class TestConfiguration {  }
 
 }
 ----
 
 Even though you are using _Spring Data Repositories_ and the `@EnableEntityDefinedRegions` annotation (perhaps;
-yes these components still work with Mocks and mock data), you can still autowire/inject the Region and access
+yes these components still work with Mocks and mock data), you can still autowire (inject) the Region and access
 it directly in the same test class:
 
-.Accessing the mock Region directly in the SD Repository test
+.Accessing the mock Region directly in the SD _Repository_ test
 [source,java]
 ----
 @RunWith(SpringRunner.class)
@@ -252,16 +258,18 @@ class MySpringDataRepositoryWithMockRegionUnitTests {
     @Autowired
     private CustomerRepository customerRepository;
 
-    @Resource
-    Region<Long, Customer> customers;
+    @Resource(name = "Customers")
+    private Region<Long, Customer> customers;
 
     @Test
-    public void simpleRepositoryCrudOpsWork() { ... }
+    public void simpleRepositoryCrudOpsWork() {
+    	//...
+    }
 
     @Test
     public void customerRegionOpsWorkToo() {
 
-        Customer janeDoe = ...;
+        Customer janeDoe = new Customer(2L, "Jane Doe");
 
         customers.put(janeDoe.getId(), janeDoe);
 
@@ -272,10 +280,50 @@ class MySpringDataRepositoryWithMockRegionUnitTests {
 }
 ----
 
-For clarification, obviously many of the Region functions and behaviors are not implemented, like persistence,
-or overflow to disk, distribution, replication, eviction, expiration, etc.  If you find you need to test your
-application with these behaviors and functions, then it would clearly be better suited as an actual Integration Test
-at that point.
+While you are allowed to inject a Region directly into your test class, it is better to use SDG's `GemfireTemplate`,
+which wraps and decorates a Region's data access operations.  `GemfireTemplate` provides a lower-level API, closer
+to the Region API, than _Spring Data Repositories_ allowing you to perform and exercise more control over advanced
+functions, while still shielding you from the Region API.
+
+The test class above could be rewritten as:
+
+.Accessing the mock Region using the SDG `GemfireTemplate` in the SD _Repository_ test
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class MySpringDataRepositoryWithMockRegionUnitTests {
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    @Qualifier("customersTemplate")
+    private GemfireTemplate customersTemplate;
+
+    @Test
+    public void simpleRepositoryCrudOpsWork() {
+    	//...
+    }
+
+    @Test
+    public void customerTemplateOpsWorkToo() {
+
+        Customer janeDoe = new Customer(2L, "Jane Doe");
+
+        customersTemplate.put(janeDoe.getId(), janeDoe);
+
+        assertThat(customersTemplate).containsKey(janeDoe.getId());
+        assertThat(customersTemplate.get(janeDoe.getId())).isEqualTo(janeDoe);
+        assertThat(customerRepository.findById(janeDoe.getId()).orElse(null)).isEqualTo(janeDoe);
+    }
+}
+----
+
+For clarification, obviously many of the Region functions and behaviors are not implemented, like persistence
+and overflow to disk, distribution, replication, eviction, expiration, etc.  If you find you need to test your
+application with these behaviors and functions, then your test would clearly be better suited as an actual
+Integration Test.
 
 [[unit-tests-mock-region-callbacks]]
 ==== Mock Region Callbacks
@@ -321,7 +369,8 @@ class MyMockRegionWithCacheLoaderUnitTests {
 
     assertThat(example.get("one")).isEqualTo(1);
     assertThat(example.get("two")).isEqualTo(2);
-    ...
+    // ...
+
   }
 
   @ClientCacheApplication
@@ -548,12 +597,12 @@ class NetworkServiceUnitTests {
   @Test
   public void processDenialOfServiceAttackLogsNetworkEvent() {
 
-    NetworkEvent event = ...;
+    NetworkEvent event = new NetworkEvent();
 
     this.service.processDenialOfServiceAttack(event);
 
     assertThat(testAppender.lastLogMessage())
-      .isEqualTo("A DDoS attack occured at 2019-07-02 19:39:15 from IP Address 10.22.101.16");
+      .isEqualTo("A DDoS attack occurred at 2019-07-02 19:39:15 from IP Address 10.22.101.16");
 
     assertThat(testAppender.lastLogMessage())
       .isEqualTo("Another log message");
@@ -564,7 +613,7 @@ class NetworkServiceUnitTests {
   @Test
   public void processLoginRequestDoesNotLogAnyMessageWithLogLevelSetToWarn() {
 
-      LoginRequest request = ...;
+      LoginRequest request = new LoginRequest();
 
       this.service.processLoginRequest(request);
 
