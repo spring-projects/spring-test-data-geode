@@ -30,6 +30,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
@@ -53,6 +55,7 @@ import org.apache.geode.cache.RegionAttributes;
 import org.apache.geode.cache.RegionService;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
+import org.springframework.data.gemfire.tests.support.MapBuilder;
 
 /**
  * Unit Tests for Mock {@link Region}.
@@ -66,6 +69,7 @@ import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
  * @see org.apache.geode.cache.CacheWriter
  * @see org.apache.geode.cache.EntryEvent
  * @see org.apache.geode.cache.Region
+ * @see org.apache.geode.cache.RegionAttributes
  * @see org.apache.geode.cache.RegionService
  * @since 0.0.3
  */
@@ -419,5 +423,69 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 			verify(mockCacheWriter, times(1)).beforeDestroy(isA(EntryEvent.class));
 			verifyNoInteractions(mockCacheListener);
 		}
+	}
+
+	@Test
+	public void mockingUnsupportedPutAllWorksAsExpected() {
+
+		doAnswer(invocation -> {
+
+			Map<Object, Object> keysValues = invocation.getArgument(0);
+
+			for (Map.Entry<Object, Object> entry : keysValues.entrySet()) {
+				this.mockRegion.put(entry.getKey(), entry.getValue());
+			}
+
+			return null;
+
+		}).when(this.mockRegion).putAll(any(Map.class));
+
+		Map<Object, Object> keysValues = MapBuilder.newMapBuilder()
+			.put(1, "mock")
+			.put(2, "test")
+			.put(3, "stub")
+			.build();
+
+		assertThat(this.mockRegion).hasSize(0);
+
+		this.mockRegion.putAll(keysValues);
+
+		assertThat(this.mockRegion).hasSize(keysValues.size());
+		assertThat(this.mockRegion).containsKeys(1, 2, 3);
+		assertThat(this.mockRegion.get(1)).isEqualTo("mock");
+		assertThat(this.mockRegion.get(2)).isEqualTo("test");
+		assertThat(this.mockRegion.get(3)).isEqualTo("stub");
+	}
+
+	@Test
+	@SuppressWarnings("all")
+	public void mockingPutIfAbsentWorksAsExpected() {
+
+		doAnswer(invocation -> {
+
+			Object key = invocation.getArgument(0);
+			Object value = invocation.getArgument(1);
+			Object existingValue = null;
+
+			synchronized (this.mockRegion) {
+
+				existingValue = this.mockRegion.get(key);
+
+				if (Objects.isNull(existingValue)) {
+					this.mockRegion.put(key, value);
+				}
+			}
+
+			return existingValue;
+
+		}).when(this.mockRegion).putIfAbsent(any(), any());
+
+		assertThat(this.mockRegion).hasSize(0);
+		assertThat(this.mockRegion.putIfAbsent(1, "test")).isNull();
+		assertThat(this.mockRegion).containsKey(1);
+		assertThat(this.mockRegion.get(1)).isEqualTo("test");
+		assertThat(this.mockRegion.putIfAbsent(1, "mock")).isEqualTo("test");
+		assertThat(this.mockRegion).containsKey(1);
+		assertThat(this.mockRegion.get(1)).isEqualTo("test");
 	}
 }
