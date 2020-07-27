@@ -54,6 +54,7 @@ public abstract class ReflectionUtils extends org.springframework.util.Reflectio
 					fieldName, target.getClass().getName())));
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static Constructor makeAccessibleReturnConstructor(Constructor constructor) {
 		makeAccessible(constructor);
 		return constructor;
@@ -69,7 +70,7 @@ public abstract class ReflectionUtils extends org.springframework.util.Reflectio
 		return method;
 	}
 
-	public static <T> Object setField(T target, String fieldName, Object value) throws NoSuchFieldException {
+	public static <T> T setField(T target, String fieldName, Object value) throws NoSuchFieldException {
 
 		Assert.notNull(target, "Target object must not be null");
 		Assert.hasText(fieldName, String.format("Field name [%s] must be specified", fieldName));
