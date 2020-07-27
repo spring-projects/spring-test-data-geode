@@ -12,6 +12,9 @@ dependencies {
 	compile "org.projectlombok:lombok"
 	compile "org.springframework:spring-test"
 	compile "org.springframework.data:spring-data-geode"
+
+	compileOnly "com.google.code.findbugs:jsr305:$findbugsVersion"
+
 	optional "ch.qos.logback:logback-classic"
 
 	provided ("org.springframework.boot:spring-boot-starter") {
