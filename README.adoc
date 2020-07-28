@@ -527,7 +527,7 @@ class ExampleUnitTest {
 
 			Object key = invocation.getArgugment(0);
 			Object value = invocation.getArgument(1);
-			Object existingValue = null;
+			Object existingValue;
 
 			synchronized (this.example) {
 
@@ -702,7 +702,7 @@ class ExampleIntegrationTest {
     @EnableLocator
     @EnableManager
     @EnableGemFireResourceCollector
-	static class TestGeodeConfiguration { }
+    static class TestGeodeConfiguration { }
 
 }
 ----
