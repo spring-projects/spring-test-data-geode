@@ -677,6 +677,102 @@ This feature would be loosely based on, and similar to,
 _Spring Boot_ https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html[Testing]
 with _Test Slices_.
 
+[[integration-testing-resource-cleanup]]
+==== Cleaning up after GemFire/Geode during Integration Tests
+
+When writing _Integration Tests_ using "live" GemFire/Geode objects (e.g. Regions), those object can leave artifacts
+behind after a test run completes.
+
+This can potentially cause conflicts between _Integration Test Cases_ that use features like persistence having
+similarly named Regions particularly if you are not careful to differentiate the working directory between your tests.
+This is also problematic, especially when switching between versions of GemFire/Geode, used by your application, during
+testing. Perhaps you are in the middle of testing a (rolling) upgrade.
+
+At any rate, STDG has you covered. If you would like to make sure that artifacts are properly cleaned up after a test
+run, then you can annotate your test class with STDG's `@EnableGemFireResourceCollector` annotation, like so:
+
+.Using `@EnableGemFireResourceCollector
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleIntegrationTest {
+
+	@CacheServerApplication
+    @EnableLocator
+    @EnableManager
+    @EnableGemFireResourceCollector
+	static class TestGeodeConfiguration { }
+
+}
+----
+
+Like the `@EnableGemFireMockObjects` annotation, you can control which Spring `TestContext` test event will trigger
+a GemFire/Geode resource (garbage) collection process using the `collectOnEvents` attribute.
+
+Also, you can attempt to clean any GemFire/Geode `DiskStore` files (created by persistence, overflow or PDX) by setting
+the `@EnableGemFireResourceCollector` annotation, `tryCleanDiskStoreFiles` attribute to `true`.
+
+The following list of GemFire/Geode files with extensions or names are cleaned up by STDG's
+`@EnableGemFireResourceCollector` functionality:
+
+.GemFire/Geode File Extensions
+|===
+| File Extension | Description
+
+| `.dat`
+| Locator view file; e.g. `locator10334view.dat`
+
+| `.gfs`
+| Statistics archive file
+
+| `.crf`
+| Oplog file containing create, update, invalidate operations
+
+| `.drf`
+| Oplog file containing delete operations
+
+| `.if`
+| DiskStore metadata file
+
+| `.krf`
+| Oplog file for key and crf offset information
+
+| `.lk`
+| DiskStore access control file
+
+| `.log`
+| Log files created by GemFire/Geode process (Locators, Servers, Manager, etc)
+
+| `.pid`
+| File containing the OS process ID of the GemFire/Geode process (Locator, Server, etc)
+
+| `.properties`
+| GemFire/Geode properties configuration file (e.g. `gemfire.properties`)
+
+| `.xml`
+| GemFire/Geode XML configuration file (e.g. `cache.xml`)
+|===
+
+.GemFire/Geode Filenames
+|===
+| Filename | Description
+
+| `backup`        | filename prefix
+| `cache`         | filename prefix
+| `configdiskdir` | _Cluster Configuration Service_ directory name
+| `default`       | filename prefix
+| `drlk_if`       | filename prefix
+| `gfsecurity`    | filename prefix
+| `gemfire`       | directory/file name
+| `geode`         | directory/file name
+| `locator`       | directory/file prefix name
+| `overflow`      | filename prefix
+
+|===
+
+The names of file extensions and files/directories, are treated by STDG as case insensitive when matching.
+
 
 [[testing-logging-behavior]]
 === Asserting Logging Behavior
