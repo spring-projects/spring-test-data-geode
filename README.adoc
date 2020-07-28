@@ -771,7 +771,10 @@ The following list of GemFire/Geode files with extensions or names are cleaned u
 
 |===
 
-The names of file extensions and files/directories, are treated by STDG as case insensitive when matching.
+The names of file extensions and files/directories are treated by STDG as case insensitive when matching.
+
+For a complete https://cwiki.apache.org/confluence/display/GEODE/Geode+Artifacts[list of artifacts] created by
+GemFire/Geode processes, follow the link.
 
 
 [[testing-logging-behavior]]
