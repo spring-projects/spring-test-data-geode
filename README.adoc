@@ -122,6 +122,78 @@ It really is that simple!
 TIP: Mocking GemFire/Geode objects outside a Spring context is possible, but beyond the scope of this simple tutorial
 for the time being.
 
+[[unit-tests-mock-object-cleanup]]
+==== Mock Object Scope & Lifecycle Management
+
+Currently, GemFire/Geode mock objects are cleaned up after an individual test class runs. Therefore, the mocked
+GemFire/Geode objects persist for the entire lifecycle of a single test class, or test suite, and can be reused
+across all the test cases of the test class.
+
+The Spring `TestContext` framework emits certain "test" events during the test lifecycle as documented in
+the `EventPublishingTestExecutionListener` class https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/context/event/EventPublishingTestExecutionListener.html[_Javadoc_].
+The test events are actually contained in the https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/context/event/package-summary.html[`org.springframework.test.context.event`] package.
+
+Currently, STDG defaults the cleanup of all mocked GemFire/Geode objects to the
+https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/context/event/AfterTestClassEvent.html[`AfterTestClassEvent`] type.
+
+By way of example, this would be equivalent to:
+
+.Default STDG GemFire/Geode mock object cleanup
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleTest {
+
+	@ClientCacheApplication
+    @EnableGemFireMockObject(destroyOnEvents = AfterTestClassEvent.class)
+	static class TestConfiguration { }
+
+}
+----
+
+You might want to cleanup all GemFire/Geode mock objects after each test case method in your test class using
+the https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/context/event/AfterTestMethodEvent.html[`AfterTestMethodEvent`] class.
+
+In this case, you can do:
+
+.GemFire/Geode mock object cleanup after each test case
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleTest {
+
+	@ClientCacheApplication
+    @EnableGemFireMockObject(destroyOnEvents = AfterTestMethodEvent.class)
+	static class TestConfiguration { }
+
+}
+----
+
+The `destroyOnEvents` attribute of the `@EnableGemFireMockObjects` annotation accepts more than one test event type,
+thereby allowing to perform GemFire/Geode mock object cleanup at multiple points in the test lifecycle.
+
+For example, maybe you need to cleanup all mocked GemFire/Geode objects before each test case executes and after each
+test class completes:
+
+.GemFire/Geode mock object cleanup before each test case executes and after each test class completes
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleTest {
+
+	@ClientCacheApplication
+    @EnableGemFireMockObject(destroyOnEvents = { BeforeTestExecutionEvent.class, AfterTestClassEvent.class })
+	static class TestConfiguration { }
+
+}
+----
+
+You now have the granularity required to control the scope and lifecycle of the GemFire/Geode mocked objects in STDG.
+
+
 [[unit-tests-mock-region-data]]
 ==== Mock Regions with Data
 
