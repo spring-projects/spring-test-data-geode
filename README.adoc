@@ -131,12 +131,12 @@ of data and emulate the same effects.
 
 As such, with STDG, it is currently possible to perform the following Region data access operations:
 
-* `containsKey(key)`
+* `containsKey(key)`,
 * `get(key)`,
 * `getEntry(key)`,
 * `invalidate(key)`,
-* `put(key, value)`
-* `size()`,
+* `put(key, value)`,
+* `size()`
 
 The "mock" Region will function and behave similarly to an actual GemFire/Geode Region involving these
 data access operations.
@@ -220,7 +220,7 @@ Then you can write a test class like the following, still using a "mock" Region 
 ----
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-class MySpringDataRepositoryWithMockRegionUnitTests {
+class MySpringDataRepositoryUnitTests {
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -292,7 +292,7 @@ The test class above could be rewritten as:
 ----
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-class MySpringDataRepositoryWithMockRegionUnitTests {
+class MySpringDataRepositoryWithGemfireTemplateUnitTests {
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -411,6 +411,105 @@ the value for the requested keys.
 
 You can register a `CacheWriter` along with 1 or more `CacheListeners` and they will be invoked, too.
 
+[[unit-tests-mock-unsupported-region-ops]]
+==== Mocking Unsupported Region Operations
+
+As stated in the <<unit-tests-mock-region-data>> section above, only the following Region data access operations are
+supported by STDG out-of-the-box (OOTB):
+
+* `containsKey(key)`,
+* `get(key)`,
+* `getEntry(key)`,
+* `invalidate(key)`,
+* `put(key, value)`,
+* `size()`
+
+How then do you mock other Region operations (e.g. `putIfAbsent(key, value)`) provided by the Region API that is not
+supported by STDG OOTB?
+
+Fortunately, you can rely on the fact that the Region object returned when mocking with `@EnableGemFireMockObjects`
+inside your _Unit Tests_ is a "_mock_" object, specifically mocked by _Mockito_. Therefore, you are able to mock
+any other Region data access operations that might be required by your application given a reference to the "mock"
+Region object.
+
+For example, suppose you also want to mock the `putIfAbsent(key, value)` _Map_ operation on Region, then you can do:
+
+.Mocking Region.putIfAbsent(key, value)
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@ContextConfiguration
+class ExampleUnitTest {
+
+	@Autowired
+    @Qualifer("exampleTemplate")
+	GemfireTemplate exampleTemplate;
+
+	@Resource(name = "Example")
+	Region<?, ?> example;
+
+	@Before
+	public void setup() {
+
+		doAnswer(invocation -> {
+
+			Object key = invocation.getArgugment(0);
+			Object value = invocation.getArgument(1);
+			Object existingValue = null;
+
+			synchronized (this.example) {
+
+				existingValue = this.example.get(key);
+
+				if (existingValue == null) {
+					this.example.put(key, value);
+				}
+			}
+
+			return existingValue;
+
+		}).when(this.example).putIfAbsent(any(), any());
+	}
+
+	@Test
+	public void putIfAbsentWorks() {
+
+		assertThat(this.exampleTemplate.putIfAbsent(1, "test")).isNull();
+		assertThat(this.exampleTemplate.putIfAbsent(1, "mock")).isEqualTo("test");
+		assertThat(this.exampleTemplate.get(1)).isEqualTo("test");
+	}
+
+	@ClientCacheApplication
+    @EnableGemFireMockObjects
+	static class TestConfiguration {
+
+        @Bean("Example")
+        ClienRegionFactoryBean mockRegion(GemFireCache gemfireCache) {
+
+            ClientRegionFactoryBean mockRegion = new ClientRegionFactoryBean();
+
+            mockRegion.setCache(gemfireCache);
+
+            return mockRegion;
+        }
+
+        @Bean
+        GemfireTemplate exampleTemplate(GemFireCache gemfireCache) {
+        	return new GemfireTemplate(gemifreCache.getRegion("/Example"));
+        }
+	}
+}
+----
+
+While the `putIfAbsent(key, value)` operation above was mocked (implemented) in terms of the existing, mocked `get(key)`
+and `put(key, value)` Region operations, you could very well have implemented/mocked `putIfAbsent(key, value)` however
+you wanted.  The Region object is a "_mock_" object after all.
+
+Not only can you mock unsupported Region methods, you can also redefine the mocked behavior of a STDG supported
+and mocked Region method, like `get(key)` or `put(key, value)` as well.
+
+This capability applies to any GemFire/Geode mocked object. The choice is up to you what a GemFire/Geode mock object
+does or does not do.
 
 [[integration-testing]]
 === Integration Testing with STDG
