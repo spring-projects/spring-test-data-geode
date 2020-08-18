@@ -256,7 +256,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
 
-	//private static final Set<GatewayReceiver> gatewayReceivers = new ConcurrentSkipListSet<>();
+	private static final Set<GatewayReceiver> gatewayReceivers = new ConcurrentSkipListSet<>();
 
 	private static final Set<String> registeredPoolNames = new ConcurrentSkipListSet<>();
 
@@ -285,7 +285,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		gemfireProperties.set(new Properties());
 		asyncEventQueues.clear();
 		diskStores.clear();
-		//gatewayReceivers.clear();
+		gatewayReceivers.clear();
 		//gatewaySenders.clear();
 		regions.clear();
 		regionAttributes.clear();
@@ -770,7 +770,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockCache.getAsyncEventQueues())
 			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(asyncEventQueues.values())));
 		when(mockCache.getCacheServers()).thenAnswer(invocation -> Collections.unmodifiableList(cacheServers));
-		//when(mockCache.getGatewayReceivers()).thenAnswer(invocation -> Collections.unmodifiableSet(gatewayReceivers));
+		when(mockCache.getGatewayReceivers()).thenAnswer(invocation -> Collections.unmodifiableSet(gatewayReceivers));
 		//when(mockCache.getGatewaySenders())
 		//	.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(gatewaySenders.values())));
 		when(mockCache.getLockLease()).thenAnswer(newGetter(lockLease));
@@ -1448,7 +1448,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			doAnswer(newSetter(running, true, null)).when(mockGatewayReceiver).start();
 			doAnswer(newSetter(running, false, null)).when(mockGatewayReceiver).stop();
 
-			//gatewayReceivers.add(mockGatewayReceiver);
+			gatewayReceivers.add(mockGatewayReceiver);
 
 			return mockGatewayReceiver;
 		});
