@@ -250,7 +250,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, DiskStore> diskStores = new ConcurrentHashMap<>();
 
-	//private static final Map<String, GatewaySender> gatewaySenders = new ConcurrentHashMap<>();
+	private static final Map<String, GatewaySender> gatewaySenders = new ConcurrentHashMap<>();
 
 	private static final Map<String, Region<Object, Object>> regions = new ConcurrentHashMap<>();
 
@@ -286,7 +286,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		asyncEventQueues.clear();
 		diskStores.clear();
 		gatewayReceivers.clear();
-		//gatewaySenders.clear();
+		gatewaySenders.clear();
 		regions.clear();
 		regionAttributes.clear();
 
@@ -771,8 +771,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(asyncEventQueues.values())));
 		when(mockCache.getCacheServers()).thenAnswer(invocation -> Collections.unmodifiableList(cacheServers));
 		when(mockCache.getGatewayReceivers()).thenAnswer(invocation -> Collections.unmodifiableSet(gatewayReceivers));
-		//when(mockCache.getGatewaySenders())
-		//	.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(gatewaySenders.values())));
+		when(mockCache.getGatewaySenders())
+			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(gatewaySenders.values())));
 		when(mockCache.getLockLease()).thenAnswer(newGetter(lockLease));
 		when(mockCache.getLockTimeout()).thenAnswer(newGetter(lockTimeout));
 		when(mockCache.getMessageSyncInterval()).thenAnswer(newGetter(messageSyncInterval));
@@ -797,6 +797,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return asyncEventQueues.get(asyncEventQueueId);
 
 		}).when(mockCache).getAsyncEventQueue(anyString());
+
+		doAnswer(invocation -> {
+
+			String gatewaySenderId = invocation.getArgument(0);
+
+			return gatewaySenders.get(gatewaySenderId);
+
+		}).when(mockCache).getGatewaySender(anyString());
 
 		return mockQueryService(
 			mockGatewaySenderFactory(
@@ -1617,7 +1625,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			}).when(mockGatewaySender).removeGatewayEventFilter(any(GatewayEventFilter.class));
 
-			//gatewaySenders.put(gatewaySenderId, mockGatewaySender);
+			gatewaySenders.put(gatewaySenderId, mockGatewaySender);
 
 			return mockGatewaySender;
 		});
