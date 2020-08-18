@@ -246,11 +246,17 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final List<Object> cachedGemFireObjects = Collections.synchronizedList(new ArrayList<>());
 
+	private static final Map<String, AsyncEventQueue> asyncEventQueues = new ConcurrentHashMap<>();
+
 	private static final Map<String, DiskStore> diskStores = new ConcurrentHashMap<>();
+
+	//private static final Map<String, GatewaySender> gatewaySenders = new ConcurrentHashMap<>();
 
 	private static final Map<String, Region<Object, Object>> regions = new ConcurrentHashMap<>();
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
+
+	//private static final Set<GatewayReceiver> gatewayReceivers = new ConcurrentSkipListSet<>();
 
 	private static final Set<String> registeredPoolNames = new ConcurrentSkipListSet<>();
 
@@ -277,7 +283,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		singletonCache.set(null);
 		gemfireProperties.set(new Properties());
+		asyncEventQueues.clear();
 		diskStores.clear();
+		//gatewayReceivers.clear();
+		//gatewaySenders.clear();
 		regions.clear();
 		regionAttributes.clear();
 
@@ -758,7 +767,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(searchTimeout, null)).when(mockCache).setSearchTimeout(anyInt());
 
 		when(mockCache.isServer()).thenReturn(true);
+		when(mockCache.getAsyncEventQueues())
+			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(asyncEventQueues.values())));
 		when(mockCache.getCacheServers()).thenAnswer(invocation -> Collections.unmodifiableList(cacheServers));
+		//when(mockCache.getGatewayReceivers()).thenAnswer(invocation -> Collections.unmodifiableSet(gatewayReceivers));
+		//when(mockCache.getGatewaySenders())
+		//	.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(gatewaySenders.values())));
 		when(mockCache.getLockLease()).thenAnswer(newGetter(lockLease));
 		when(mockCache.getLockTimeout()).thenAnswer(newGetter(lockTimeout));
 		when(mockCache.getMessageSyncInterval()).thenAnswer(newGetter(messageSyncInterval));
@@ -775,6 +789,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		when(mockCache.createRegionFactory(anyString())).thenAnswer(invocation ->
 			mockRegionFactory(mockCache, invocation.<String>getArgument(0)));
+
+		doAnswer(invocation -> {
+
+			String asyncEventQueueId = invocation.getArgument(0);
+
+			return asyncEventQueues.get(asyncEventQueueId);
+
+		}).when(mockCache).getAsyncEventQueue(anyString());
 
 		return mockQueryService(
 			mockGatewaySenderFactory(
@@ -897,6 +919,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				.when(mockAsyncEventQueue).resumeEventDispatching();
 
 			when(mockAsyncEventQueue.size()).thenReturn(0);
+
+			asyncEventQueues.put(asyncEventQueueId, mockAsyncEventQueue);
 
 			return mockAsyncEventQueue;
 		});
@@ -1424,6 +1448,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			doAnswer(newSetter(running, true, null)).when(mockGatewayReceiver).start();
 			doAnswer(newSetter(running, false, null)).when(mockGatewayReceiver).stop();
 
+			//gatewayReceivers.add(mockGatewayReceiver);
+
 			return mockGatewayReceiver;
 		});
 
@@ -1590,6 +1616,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				return null;
 
 			}).when(mockGatewaySender).removeGatewayEventFilter(any(GatewayEventFilter.class));
+
+			//gatewaySenders.put(gatewaySenderId, mockGatewaySender);
 
 			return mockGatewaySender;
 		});
