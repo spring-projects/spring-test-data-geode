@@ -179,7 +179,7 @@ public class GemFireResourceCollectorApplicationListener
 	public GemFireResourceCollectorApplicationListener(
 			@Nullable Iterable<Class<? extends ApplicationEvent>> gemfireResourceCollectorEventTypes) {
 
-		this(FileSystemUtils.WORKING_DIRECTORY, gemfireResourceCollectorEventTypes);
+		this(DEFAULT_SEARCH_DIRECTORY, gemfireResourceCollectorEventTypes);
 	}
 
 	/**
