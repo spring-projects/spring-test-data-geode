@@ -17,6 +17,7 @@ package org.springframework.data.gemfire.tests.integration.context.event;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.gemfire.tests.integration.annotation.GemFireResourceCollectorConfiguration;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
+import org.springframework.data.gemfire.tests.util.ThreadUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
 import org.springframework.lang.NonNull;
@@ -65,6 +67,10 @@ import org.slf4j.LoggerFactory;
  */
 public class GemFireResourceCollectorApplicationListener
 		implements ApplicationContextAware, ApplicationListener<ApplicationEvent> {
+
+	protected static final int DEFAULT_DELETE_ATTEMPTS = 2;
+
+	protected static final long DEFAULT_DELETE_TIMED_WAIT_INTERVAL = Duration.ofMillis(250).toMillis();
 
 	protected static final File DEFAULT_SEARCH_DIRECTORY = FileSystemUtils.WORKING_DIRECTORY;
 
@@ -346,7 +352,7 @@ public class GemFireResourceCollectorApplicationListener
 				FileSystemUtils.deleteRecursive(file);
 			}
 			else {
-				file.delete();
+				tryDelete(file);
 			}
 		}
 
@@ -387,6 +393,45 @@ public class GemFireResourceCollectorApplicationListener
 	public GemFireResourceCollectorApplicationListener tryCleanDiskStoreFiles(boolean enable) {
 		this.tryCleanDiskStoreFilesEnabled = enable;
 		return this;
+	}
+
+	/**
+	 * Tries to delete a {@link File} refering to a single {@link File#isFile() "file"} (not a {@literal directory})
+	 * in the file system.
+	 *
+	 * @param file {@link File} to delete.
+	 * @return a boolean value indicating whether the given {@link File} was successfully deleted.
+	 * @see #tryDelete(File, int, long)
+	 * @see java.io.File
+	 */
+	protected boolean tryDelete(File file) {
+		return tryDelete(file, DEFAULT_DELETE_ATTEMPTS, DEFAULT_DELETE_TIMED_WAIT_INTERVAL);
+	}
+
+	/**
+	 * Tries to delete a {@link File} refering to a single {@link File#isFile() "file"} (not a {@literal directory})
+	 * in the file system.
+	 *
+	 * @param file {@link File} to delete.
+	 * @param attempts {@link Integer} indicating the number of attemps to try and delete the {@link File}.
+	 * @param waitDurationBetweenAttempts {@link Long} indicating the number of milliseconds to wait
+	 * between delete attempts.
+	 * @return a boolean value indicating whether the given {@link File} was successfully deleted.
+	 * @see #tryDelete(File, int, long)
+	 * @see java.io.File
+	 */
+	@SuppressWarnings("all")
+	protected boolean tryDelete(File file, int attempts, long waitDurationBetweenAttempts) {
+
+		if (FileSystemUtils.isFile(file)) {
+
+			long interval = waitDurationBetweenAttempts;
+			long duration = attempts * interval;
+
+			return ThreadUtils.timedWait(duration, interval, file::delete);
+		}
+
+		return false;
 	}
 
 	/**
