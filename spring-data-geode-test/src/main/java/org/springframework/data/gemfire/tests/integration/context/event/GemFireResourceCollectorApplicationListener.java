@@ -349,7 +349,7 @@ public class GemFireResourceCollectorApplicationListener
 
 		for (File file : FileSystemUtils.safeListFiles(directory, GemFireResourceFileFilter.INSTANCE)) {
 			if (FileSystemUtils.isDirectory(file)) {
-				FileSystemUtils.deleteRecursive(file);
+				collectGemFireResources(file);
 			}
 			else {
 				tryDelete(file);
@@ -396,32 +396,31 @@ public class GemFireResourceCollectorApplicationListener
 	}
 
 	/**
-	 * Tries to delete a {@link File} refering to a single {@link File#isFile() "file"} (not a {@literal directory})
-	 * in the file system.
+	 * Tries to delete the given {@link File} referring to a single {@link File#isFile() "file"}
+	 * (not a {@literal directory}) in the file system.
 	 *
 	 * @param file {@link File} to delete.
 	 * @return a boolean value indicating whether the given {@link File} was successfully deleted.
 	 * @see #tryDelete(File, int, long)
 	 * @see java.io.File
 	 */
-	protected boolean tryDelete(File file) {
+	protected boolean tryDelete(@Nullable File file) {
 		return tryDelete(file, DEFAULT_DELETE_ATTEMPTS, DEFAULT_DELETE_TIMED_WAIT_INTERVAL);
 	}
 
 	/**
-	 * Tries to delete a {@link File} refering to a single {@link File#isFile() "file"} (not a {@literal directory})
-	 * in the file system.
+	 * Tries to delete the given {@link File} referring to a single {@link File#isFile() "file"}
+	 * (not a {@literal directory}) in the file system.
 	 *
 	 * @param file {@link File} to delete.
 	 * @param attempts {@link Integer} indicating the number of attemps to try and delete the {@link File}.
 	 * @param waitDurationBetweenAttempts {@link Long} indicating the number of milliseconds to wait
 	 * between delete attempts.
 	 * @return a boolean value indicating whether the given {@link File} was successfully deleted.
-	 * @see #tryDelete(File, int, long)
 	 * @see java.io.File
 	 */
 	@SuppressWarnings("all")
-	protected boolean tryDelete(File file, int attempts, long waitDurationBetweenAttempts) {
+	protected boolean tryDelete(@Nullable File file, int attempts, long waitDurationBetweenAttempts) {
 
 		if (FileSystemUtils.isFile(file)) {
 
