@@ -352,7 +352,9 @@ public class GemFireResourceCollectorApplicationListener
 				collectGemFireResources(file);
 			}
 			else {
-				tryDelete(file);
+				if (!tryDelete(file)) {
+					file.deleteOnExit();
+				}
 			}
 		}
 
