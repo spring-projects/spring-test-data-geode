@@ -2056,7 +2056,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockQueryStatistics;
 	}
 
-	public static <T> SelectResults<T> mockSelectResults() {
+	private static <T> SelectResults<T> mockSelectResults() {
 
 		ObjectType mockObjectType = mock(ObjectType.class, withSettings().lenient());
 
@@ -2078,6 +2078,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doReturn(Collections.emptySet()).when(mockSelectResults).asSet();
 		doReturn(mockCollectionType).when(mockSelectResults).getCollectionType();
 		doReturn(false).when(mockSelectResults).isModifiable();
+		doReturn(Collections.emptyIterator()).when(mockSelectResults).iterator();
 		doReturn(0).when(mockSelectResults).occurrences(any());
 		doNothing().when(mockSelectResults).setElementType(any(ObjectType.class));
 

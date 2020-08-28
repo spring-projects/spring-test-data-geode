@@ -17,6 +17,8 @@ package org.springframework.data.gemfire.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 import org.apache.geode.cache.GemFireCache;
@@ -68,6 +70,11 @@ public class MockCacheQueryServiceInteractionsUnitTests {
 		assertThat(objectType.isMapType()).isFalse();
 		assertThat(objectType.isStructType()).isFalse();
 		assertThat(objectType.resolveClass()).isEqualTo(Object.class);
+
+		Iterator<?> iterator = selectResults.iterator();
+
+		assertThat(iterator).isNotNull();
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
