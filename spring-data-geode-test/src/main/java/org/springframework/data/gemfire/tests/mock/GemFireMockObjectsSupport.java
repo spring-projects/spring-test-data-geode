@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -126,6 +128,9 @@ import org.apache.geode.cache.query.IndexStatistics;
 import org.apache.geode.cache.query.Query;
 import org.apache.geode.cache.query.QueryService;
 import org.apache.geode.cache.query.QueryStatistics;
+import org.apache.geode.cache.query.SelectResults;
+import org.apache.geode.cache.query.types.CollectionType;
+import org.apache.geode.cache.query.types.ObjectType;
 import org.apache.geode.cache.server.CacheServer;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
 import org.apache.geode.cache.server.ServerLoadProbe;
@@ -1809,10 +1814,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		QueryService mockQueryService = mockQueryService();
 
-		when(regionService.getQueryService()).thenReturn(mockQueryService);
+		doReturn(mockQueryService).when(regionService).getQueryService();
 
 		if (regionService instanceof ClientCache) {
-			when(((ClientCache) regionService).getLocalQueryService()).thenReturn(mockQueryService);
+			doReturn(mockQueryService).when((ClientCache) regionService).getLocalQueryService();
+			doReturn(mockQueryService).when((ClientCache) regionService).getQueryService(anyString());
 		}
 
 		return regionService;
@@ -1827,11 +1833,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		Set<Index> indexes = Collections.synchronizedSet(new HashSet<>());
 
 		try {
-			when(mockQueryService.getCqs()).thenAnswer(invocation -> cqQueries.toArray(new CqQuery[cqQueries.size()]));
 
 			when(mockQueryService.getCq(anyString())).thenAnswer(invocation ->
 				cqQueries.stream().filter(cqQuery -> invocation.getArgument(0).equals(cqQuery.getName()))
 					.findFirst().orElse(null));
+
+			when(mockQueryService.getCqs()).thenAnswer(invocation -> cqQueries.toArray(new CqQuery[cqQueries.size()]));
 
 			when(mockQueryService.getCqs(anyString())).thenAnswer(invocation -> {
 
@@ -1856,18 +1863,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				return cqQueriesByRegion.toArray(new CqQuery[cqQueriesByRegion.size()]);
 			});
 
-			when(mockQueryService.getIndexes()).thenReturn(indexes);
-
-			when(mockQueryService.getIndexes(any(Region.class))).thenAnswer(invocation -> {
-
-				Region<?, ?> region = invocation.getArgument(0);
-
-				return indexes.stream()
-					.filter(index -> index.getRegion().equals(region))
-					.collect(Collectors.toList());
-
-			});
-
 			when(mockQueryService.getIndex(any(Region.class), anyString())).thenAnswer(invocation -> {
 
 				Region<?, ?> region = invocation.getArgument(0);
@@ -1879,6 +1874,18 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				return indexesForRegion.stream()
 					.filter(index -> index.getName().equals(indexName))
 					.findFirst().orElse(null);
+
+			});
+
+			when(mockQueryService.getIndexes()).thenReturn(indexes);
+
+			when(mockQueryService.getIndexes(any(Region.class))).thenAnswer(invocation -> {
+
+				Region<?, ?> region = invocation.getArgument(0);
+
+				return indexes.stream()
+					.filter(index -> index.getRegion().equals(region))
+					.collect(Collectors.toList());
 
 			});
 
@@ -1912,6 +1919,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockQueryService.newCq(anyString(), anyString(), any(CqAttributes.class), anyBoolean()))
 				.thenAnswer(invocation -> add(cqQueries, mockCqQuery(invocation.getArgument(0),
 					invocation.getArgument(1), invocation.getArgument(2), invocation.getArgument(3))));
+
+			when(mockQueryService.newQuery(anyString()))
+				.thenAnswer(invocation -> mockQuery(invocation.getArgument(0)));
+
 		}
 		catch (Exception cause) {
 			throw new MockObjectInvocationException(cause);
@@ -2000,8 +2011,20 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		QueryStatistics mockQueryStatistics = mockQueryStatistics(mockQuery);
 
-		when(mockQuery.getQueryString()).thenReturn(queryString);
-		when(mockQuery.getStatistics()).thenReturn(mockQueryStatistics);
+		SelectResults<?> mockSelectResults = mockSelectResults();
+
+		doReturn(queryString).when(mockQuery).getQueryString();
+		doReturn(mockQueryStatistics).when(mockQuery).getStatistics();
+
+		try {
+			doReturn(mockSelectResults).when(mockQuery).execute();
+			doReturn(mockSelectResults).when(mockQuery).execute(any(Object.class));
+			doReturn(mockSelectResults).when(mockQuery).execute(any(RegionFunctionContext.class));
+			doReturn(mockSelectResults).when(mockQuery).execute(any(RegionFunctionContext.class), any());
+		}
+		catch (Throwable cause) {
+			throw new MockObjectInvocationException(cause);
+		}
 
 		return mockQuery;
 	}
@@ -2031,6 +2054,34 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockQueryStatistics.getTotalExecutionTime()).thenReturn(0L);
 
 		return mockQueryStatistics;
+	}
+
+	public static <T> SelectResults<T> mockSelectResults() {
+
+		ObjectType mockObjectType = mock(ObjectType.class, withSettings().lenient());
+
+		doReturn(Object.class.getSimpleName()).when(mockObjectType).getSimpleClassName();
+		doReturn(false).when(mockObjectType).isCollectionType();
+		doReturn(false).when(mockObjectType).isMapType();
+		doReturn(false).when(mockObjectType).isStructType();
+		doReturn(Object.class).when(mockObjectType).resolveClass();
+
+		CollectionType mockCollectionType = mock(CollectionType.class, withSettings().lenient());
+
+		doReturn(false).when(mockCollectionType).allowsDuplicates();
+		doReturn(mockObjectType).when(mockCollectionType).getElementType();
+		doReturn(false).when(mockCollectionType).isOrdered();
+
+		SelectResults<T> mockSelectResults = mock(SelectResults.class, withSettings().lenient());
+
+		doReturn(Collections.emptyList()).when(mockSelectResults).asList();
+		doReturn(Collections.emptySet()).when(mockSelectResults).asSet();
+		doReturn(mockCollectionType).when(mockSelectResults).getCollectionType();
+		doReturn(false).when(mockSelectResults).isModifiable();
+		doReturn(0).when(mockSelectResults).occurrences(any());
+		doNothing().when(mockSelectResults).setElementType(any(ObjectType.class));
+
+		return mockSelectResults;
 	}
 
 	public static Index mockIndex(String name, String expression, String fromClause, IndexType indexType) {
