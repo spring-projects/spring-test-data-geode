@@ -2325,15 +2325,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		mockRegionDataAccessOperations(mockRegion, mockRegionAttributes);
 
-		when(mockRegion.getSubregion(anyString())).thenAnswer(invocation -> {
+		doAnswer(invocation -> {
 
 			String subRegionPath = toRegionPath(invocation.getArgument(0));
 			String subRegionFullPath = String.format("%1$s%2$s", mockRegion.getFullPath(), subRegionPath);
 
 			return regions.get(subRegionFullPath);
-		});
 
-		when(mockRegion.subregions(anyBoolean())).thenAnswer(invocation -> {
+		}).when(mockRegion).getSubregion(anyString());
+
+		doAnswer(invocation -> {
 
 			boolean recursive = invocation.getArgument(0);
 
@@ -2342,7 +2343,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 					.flatMap(subRegion -> subRegion.subregions(true).stream())
 					.collect(Collectors.toSet())
 				: subRegions;
-		});
+
+		}).when(mockRegion).subregions(anyBoolean());
 
 		return rememberMockedRegion(mockRegion);
 	}
