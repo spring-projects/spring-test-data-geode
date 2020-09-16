@@ -2358,6 +2358,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).containsValueForKey(any());
 
+		// Map.forEach(:BiConsumer<K, V>)
 		doAnswer(invocation -> {
 
 			BiConsumer<K, V> consumer = invocation.getArgument(0);
@@ -2368,8 +2369,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).forEach(any(BiConsumer.class));
 
-		// Region.get(key)
-		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {
+		// Map.get(key) / Region.get(key)
+		doAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
 			V value = invalidatedKeys.contains(key) ? null : data.get(key);
@@ -2400,7 +2401,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			}
 
 			return value;
-		});
+
+		}).when(mockRegion).get(ArgumentMatchers.<K>any());
 
 		// Region.getEntry(key)
 		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(regionGetEntryInvocation ->
