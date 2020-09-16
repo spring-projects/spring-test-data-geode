@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -30,7 +32,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -55,6 +59,7 @@ import org.apache.geode.cache.LoaderHelper;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
 import org.apache.geode.cache.RegionService;
+import org.apache.geode.internal.cache.LoaderHelperImpl;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.support.MapBuilder;
@@ -563,5 +568,49 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		this.mockRegion.forEach((key, value) -> entryStrings.add(String.format("%1$s-%2$s", key, value)));
 
 		assertThat(entryStrings).containsExactlyInAnyOrder("1-TEST", "2-MOCK");
+	}
+
+	@Test
+	public void regionGetAllForKeysIsCorrect() {
+
+		Map<Object, Object> expectedResults = MapBuilder.newMapBuilder()
+			.put(1, "ONE")
+			.put(2, "TWO")
+			.put(3, "THREE")
+			.put(4, "FOUR")
+			.put(5, null)
+			.build();
+
+		List<Object> keys = Arrays.asList(null, 1, 2, null, 3, null, 4, 5);
+
+		CacheLoader<Object, Object> mockCacheLoader = mock(CacheLoader.class);
+
+		doAnswer(invocation -> {
+
+			LoaderHelper<Object, Object> loaderHelper = invocation.getArgument(0);
+
+			Object key = loaderHelper.getKey();
+
+			return key != null && key.equals(3) ? "THREE" : null;
+
+		}).when(mockCacheLoader).load(any(LoaderHelper.class));
+
+		RegionAttributes<Object, Object> mockRegionAttributes = this.mockRegion.getAttributes();
+
+		doReturn(mockCacheLoader).when(mockRegionAttributes).getCacheLoader();
+
+		this.mockRegion.put(1, "ONE");
+		this.mockRegion.put(2, "TWO");
+		this.mockRegion.put(4, "FOUR");
+
+		Map<Object, Object> actualResults = this.mockRegion.getAll(keys);
+
+		assertThat(actualResults).isNotNull();
+		assertThat(actualResults).isEqualTo(expectedResults);
+
+		verify(this.mockRegion, times(5)).get(isNotNull());
+		verify(mockCacheLoader, times(2)).load(isA(LoaderHelper.class));
+		verify(mockRegionAttributes, times(2)).getCacheLoader();
+		verifyNoMoreInteractions(mockCacheLoader);
 	}
 }

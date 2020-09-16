@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -2403,6 +2404,23 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return value;
 
 		}).when(mockRegion).get(ArgumentMatchers.<K>any());
+
+		// Region.getAll(:Collection<K>)
+		doAnswer(invocation -> {
+
+			Collection<K> keys = invocation.getArgument(0);
+
+			Map<K, V> result = new HashMap<>(keys.size());
+
+			for (K key : keys) {
+				if (key != null) {
+					result.put(key, mockRegion.get(key));
+				}
+			}
+
+			return result;
+
+		}).when(mockRegion).getAll(any(Collection.class));
 
 		// Region.getEntry(key)
 		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(regionGetEntryInvocation ->
