@@ -513,12 +513,26 @@ You can register a `CacheWriter` along with 1 or more `CacheListeners` and they 
 As stated in the <<unit-tests-mock-region-data>> section above, only the following Region data access operations are
 supported by STDG out-of-the-box (OOTB):
 
-* `containsKey(key)`,
-* `get(key)`,
-* `getEntry(key)`,
-* `invalidate(key)`,
-* `put(key, value)`,
+* `clear()`
+* `containsKey(key)`
+* `containsValue(value)`
+* `containsValueForKey(value)`
+* `forEach(:BiConsumer<K, V>)`
+* `get(key)`
+* `getAll()`
+* `getEntry(key)`
+* `getOrDefault(key, defaultValue)`
+* `invalidate(key)`
+* `isEmpty()`
+* `keySet()`
+* `localClear()`
+* `localValidate()`
+* `put(key, value)`
+* `putAll(:Map<K, V>)`
+* `remove(key)`
+* `removeAll(:Collection<K>)`
 * `size()`
+* `values()`
 
 How then do you mock other Region operations (e.g. `putIfAbsent(key, value)`) provided by the Region API that is not
 supported by STDG OOTB?
