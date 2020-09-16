@@ -2313,18 +2313,17 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	public static <K, V> Region<K, V> mockRegion(RegionService regionService, String name,
 			RegionAttributes<K, V> regionAttributes) {
 
-		Map<K, V> data = new ConcurrentHashMap<>();
-
 		Region<K, V> mockRegion = mock(Region.class, withSettings().name(name).lenient());
 
 		RegionAttributes<K, V> mockRegionAttributes = mockRegionAttributes(mockRegion, regionAttributes);
 
-		Set<K> invalidatedKeys = new HashSet<>();
 		Set<Region<?, ?>> subRegions = new CopyOnWriteArraySet<>();
 
 		when(mockRegion.getFullPath()).thenReturn(toRegionPath(name));
 		when(mockRegion.getName()).thenReturn(toRegionName(name));
 		when(mockRegion.getRegionService()).thenReturn(regionService);
+
+		mockRegionDataAccessOperations(mockRegion, mockRegionAttributes);
 
 		when(mockRegion.getSubregion(anyString())).thenAnswer(invocation -> {
 
@@ -2333,228 +2332,6 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			return regions.get(subRegionFullPath);
 		});
-
-		// Map.clear() / Region.clear()
-		doAnswer(invocation -> {
-			data.clear();
-			return null;
-		}).when(mockRegion).clear();
-
-		// Map.containsKey(key) / Region.containsKey(key)
-		doAnswer(invocation -> data.containsKey(invocation.getArgument(0)))
-			.when(mockRegion).containsKey(any());
-
-		// Map.containsValue(value) / Region.containsValue(value)
-		doAnswer(invocation -> data.containsValue(invocation.getArgument(0)))
-			.when(mockRegion).containsValue(any());
-
-		// Region.containsValueForKey(key)
-		doAnswer(invocation -> {
-
-			K key = invocation.getArgument(0);
-
-			return !invalidatedKeys.contains(key)
-				&& data.containsKey(key)
-				&& Objects.nonNull(data.get(key));
-
-		}).when(mockRegion).containsValueForKey(any());
-
-		// Map.forEach(:BiConsumer<K, V>)
-		doAnswer(invocation -> {
-
-			BiConsumer<K, V> consumer = invocation.getArgument(0);
-
-			data.forEach(consumer);
-
-			return null;
-
-		}).when(mockRegion).forEach(any(BiConsumer.class));
-
-		// Map.get(key) / Region.get(key)
-		doAnswer(invocation -> {
-
-			K key = invocation.getArgument(0);
-			V value = invalidatedKeys.contains(key) ? null : data.get(key);
-
-			if (value == null) {
-
-				value = Optional.ofNullable(mockRegionAttributes.getCacheLoader())
-					.map(cacheLoader -> {
-
-						LoaderHelper<K, V> mockLoaderHelper = mock(LoaderHelper.class, withSettings().lenient());
-
-						when(mockLoaderHelper.getArgument()).thenReturn(null);
-						when(mockLoaderHelper.getKey()).thenReturn(key);
-						when(mockLoaderHelper.getRegion()).thenReturn(mockRegion);
-
-						return cacheLoader.load(mockLoaderHelper);
-
-					})
-					.map(loadedValue -> {
-
-						data.put(key, loadedValue);
-						invalidatedKeys.remove(key);
-
-						return loadedValue;
-
-					})
-					.orElse(value);
-			}
-
-			return value;
-
-		}).when(mockRegion).get(ArgumentMatchers.<K>any());
-
-		// Region.getAll(:Collection<K>)
-		doAnswer(invocation -> {
-
-			Collection<K> keys = invocation.getArgument(0);
-
-			Map<K, V> result = new HashMap<>(keys.size());
-
-			for (K key : keys) {
-				if (key != null) {
-					result.put(key, mockRegion.get(key));
-				}
-			}
-
-			return result;
-
-		}).when(mockRegion).getAll(any(Collection.class));
-
-		// Region.getEntry(key)
-		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(regionGetEntryInvocation ->
-			data.entrySet().stream()
-				.filter(entry -> entry.getKey().equals(regionGetEntryInvocation.getArgument(0)))
-				.findFirst()
-				.map(entry -> {
-
-					Map.Entry<K, V> entrySpy = spy(entry);
-
-					doAnswer(entryGetValueInvocation ->
-							invalidatedKeys.contains(entry.getKey()) ? null : entry.getValue())
-						.when(entrySpy).getValue();
-
-					return entrySpy;
-
-				})
-				.orElse(null));
-
-		// Region.invalidate(key)
-		doAnswer(invocation -> {
-
-			K key = invocation.getArgument(0);
-
-			if (!data.containsKey(key)) {
-				throw new EntryNotFoundException(String.format("Entry with key [%s] not found", key));
-			}
-
-			if (invalidatedKeys.add(key)) {
-
-				EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
-
-				when(mockEntryEvent.getKey()).thenReturn(key);
-				when(mockEntryEvent.getNewValue()).thenReturn(null);
-				when(mockEntryEvent.getOldValue()).thenReturn(data.get(key));
-				when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
-
-				Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
-					.filter(Objects::nonNull)
-					.forEach(cacheListener -> cacheListener.afterInvalidate(mockEntryEvent));
-			}
-
-			return null;
-
-		}).when(mockRegion).invalidate(any());
-
-		// Region.put(key, value)
-		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
-
-			K key = invocation.getArgument(0);
-			V newValue = invocation.getArgument(1);
-
-			Assert.notNull(newValue, "Value is required");
-
-			boolean entryExists = data.containsKey(key);
-
-			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
-
-			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
-
-			when(mockEntryEvent.getKey()).thenReturn(key);
-			when(mockEntryEvent.getNewValue()).thenReturn(newValue);
-			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
-			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
-
-			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
-
-			if (cacheWriter != null) {
-				try {
-					if (entryExists) {
-						cacheWriter.beforeUpdate(mockEntryEvent);
-					}
-					else {
-						cacheWriter.beforeCreate(mockEntryEvent);
-					}
-				}
-				catch (Throwable cause) {
-					throw new CacheWriterException("Create/Update Error", cause);
-				}
-			}
-
-			V existingValue = data.put(key, newValue);
-
-			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
-				.filter(Objects::nonNull)
-				.forEach(cacheListener -> {
-
-					if (entryExists) {
-						cacheListener.afterUpdate(mockEntryEvent);
-					}
-					else {
-						cacheListener.afterCreate(mockEntryEvent);
-					}
-				});
-
-			return invalidatedKeys.remove(key) ? null : existingValue;
-		});
-
-		// Region.remove(key)
-		when(mockRegion.remove(any())).thenAnswer(invocation -> {
-
-			K key = invocation.getArgument(0);
-
-			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
-
-			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
-
-			when(mockEntryEvent.getKey()).thenReturn(key);
-			when(mockEntryEvent.getNewValue()).thenReturn(null);
-			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
-			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
-
-			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
-
-			if (cacheWriter != null) {
-				try {
-					cacheWriter.beforeDestroy(mockEntryEvent);
-				}
-				catch (Throwable cause) {
-					throw new CacheWriterException("Destroy Error", cause);
-				}
-			}
-
-			V value  = data.remove(key);
-
-			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
-				.filter(Objects::nonNull)
-				.forEach(cacheListener -> cacheListener.afterDestroy(mockEntryEvent));
-
-			return invalidatedKeys.remove(key) ? null : value;
-		});
-
-		// Region.size()
-		doAnswer(invocation -> data.size()).when(mockRegion).size();
 
 		when(mockRegion.subregions(anyBoolean())).thenAnswer(invocation -> {
 
@@ -2748,6 +2525,236 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionAttributes.isLockGrantor()).thenAnswer(newGetter(baseRegionAttributes::isLockGrantor));
 
 		return mockRegionAttributes;
+	}
+
+	private static <K, V> void mockRegionDataAccessOperations(Region<K, V> mockRegion,
+			RegionAttributes<K, V> mockRegionAttributes) {
+
+		Map<K, V> data = new ConcurrentHashMap<>();
+
+		Set<K> invalidatedKeys = new HashSet<>();
+
+		// Map.clear() / Region.clear()
+		doAnswer(invocation -> {
+			data.clear();
+			return null;
+		}).when(mockRegion).clear();
+
+		// Map.containsKey(key) / Region.containsKey(key)
+		doAnswer(invocation -> data.containsKey(invocation.getArgument(0)))
+			.when(mockRegion).containsKey(any());
+
+		// Map.containsValue(value) / Region.containsValue(value)
+		doAnswer(invocation -> data.containsValue(invocation.getArgument(0)))
+			.when(mockRegion).containsValue(any());
+
+		// Region.containsValueForKey(key)
+		doAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+
+			return !invalidatedKeys.contains(key)
+				&& data.containsKey(key)
+				&& Objects.nonNull(data.get(key));
+
+		}).when(mockRegion).containsValueForKey(any());
+
+		// Map.forEach(:BiConsumer<K, V>)
+		doAnswer(invocation -> {
+
+			BiConsumer<K, V> consumer = invocation.getArgument(0);
+
+			data.forEach(consumer);
+
+			return null;
+
+		}).when(mockRegion).forEach(any(BiConsumer.class));
+
+		// Map.get(key) / Region.get(key)
+		doAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+			V value = invalidatedKeys.contains(key) ? null : data.get(key);
+
+			if (value == null) {
+
+				value = Optional.ofNullable(mockRegionAttributes.getCacheLoader())
+					.map(cacheLoader -> {
+
+						LoaderHelper<K, V> mockLoaderHelper = mock(LoaderHelper.class, withSettings().lenient());
+
+						when(mockLoaderHelper.getArgument()).thenReturn(null);
+						when(mockLoaderHelper.getKey()).thenReturn(key);
+						when(mockLoaderHelper.getRegion()).thenReturn(mockRegion);
+
+						return cacheLoader.load(mockLoaderHelper);
+
+					})
+					.map(loadedValue -> {
+
+						data.put(key, loadedValue);
+						invalidatedKeys.remove(key);
+
+						return loadedValue;
+
+					})
+					.orElse(value);
+			}
+
+			return value;
+
+		}).when(mockRegion).get(ArgumentMatchers.<K>any());
+
+		// Region.getAll(:Collection<K>)
+		doAnswer(invocation -> {
+
+			Collection<K> keys = invocation.getArgument(0);
+
+			Map<K, V> result = new HashMap<>(keys.size());
+
+			for (K key : keys) {
+				if (key != null) {
+					result.put(key, mockRegion.get(key));
+				}
+			}
+
+			return result;
+
+		}).when(mockRegion).getAll(any(Collection.class));
+
+		// Region.getEntry(key)
+		when(mockRegion.getEntry(ArgumentMatchers.<K>any())).thenAnswer(regionGetEntryInvocation ->
+			data.entrySet().stream()
+				.filter(entry -> entry.getKey().equals(regionGetEntryInvocation.getArgument(0)))
+				.findFirst()
+				.map(entry -> {
+
+					Map.Entry<K, V> entrySpy = spy(entry);
+
+					doAnswer(entryGetValueInvocation ->
+						invalidatedKeys.contains(entry.getKey()) ? null : entry.getValue())
+						.when(entrySpy).getValue();
+
+					return entrySpy;
+
+				})
+				.orElse(null));
+
+		// Region.invalidate(key)
+		doAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+
+			if (!data.containsKey(key)) {
+				throw new EntryNotFoundException(String.format("Entry with key [%s] not found", key));
+			}
+
+			if (invalidatedKeys.add(key)) {
+
+				EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+				when(mockEntryEvent.getKey()).thenReturn(key);
+				when(mockEntryEvent.getNewValue()).thenReturn(null);
+				when(mockEntryEvent.getOldValue()).thenReturn(data.get(key));
+				when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+				Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+					.filter(Objects::nonNull)
+					.forEach(cacheListener -> cacheListener.afterInvalidate(mockEntryEvent));
+			}
+
+			return null;
+
+		}).when(mockRegion).invalidate(any());
+
+		// Region.put(key, value)
+		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+			V newValue = invocation.getArgument(1);
+
+			Assert.notNull(newValue, "Value is required");
+
+			boolean entryExists = data.containsKey(key);
+
+			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
+
+			when(mockEntryEvent.getKey()).thenReturn(key);
+			when(mockEntryEvent.getNewValue()).thenReturn(newValue);
+			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
+			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
+
+			if (cacheWriter != null) {
+				try {
+					if (entryExists) {
+						cacheWriter.beforeUpdate(mockEntryEvent);
+					}
+					else {
+						cacheWriter.beforeCreate(mockEntryEvent);
+					}
+				}
+				catch (Throwable cause) {
+					throw new CacheWriterException("Create/Update Error", cause);
+				}
+			}
+
+			V existingValue = data.put(key, newValue);
+
+			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+				.filter(Objects::nonNull)
+				.forEach(cacheListener -> {
+
+					if (entryExists) {
+						cacheListener.afterUpdate(mockEntryEvent);
+					}
+					else {
+						cacheListener.afterCreate(mockEntryEvent);
+					}
+				});
+
+			return invalidatedKeys.remove(key) ? null : existingValue;
+		});
+
+		// Region.remove(key)
+		when(mockRegion.remove(any())).thenAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+
+			EntryEvent<K, V> mockEntryEvent = mock(EntryEvent.class, withSettings().lenient());
+
+			V entryEventValue = invalidatedKeys.contains(key) ? null : data.get(key);
+
+			when(mockEntryEvent.getKey()).thenReturn(key);
+			when(mockEntryEvent.getNewValue()).thenReturn(null);
+			when(mockEntryEvent.getOldValue()).thenReturn(entryEventValue);
+			when(mockEntryEvent.getRegion()).thenReturn(mockRegion);
+
+			CacheWriter<K, V> cacheWriter = mockRegionAttributes.getCacheWriter();
+
+			if (cacheWriter != null) {
+				try {
+					cacheWriter.beforeDestroy(mockEntryEvent);
+				}
+				catch (Throwable cause) {
+					throw new CacheWriterException("Destroy Error", cause);
+				}
+			}
+
+			V value  = data.remove(key);
+
+			Arrays.stream(ArrayUtils.nullSafeArray(mockRegionAttributes.getCacheListeners(), CacheListener.class))
+				.filter(Objects::nonNull)
+				.forEach(cacheListener -> cacheListener.afterDestroy(mockEntryEvent));
+
+			return invalidatedKeys.remove(key) ? null : value;
+		});
+
+		// Region.size()
+		doAnswer(invocation -> data.size()).when(mockRegion).size();
 	}
 
 	public static <K, V> Region<K, V> mockSubRegion(Region<K, V> parent, String name,
