@@ -2642,6 +2642,17 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				})
 				.orElse(null));
 
+		// Map.getOrDefault(key, defaultValue)
+		doAnswer(invocation -> {
+
+			Object key = invocation.getArgument(0);
+			Object value = data.get(key);
+			Object defaultValue = invocation.getArgument(1);
+
+			return value != null ? value : defaultValue;
+
+		}).when(mockRegion).getOrDefault(any(), any());
+
 		// Region.invalidate(key)
 		doAnswer(invocation -> {
 

@@ -59,7 +59,6 @@ import org.apache.geode.cache.LoaderHelper;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
 import org.apache.geode.cache.RegionService;
-import org.apache.geode.internal.cache.LoaderHelperImpl;
 
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.support.MapBuilder;
@@ -612,5 +611,14 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		verify(mockCacheLoader, times(2)).load(isA(LoaderHelper.class));
 		verify(mockRegionAttributes, times(2)).getCacheLoader();
 		verifyNoMoreInteractions(mockCacheLoader);
+	}
+
+	@Test
+	public void mapGetOrDefaultIsCorrect() {
+
+		this.mockRegion.put(1, "TEST");
+
+		assertThat(this.mockRegion.getOrDefault(1, "MOCK")).isEqualTo("TEST");
+		assertThat(this.mockRegion.getOrDefault(2, "MOCK")).isEqualTo("MOCK");
 	}
 }
