@@ -621,4 +621,21 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		assertThat(this.mockRegion.getOrDefault(1, "MOCK")).isEqualTo("TEST");
 		assertThat(this.mockRegion.getOrDefault(2, "MOCK")).isEqualTo("MOCK");
 	}
+
+	@Test
+	public void mapRegionIsEmptyIsCorrect() {
+
+		assertThat(this.mockRegion).hasSize(0);
+		assertThat(this.mockRegion).isEmpty();
+
+		this.mockRegion.put(1, "TEST");
+
+		assertThat(this.mockRegion).hasSize(1);
+		assertThat(this.mockRegion).isNotEmpty();
+
+		this.mockRegion.remove(1);
+
+		assertThat(this.mockRegion).hasSize(0);
+		assertThat(this.mockRegion).isEmpty();
+	}
 }
