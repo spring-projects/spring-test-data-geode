@@ -2699,7 +2699,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		}).when(mockRegion).localInvalidate(any());
 
 		// Region.put(key, value)
-		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
+		doAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
 			V newValue = invocation.getArgument(1);
@@ -2748,7 +2748,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				});
 
 			return invalidatedKeys.remove(key) ? null : existingValue;
-		});
+
+		}).when(mockRegion).put(any(), any());
 
 		// Region.remove(key)
 		when(mockRegion.remove(any())).thenAnswer(invocation -> {
