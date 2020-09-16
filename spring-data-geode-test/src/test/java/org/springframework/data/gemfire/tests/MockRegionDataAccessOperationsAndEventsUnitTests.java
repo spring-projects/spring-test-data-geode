@@ -488,4 +488,19 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		assertThat(this.mockRegion).containsKey(1);
 		assertThat(this.mockRegion.get(1)).isEqualTo("test");
 	}
+
+	@Test
+	public void mapRegionClearIsCorrect() {
+
+		assertThat(this.mockRegion).hasSize(0);
+
+		this.mockRegion.put(1, "TEST");
+		this.mockRegion.put(2, "MOCK");
+
+		assertThat(this.mockRegion).hasSize(2);
+
+		this.mockRegion.clear();
+
+		assertThat(this.mockRegion).hasSize(0);
+	}
 }

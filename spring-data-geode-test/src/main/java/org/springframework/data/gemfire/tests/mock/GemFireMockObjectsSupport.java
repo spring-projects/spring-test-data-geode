@@ -2332,7 +2332,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return regions.get(subRegionFullPath);
 		});
 
-		// Region.containsKey(key)
+		// Map.clear() / Region.clear()
+		doAnswer(invocation -> {
+			data.clear();
+			return null;
+		}).when(mockRegion).clear();
+
+		// Map.containsKey(key) / Region.containsKey(key)
 		when(mockRegion.containsKey(any())).thenAnswer(invocation ->
 			data.containsKey(invocation.getArgument(0)));
 
@@ -2502,7 +2508,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		});
 
 		// Region.size()
-		when(mockRegion.size()).thenAnswer(invocation -> data.size());
+		doAnswer(invocation -> data.size()).when(mockRegion).size();
 
 		when(mockRegion.subregions(anyBoolean())).thenAnswer(invocation -> {
 
