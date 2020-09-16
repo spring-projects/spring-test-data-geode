@@ -2342,8 +2342,20 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(invocation -> data.containsKey(invocation.getArgument(0)))
 			.when(mockRegion).containsKey(any());
 
+		// Map.containsValue(value) / Region.containsValue(value)
 		doAnswer(invocation -> data.containsValue(invocation.getArgument(0)))
 			.when(mockRegion).containsValue(any());
+
+		// Region.containsValueForKey(key)
+		doAnswer(invocation -> {
+
+			K key = invocation.getArgument(0);
+
+			return !invalidatedKeys.contains(key)
+				&& data.containsKey(key)
+				&& Objects.nonNull(data.get(key));
+
+		}).when(mockRegion).containsValueForKey(any());
 
 		// Region.get(key)
 		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {

@@ -529,4 +529,20 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		assertThat(this.mockRegion.containsValue("Mock")).isFalse();
 		assertThat(this.mockRegion.containsValue("mock")).isFalse();
 	}
+
+	@Test
+	public void regionContainsValueForKeyIsCorrect() {
+
+		assertThat(this.mockRegion).hasSize(0);
+
+		this.mockRegion.put(1, "TEST");
+		this.mockRegion.put(2, "MOCK");
+		this.mockRegion.invalidate(2);
+
+		assertThat(this.mockRegion).hasSize(2);
+		assertThat(this.mockRegion.containsValueForKey(1)).isTrue();
+		assertThat(this.mockRegion.containsValueForKey(1L)).isFalse();
+		assertThat(this.mockRegion.containsValueForKey(2)).isFalse();
+		assertThat(this.mockRegion.containsValueForKey(3)).isFalse();
+	}
 }
