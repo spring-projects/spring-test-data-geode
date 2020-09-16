@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -747,5 +748,41 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		verify(this.mockRegion, times(1)).remove(eq(1));
 		verify(this.mockRegion, times(1)).remove(eq(2));
 		verify(this.mockRegion, never()).remove(eq(3));
+	}
+
+	@Test
+	public void mapRegionValuesIsCorrect() {
+
+		this.mockRegion.put(1, "TEST");
+		this.mockRegion.put(2, "MOCK");
+		this.mockRegion.put(3, "NULL");
+
+		Collection<Object> values = this.mockRegion.values();
+
+		assertThat(values).isNotNull();
+		assertThat(values).hasSize(3);
+		assertThat(values).containsExactlyInAnyOrder("TEST", "MOCK", "NULL");
+
+		this.mockRegion.put(3, "THREE");
+		this.mockRegion.put(4, "FOUR");
+
+		values = this.mockRegion.values();
+
+		assertThat(values).isNotNull();
+		assertThat(values).hasSize(4);
+		assertThat(values).containsExactlyInAnyOrder("TEST", "MOCK", "THREE", "FOUR");
+
+		this.mockRegion.removeAll(Arrays.asList(3, 4));
+
+		values = this.mockRegion.values();
+
+		assertThat(values).isNotNull();
+		assertThat(values).hasSize(2);
+		assertThat(values).containsExactlyInAnyOrder("TEST", "MOCK");
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void mapRegionValuesIsUnmodifiable() {
+		this.mockRegion.values().add("TEST");
 	}
 }

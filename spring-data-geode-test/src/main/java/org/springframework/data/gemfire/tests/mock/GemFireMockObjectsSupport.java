@@ -2551,6 +2551,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			.when(mockRegion).containsValue(any());
 
 		// Region.containsValueForKey(key)
+		// NOTE: This containsValueForKey(..) operation is not atomic
 		doAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
@@ -2608,6 +2609,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		}).when(mockRegion).get(ArgumentMatchers.<K>any());
 
 		// Region.getAll(:Collection<K>)
+		// NOTE: This getAll(..) operation is not atomic
 		doAnswer(invocation -> {
 
 			Collection<K> keys = invocation.getArgument(0);
@@ -2752,6 +2754,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		}).when(mockRegion).put(any(), any());
 
 		// Map.putAll(:Map<K, V>) / Region.putAll(:Map<K, V>)
+		// NOTE: This putAll(..) operation is not atomic
 		doAnswer(invocation -> {
 
 			Map<K, V> map = invocation.getArgument(0);
@@ -2762,6 +2765,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return null;
 
 		}).when(mockRegion).putAll(any(Map.class));
+
+		// TODO Map.putIfAbsent(key, value) / Region.putIfAbsent(key, value) ???
 
 		// Map.remove(key) / Region.remove(key)
 		doAnswer(invocation -> {
@@ -2798,7 +2803,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).remove(any());
 
+		// TODO Map.remove(key, value) / Region.remove(key, value) ???
+
 		// Region.removeAll(:Collection<K>)
+		// NOTE: This removeAll(..) implementation is not atomic
 		doAnswer(invocation -> {
 
 			Collection<K> keys = invocation.getArgument(0);
@@ -2811,8 +2819,15 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).removeAll(any(Collection.class));
 
+		// TODO Map.replace(key, value) / Region.replace(key, value) ???
+		// TODO Map.replace(key, oldValue, newValue) / Region.replace(key, oldValue, newValue) ???
+		// TODO Map.replaceAll(:BiFunction<K, V) ???
+
 		// Region.size()
 		doAnswer(invocation -> data.size()).when(mockRegion).size();
+
+		// Map.values() / Region.values()
+		doAnswer(invocation -> Collections.unmodifiableCollection(data.values())).when(mockRegion).values();
 	}
 
 	public static <K, V> Region<K, V> mockSubRegion(Region<K, V> parent, String name,
