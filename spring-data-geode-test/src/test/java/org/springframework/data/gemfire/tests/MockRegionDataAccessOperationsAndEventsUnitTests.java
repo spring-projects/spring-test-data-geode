@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import org.apache.geode.UnmodifiableException;
 import org.apache.geode.cache.CacheListener;
 import org.apache.geode.cache.CacheLoader;
 import org.apache.geode.cache.CacheWriter;
@@ -637,5 +638,44 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 
 		assertThat(this.mockRegion).hasSize(0);
 		assertThat(this.mockRegion).isEmpty();
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void mapRegionKeySetIsCorrect() {
+
+		Set keys = this.mockRegion.keySet();
+
+		assertThat(keys).isNotNull();
+		assertThat(keys).isEmpty();
+
+		this.mockRegion.put(1, "TEST");
+
+		keys = this.mockRegion.keySet();
+
+		assertThat(keys).isNotNull();
+		assertThat(keys).hasSize(1);
+		assertThat(keys).containsExactlyInAnyOrder(1);
+
+		this.mockRegion.put(2, "MOCK");
+
+		keys = this.mockRegion.keySet();
+
+		assertThat(keys).isNotNull();
+		assertThat(keys).hasSize(2);
+		assertThat(keys).containsExactlyInAnyOrder(1, 2);
+
+		this.mockRegion.remove(1);
+
+		keys = this.mockRegion.keySet();
+
+		assertThat(keys).isNotNull();
+		assertThat(keys).hasSize(1);
+		assertThat(keys).containsExactlyInAnyOrder(2);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void mapRegionKeySetIsUnmodifiable() {
+		this.mockRegion.keySet().add(1);
 	}
 }

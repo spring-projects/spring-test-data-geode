@@ -2683,6 +2683,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		// Map.isEmpty() / Region.isEmpty()
 		doAnswer(invocation -> data.isEmpty()).when(mockRegion).isEmpty();
 
+		// Map.keySet() / Region.keySet()
+		doAnswer(invocation -> Collections.unmodifiableSet(data.keySet())).when(mockRegion).keySet();
+
 		// Region.put(key, value)
 		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
 
