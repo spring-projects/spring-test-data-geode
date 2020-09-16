@@ -2751,6 +2751,18 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).put(any(), any());
 
+		// Map.putAll(:Map<K, V>) / Region.putAll(:Map<K, V>)
+		doAnswer(invocation -> {
+
+			Map<K, V> map = invocation.getArgument(0);
+
+			CollectionUtils.nullSafeMap(map).entrySet()
+				.forEach(entry -> mockRegion.put(entry.getKey(), entry.getValue()));
+
+			return null;
+
+		}).when(mockRegion).putAll(any(Map.class));
+
 		// Region.remove(key)
 		when(mockRegion.remove(any())).thenAnswer(invocation -> {
 

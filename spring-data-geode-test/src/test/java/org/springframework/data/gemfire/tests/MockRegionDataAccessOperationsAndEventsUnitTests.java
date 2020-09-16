@@ -707,4 +707,23 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 
 		verify(this.mockRegion, times(1)).invalidate(eq(1));
 	}
+
+	@Test
+	public void mapRegionPutAllIsCorrect() {
+
+		Map<Object, Object> map = MapBuilder.newMapBuilder()
+			.put(1, "TEST")
+			.put(2, "MOCK")
+			.build();
+
+		assertThat(this.mockRegion).isEmpty();
+
+		this.mockRegion.putAll(map);
+
+		assertThat(this.mockRegion).hasSize(map.size());
+		assertThat(this.mockRegion.getAll(map.keySet())).isEqualTo(map);
+
+		verify(this.mockRegion, times(1)).put(eq(1), eq("TEST"));
+		verify(this.mockRegion, times(1)).put(eq(2), eq("MOCK"));
+	}
 }
