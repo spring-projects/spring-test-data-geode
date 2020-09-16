@@ -67,6 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -2356,6 +2357,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				&& Objects.nonNull(data.get(key));
 
 		}).when(mockRegion).containsValueForKey(any());
+
+		doAnswer(invocation -> {
+
+			BiConsumer<K, V> consumer = invocation.getArgument(0);
+
+			data.forEach(consumer);
+
+			return null;
+
+		}).when(mockRegion).forEach(any(BiConsumer.class));
 
 		// Region.get(key)
 		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {

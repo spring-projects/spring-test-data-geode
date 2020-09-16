@@ -30,8 +30,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
@@ -544,5 +546,22 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 		assertThat(this.mockRegion.containsValueForKey(1L)).isFalse();
 		assertThat(this.mockRegion.containsValueForKey(2)).isFalse();
 		assertThat(this.mockRegion.containsValueForKey(3)).isFalse();
+	}
+
+	@Test
+	public void mapForEachIsCorrect() {
+
+		Set<String> entryStrings = new HashSet<>(2);
+
+		assertThat(this.mockRegion).hasSize(0);
+
+		this.mockRegion.put(1, "TEST");
+		this.mockRegion.put(2, "MOCK");
+
+		assertThat(this.mockRegion).hasSize(2);
+
+		this.mockRegion.forEach((key, value) -> entryStrings.add(String.format("%1$s-%2$s", key, value)));
+
+		assertThat(entryStrings).containsExactlyInAnyOrder("1-TEST", "2-MOCK");
 	}
 }
