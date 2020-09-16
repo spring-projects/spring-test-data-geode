@@ -2058,6 +2058,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockQueryStatistics;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <T> SelectResults<T> mockSelectResults() {
 
 		ObjectType mockObjectType = mock(ObjectType.class, withSettings().lenient());
@@ -2115,6 +2116,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockLuceneIndexFactory(null);
 	}
 
+	@SuppressWarnings("unchecked")
 	private static LuceneIndexFactory mockLuceneIndexFactory(Map<LuceneIndexKey, LuceneIndex> luceneIndexes) {
 
 		LuceneIndexFactory mockLuceneIndexFactory = mock(LuceneIndexFactory.class);
@@ -2529,6 +2531,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockRegionAttributes;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <K, V> void mockRegionDataAccessOperations(Region<K, V> mockRegion,
 			RegionAttributes<K, V> mockRegionAttributes) {
 
@@ -3403,6 +3406,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		localGemFireProperties.putAll(withGemFireSystemProperties());
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Properties withGemFireApiProperties(Object cacheFactory, String gemfirePropertiesFieldName) {
 
 		Class<?> cacheFactoryType = Optional.ofNullable(cacheFactory)
