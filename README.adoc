@@ -1,7 +1,7 @@
 image:https://api.travis-ci.org/spring-projects/spring-test-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-test-data-geode"]
 
 [[about]]
-== Spring Test Framework for Apache Geode & VMware GemFire
+== Spring Test Framework for Apache Geode & VMware Tanzu GemFire
 
 The STDG project is a _Spring Data_ module, building on the core _Spring Framework's_ `TestContext`, used to write
 _Unit_ and _Integration Tests_ when building _Spring Data_ for https://geode.apache.org/[Apache Geode]
