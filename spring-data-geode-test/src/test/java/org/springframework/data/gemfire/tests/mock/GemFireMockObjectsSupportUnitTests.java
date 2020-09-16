@@ -17,6 +17,7 @@ package org.springframework.data.gemfire.tests.mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -117,6 +118,26 @@ public class GemFireMockObjectsSupportUnitTests {
 		assertThat(mockClientSubscriptionConfig.getCapacity()).isEqualTo(1024);
 		assertThat(mockClientSubscriptionConfig.getDiskStoreName()).isEqualTo("TestDiskStore");
 		assertThat(mockClientSubscriptionConfig.getEvictionPolicy()).isEqualTo("entry");
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void mockSubRegionIsCorrect() {
+
+		Region mockRegion = mock(Region.class);
+
+		doReturn("MockRegion").when(mockRegion).getName();
+		doReturn("/MockRegion").when(mockRegion).getFullPath();
+
+		RegionAttributes mockRegionAttributes = mock(RegionAttributes.class);
+
+		Region mockSubRegion = GemFireMockObjectsSupport.mockSubRegion(mockRegion, "MockSubRegion",
+			mockRegionAttributes);
+
+		assertThat(mockSubRegion).isNotNull();
+		assertThat(mockSubRegion.getName()).isEqualTo("MockSubRegion");
+		assertThat(mockSubRegion.getFullPath()).isEqualTo("/MockRegion/MockSubRegion");
+		assertThat(mockSubRegion.getParentRegion()).isEqualTo(mockRegion);
 	}
 
 	@Test

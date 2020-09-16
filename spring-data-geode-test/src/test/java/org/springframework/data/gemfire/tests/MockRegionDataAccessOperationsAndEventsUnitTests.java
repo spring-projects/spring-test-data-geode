@@ -465,7 +465,7 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 
 	@Test
 	@SuppressWarnings("all")
-	public void mockingPutIfAbsentWorksAsExpected() {
+	public void mockingUnsupportedPutIfAbsentWorksAsExpected() {
 
 		doAnswer(invocation -> {
 

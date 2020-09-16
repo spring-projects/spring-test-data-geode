@@ -623,7 +623,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 				int lastIndexOfRegionSeparator = it.lastIndexOf(Region.SEPARATOR);
 
-				return lastIndexOfRegionSeparator < 0 ? it : it.substring(lastIndexOfRegionSeparator);
+				return lastIndexOfRegionSeparator < 0 ? it : it.substring(lastIndexOfRegionSeparator + 1);
 			})
 			.filter(it -> !it.isEmpty())
 			.orElseThrow(() -> newIllegalArgumentException("Region name [%s] is required", regionName));
@@ -2776,6 +2776,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		String subRegionName = String.format("%1$s%2$s", parent.getFullPath(), toRegionPath(name));
 
 		Region<K, V> mockSubRegion = mockRegion(parent.getRegionService(), subRegionName, regionAttributes);
+
+		doReturn(parent).when(mockSubRegion).getParentRegion();
 
 		parent.subregions(false).add(mockSubRegion);
 
