@@ -36,11 +36,20 @@ import org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
 
 /**
- * Unit tests for {@link GemFireMockObjectsSupport}.
+ * Unit Tests for {@link GemFireMockObjectsSupport}.
  *
  * @author John Blum
  * @see org.junit.Test
  * @see org.mockito.Mockito
+ * @see org.apache.geode.cache.AttributesMutator
+ * @see org.apache.geode.cache.Cache
+ * @see org.apache.geode.cache.Region
+ * @see org.apache.geode.cache.RegionAttributes
+ * @see org.apache.geode.cache.RegionService
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventListener
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
+ * @see org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory
+ * @see org.apache.geode.cache.server.ClientSubscriptionConfig
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 1.0.0
  */

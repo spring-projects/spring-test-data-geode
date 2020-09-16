@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -570,7 +571,7 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 	}
 
 	@Test
-	public void regionGetAllForKeysIsCorrect() {
+	public void regionGetAllKeysIsCorrect() {
 
 		Map<Object, Object> expectedResults = MapBuilder.newMapBuilder()
 			.put(1, "ONE")
@@ -725,5 +726,25 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 
 		verify(this.mockRegion, times(1)).put(eq(1), eq("TEST"));
 		verify(this.mockRegion, times(1)).put(eq(2), eq("MOCK"));
+	}
+
+	@Test
+	public void regionRemoveAllKeysIsCorrect() {
+
+		this.mockRegion.put(1, "TEST");
+		this.mockRegion.put(2, "MOCK");
+		this.mockRegion.put(3, "NULL");
+
+		assertThat(this.mockRegion).hasSize(3);
+
+		this.mockRegion.removeAll(Arrays.asList(1, 2));
+
+		assertThat(this.mockRegion).hasSize(1);
+		assertThat(this.mockRegion).doesNotContainKeys(1, 2);
+		assertThat(this.mockRegion.get(3)).isEqualTo("NULL");
+
+		verify(this.mockRegion, times(1)).remove(eq(1));
+		verify(this.mockRegion, times(1)).remove(eq(2));
+		verify(this.mockRegion, never()).remove(eq(3));
 	}
 }

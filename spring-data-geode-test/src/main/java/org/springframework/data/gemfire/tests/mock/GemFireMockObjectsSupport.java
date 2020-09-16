@@ -2797,6 +2797,19 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return invalidatedKeys.remove(key) ? null : value;
 		});
 
+		// Region.removeAll(:Collection<K>)
+		doAnswer(invocation -> {
+
+			Collection<K> keys = invocation.getArgument(0);
+
+			CollectionUtils.nullSafeCollection(keys).stream()
+				.filter(Objects::nonNull)
+				.forEach(mockRegion::remove);
+
+			return null;
+
+		}).when(mockRegion).removeAll(any(Collection.class));
+
 		// Region.size()
 		doAnswer(invocation -> data.size()).when(mockRegion).size();
 	}
