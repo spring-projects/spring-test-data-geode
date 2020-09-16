@@ -2692,6 +2692,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return null;
 		}).when(mockRegion).localClear();
 
+		// Region.localInvalidate(key)
+		doAnswer(invocation -> {
+			mockRegion.invalidate(invocation.getArgument(0));
+			return null;
+		}).when(mockRegion).localInvalidate(any());
+
 		// Region.put(key, value)
 		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
 

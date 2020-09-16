@@ -693,4 +693,18 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 
 		verify(this.mockRegion, times(1)).clear();
 	}
+
+	@Test
+	public void regionLocalInvalidateCallsRegionInvalidate() {
+
+		this.mockRegion.put(1, "TEST");
+
+		assertThat(this.mockRegion.get(1)).isEqualTo("TEST");
+
+		this.mockRegion.localInvalidate(1);
+
+		assertThat(this.mockRegion.get(1)).isNull();
+
+		verify(this.mockRegion, times(1)).invalidate(eq(1));
+	}
 }
