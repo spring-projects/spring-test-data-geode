@@ -2339,7 +2339,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		}).when(mockRegion).clear();
 
 		// Map.containsKey(key) / Region.containsKey(key)
-		doAnswer(invocation -> data.containsKey(invocation.getArgument(0))).when(mockRegion).containsKey(any());
+		doAnswer(invocation -> data.containsKey(invocation.getArgument(0)))
+			.when(mockRegion).containsKey(any());
+
+		doAnswer(invocation -> data.containsValue(invocation.getArgument(0)))
+			.when(mockRegion).containsValue(any());
 
 		// Region.get(key)
 		when(mockRegion.get(ArgumentMatchers.<K>any())).thenAnswer(invocation -> {
