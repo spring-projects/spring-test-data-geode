@@ -2686,6 +2686,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		// Map.keySet() / Region.keySet()
 		doAnswer(invocation -> Collections.unmodifiableSet(data.keySet())).when(mockRegion).keySet();
 
+		// Region.localClear()
+		doAnswer(invocation -> {
+			mockRegion.clear();
+			return null;
+		}).when(mockRegion).localClear();
+
 		// Region.put(key, value)
 		when(mockRegion.put(any(), any())).thenAnswer(invocation -> {
 

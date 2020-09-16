@@ -49,7 +49,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import org.apache.geode.UnmodifiableException;
 import org.apache.geode.cache.CacheListener;
 import org.apache.geode.cache.CacheLoader;
 import org.apache.geode.cache.CacheWriter;
@@ -677,5 +676,21 @@ public class MockRegionDataAccessOperationsAndEventsUnitTests {
 	@Test(expected = UnsupportedOperationException.class)
 	public void mapRegionKeySetIsUnmodifiable() {
 		this.mockRegion.keySet().add(1);
+	}
+
+	@Test
+	public void regionLocalClearCallsRegionClear() {
+
+		assertThat(this.mockRegion).isEmpty();
+
+		this.mockRegion.put(1, "TEST");
+
+		assertThat(this.mockRegion).hasSize(1);
+
+		this.mockRegion.localClear();
+
+		assertThat(this.mockRegion).isEmpty();
+
+		verify(this.mockRegion, times(1)).clear();
 	}
 }
