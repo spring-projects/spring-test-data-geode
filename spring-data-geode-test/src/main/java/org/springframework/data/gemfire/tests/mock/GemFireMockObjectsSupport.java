@@ -2763,8 +2763,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockRegion).putAll(any(Map.class));
 
-		// Region.remove(key)
-		when(mockRegion.remove(any())).thenAnswer(invocation -> {
+		// Map.remove(key) / Region.remove(key)
+		doAnswer(invocation -> {
 
 			K key = invocation.getArgument(0);
 
@@ -2795,7 +2795,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				.forEach(cacheListener -> cacheListener.afterDestroy(mockEntryEvent));
 
 			return invalidatedKeys.remove(key) ? null : value;
-		});
+
+		}).when(mockRegion).remove(any());
 
 		// Region.removeAll(:Collection<K>)
 		doAnswer(invocation -> {

@@ -65,7 +65,7 @@ import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.support.MapBuilder;
 
 /**
- * Unit Tests for Mock {@link Region}.
+ * Unit Tests for Mock {@link Region} Data Access Operations and Events.
  *
  * @author John Blum
  * @see org.junit.Test
@@ -75,6 +75,7 @@ import org.springframework.data.gemfire.tests.support.MapBuilder;
  * @see org.apache.geode.cache.CacheLoader
  * @see org.apache.geode.cache.CacheWriter
  * @see org.apache.geode.cache.EntryEvent
+ * @see org.apache.geode.cache.LoaderHelper
  * @see org.apache.geode.cache.Region
  * @see org.apache.geode.cache.RegionAttributes
  * @see org.apache.geode.cache.RegionService
