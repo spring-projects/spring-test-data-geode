@@ -199,18 +199,42 @@ You now have the granularity required to control the scope and lifecycle of the 
 
 While implementing a fully capable GemFire/Geode Region would defeat the purpose of Mocking and Unit Testing in general,
 it is desirable to sometimes perform basic Region data access operations, such as `get` and `put`, with small quantities
-of data and emulate the same effects.
+of data and emulate, or simulate the same effects.
 
 As such, with STDG, it is currently possible to perform the following Region data access operations:
 
-* `containsKey(key)`,
-* `get(key)`,
-* `getEntry(key)`,
-* `invalidate(key)`,
-* `put(key, value)`,
+* `clear()`
+* `containsKey(key)`
+* `containsValue(value)`
+* `containsValueForKey(value)`
+* `forEach(:BiConsumer<K, V>)`
+* `get(key)`
+* `getAll()`
+* `getEntry(key)`
+* `getOrDefault(key, defaultValue)`
+* `invalidate(key)`
+* `isEmpty()`
+* `keySet()`
+* `localClear()`
+* `localValidate()`
+* `put(key, value)`
+* `putAll(:Map<K, V>)`
+* `remove(key)`
+* `removeAll(:Collection<K>)`
 * `size()`
+* `values()`
 
-The "mock" Region will function and behave similarly to an actual GemFire/Geode Region involving these
+NOTE: Some mock Map/Region data access operations are still being considered, such as: `putIfAbsent(key, value)`,
+`remove(key, value)`, `replace(key, value)`, `replace(key, oldValue, newValue)` and `replaceAll(:BiFunction<K, V>)`.
+Other mock Region data access operations will not be implemented at all (e.g. `keySetOnServer()` or `sizeOnServer()`,
+etc) since they necessarily involve a more complex topology. Regardless, you can still mock any Map/Region operation
+you like by following these <<unit-tests-mock-unsupported-region-ops,instructions>>.
+
+WARNING: Some mock Map/Region data access operations are implemented in terms of other Map/Region operations
+(e.g. `putAll(:Map<K, V))` is implemented in terms of `put(key, value)`) and are therefore compound actions
+that are not atomic.  In other words, we did not make the atomic.
+
+The "mock" Region will behave and function similarly to an actual GemFire/Geode Region involving these
 data access operations.
 
 By way of example, this means you can do things like the following in a Unit Test with a "mock" Region:
@@ -393,8 +417,8 @@ class MySpringDataRepositoryWithGemfireTemplateUnitTests {
 ----
 
 For clarification, obviously many of the Region functions and behaviors are not implemented, like persistence
-and overflow to disk, distribution, replication, eviction, expiration, etc.  If you find you need to test your
-application with these behaviors and functions, then your test would clearly be better suited as an actual
+and overflow to disk, distribution, replication, eviction, expiration, querying, etc.  If you find you need to test
+your application with these behaviors and functions, then your test would clearly be better suited as an actual
 Integration Test.
 
 [[unit-tests-mock-region-callbacks]]
