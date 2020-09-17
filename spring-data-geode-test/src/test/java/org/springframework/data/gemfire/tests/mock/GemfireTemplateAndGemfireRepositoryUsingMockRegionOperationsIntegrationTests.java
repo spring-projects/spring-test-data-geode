@@ -38,6 +38,7 @@ import org.springframework.data.gemfire.config.annotation.EnableEntityDefinedReg
 import org.springframework.data.gemfire.mapping.GemfireMappingContext;
 import org.springframework.data.gemfire.repository.GemfireRepository;
 import org.springframework.data.gemfire.repository.support.GemfireRepositoryFactoryBean;
+import org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport;
 import org.springframework.data.gemfire.tests.mock.annotation.EnableGemFireMockObjects;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,13 +56,15 @@ import lombok.RequiredArgsConstructor;
  * @see org.apache.geode.cache.Region
  * @see org.springframework.data.gemfire.GemfireTemplate
  * @see org.springframework.data.gemfire.repository.GemfireRepository
+ * @see org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.junit4.SpringRunner
  * @since 0.0.19
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class GemfireTemplateAndGemfireRepositoryUsingMockRegionOperationsIntegrationTests {
+public class GemfireTemplateAndGemfireRepositoryUsingMockRegionOperationsIntegrationTests
+		extends IntegrationTestsSupport {
 
 	private final Customer jonDoe = Customer.newCustomer(1L, "Jon Doe");
 
