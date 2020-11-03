@@ -109,9 +109,21 @@ public class ClientServerIntegrationTestsConfiguration {
 	@Configuration
 	@EnableLocator
 	@EnableLogging
+	@Profile("locator")
+	static class LocatorConfiguration { }
+
+	@Configuration
+	@EnableLocator
+	@EnableLogging
 	@EnableManager(start = true)
 	@Profile("locator-manager")
 	static class LocatorManagerConfiguration { }
+
+	@Configuration
+	@EnableLogging
+	@EnableManager(start = true)
+	@Profile("manager")
+	static class ManagerConfiguration { }
 
 	public static class SpringBootIsAbsentCondition implements Condition {
 
