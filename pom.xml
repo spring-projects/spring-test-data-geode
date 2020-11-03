@@ -87,7 +87,7 @@
 		<junit.version>4.13.1</junit.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.16</lombok.version>
-		<mockito.version>3.0.0</mockito.version>
+		<mockito.version>3.6.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<spring.version>5.1.9.RELEASE</spring.version>
 		<spring-boot.version>2.1.8.RELEASE</spring-boot.version>
