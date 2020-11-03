@@ -14,5 +14,9 @@ dependencyManagement {
 		dependency "org.apache.geode:geode-cq:$apacheGeodeVersion"
 		dependency "org.apache.geode:geode-lucene:$apacheGeodeVersion"
 		dependency "org.apache.geode:geode-wan:$apacheGeodeVersion"
+		dependency "io.pivotal.gemfire:geode-core:$pivotalGemFireVersion"
+		dependency "io.pivotal.gemfire:geode-cq:$pivotalGemFireVersion"
+		dependency "io.pivotal.gemfire:geode-lucene:$pivotalGemFireVersion"
+		dependency "io.pivotal.gemfire:geode-wan:$pivotalGemFireVersion"
 	}
 }
