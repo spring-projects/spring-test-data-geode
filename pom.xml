@@ -92,7 +92,7 @@
 		<mockito.version>3.6.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<pivotal-gemfire.version>9.10.5</pivotal-gemfire.version>
-		<spring.version>5.2.10.RELEASE</spring.version>
+		<spring.version>5.3.1</spring.version>
 		<spring-boot.version>2.3.5.RELEASE</spring-boot.version>
 		<spring-data-releasetrain.version>Neumann-BUILD-SNAPSHOT</spring-data-releasetrain.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
