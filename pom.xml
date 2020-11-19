@@ -137,7 +137,6 @@
 				<artifactId>logback-classic</artifactId>
 				<version>${logback.version}</version>
 			</dependency>
-<!--
 			<dependency>
 				<groupId>org.apache.geode</groupId>
 				<artifactId>geode-core</artifactId>
@@ -158,7 +157,6 @@
 				<artifactId>geode-wan</artifactId>
 				<version>${apache-geode.version}</version>
 			</dependency>
--->
 			<dependency>
 				<groupId>io.pivotal.gemfire</groupId>
 				<artifactId>geode-core</artifactId>
