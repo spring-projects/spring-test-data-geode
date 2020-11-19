@@ -63,6 +63,10 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<java-module-name>spring.data.geode.test</java-module-name>
+	</properties>
+
 	<dependencies>
 
 		<dependency>
