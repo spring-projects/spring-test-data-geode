@@ -34,9 +34,9 @@ allprojects {
 
 description = 'Spring Test Framework for Apache Geode and VMware Tanzu GemFire using Spring Data.'
 
-ext['spring.version'] = "$springVersion"
-ext['spring-framework.version'] = "$springVersion"
-ext['spring-data-bom.version'] = "$springDataBomVersion"
+//ext['spring.version'] = "$springVersion"
+//ext['spring-framework.version'] = "$springVersion"
+//ext['spring-data-bom.version'] = "$springDataBomVersion"
 
 ext.releaseBuild = version.endsWith('RELEASE')
 ext.snapshotBuild = version.endsWith('SNAPSHOT')
