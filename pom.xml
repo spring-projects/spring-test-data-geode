@@ -183,7 +183,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-releasetrain</artifactId>
+				<artifactId>spring-data-bom</artifactId>
 				<version>${spring-data-bom.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
