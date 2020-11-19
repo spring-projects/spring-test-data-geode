@@ -18,7 +18,6 @@
 
 	<modules>
 		<module>spring-data-geode-test</module>
-		<module>spring-data-gemfire-test</module>
 	</modules>
 
 	<name>Spring Test Framework for Apache Geode and VMware Tanzu GemFire</name>
