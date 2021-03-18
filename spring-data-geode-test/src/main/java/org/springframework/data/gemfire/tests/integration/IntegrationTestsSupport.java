@@ -24,10 +24,14 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,14 +44,24 @@ import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
+import org.apache.geode.internal.cache.CacheLifecycleListener;
+import org.apache.geode.internal.cache.GemFireCacheImpl;
+import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
 
+import org.apache.shiro.util.Assert;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -97,15 +111,17 @@ public abstract class IntegrationTestsSupport {
 	private static final Predicate<String> SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE =
 		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("spring");
 
-	private static final Predicate<String> ALL_SYSTEM_PROPERTIES_NAME_PREDICATE =
-		JAVAX_NET_SSL_NAME_PREDICATE
-			.or(GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
-			.or(GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
-			.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
+	private static final Predicate<String> ALL_SYSTEM_PROPERTIES_NAME_PREDICATE = JAVAX_NET_SSL_NAME_PREDICATE
+		.or(GEMFIRE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
+		.or(GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
+		.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
+
+	private static final TestContextCacheLifecycleListenerAdapter cacheLifecycleListener =
+		TestContextCacheLifecycleListenerAdapter.getInstance();
 
 	@BeforeClass
 	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
-		closeGemFireCacheWaitOnCloseEvent();
+		closeGemFireCacheWaitOnCacheClosedEvent();
 	}
 
 	@BeforeClass
@@ -113,8 +129,6 @@ public abstract class IntegrationTestsSupport {
 		SocketCreatorFactory.close();
 	}
 
-	// TODO: Remove once GEODE-7157 (https://issues.apache.org/jira/browse/GEODE-7157) is fixed!
-	//  Do the job of Apache Geode & VMware GemFire since it cannot do its own damn job!
 	@BeforeClass
 	public static void closeAnySslConfigurationBeforeTestExecution() {
 
@@ -179,11 +193,11 @@ public abstract class IntegrationTestsSupport {
 			.forEach(InternalDataSerializer::unregister);
 	}
 
-	public static void closeGemFireCacheWaitOnCloseEvent() {
-		closeGemFireCacheWaitOnCloseEvent(DEFAULT_WAIT_DURATION);
+	public static void closeGemFireCacheWaitOnCacheClosedEvent() {
+		closeGemFireCacheWaitOnCacheClosedEvent(DEFAULT_WAIT_DURATION);
 	}
 
-	public static void closeGemFireCacheWaitOnCloseEvent(long duration) {
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(long duration) {
 
 		AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -191,9 +205,8 @@ public abstract class IntegrationTestsSupport {
 			try {
 				return Optional.ofNullable(GemfireUtils.resolveGemFireCache())
 					.filter(cache -> !closed.get())
-					.filter(cache -> !cache.isClosed())
 					.map(IntegrationTestsSupport::close)
-					.map(GemFireCache::isClosed)
+					.map(cacheLifecycleListener::isClosed)
 					.orElse(true);
 			}
 			catch (CacheClosedException ignore) {
@@ -203,7 +216,7 @@ public abstract class IntegrationTestsSupport {
 		}, duration);
 	}
 
-	private static GemFireCache close(GemFireCache cache) {
+	private static @Nullable GemFireCache close(@Nullable GemFireCache cache) {
 
 		return Optional.ofNullable(cache)
 			.map(it -> {
@@ -371,5 +384,126 @@ public abstract class IntegrationTestsSupport {
 	@FunctionalInterface
 	protected interface Condition {
 		boolean evaluate();
+	}
+
+	protected static abstract class AbstractApplicationContextCacheLifecycleListenerAdapter
+			implements ApplicationEventPublisherAware, CacheLifecycleListener {
+
+		private ApplicationEventPublisher applicationEventPublisher;
+
+		/**
+		 * @inheritDoc
+		 */
+		@Override
+		public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher applicationEventPublisher) {
+			this.applicationEventPublisher = applicationEventPublisher;
+		}
+
+		protected Optional<ApplicationEventPublisher> getApplicationEventPublisher() {
+			return Optional.ofNullable(this.applicationEventPublisher);
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		@Override
+		public void cacheCreated(InternalCache cache) {
+			getApplicationEventPublisher().ifPresent(eventPublisher ->
+				eventPublisher.publishEvent(new CacheCreatedEvent(cache)));
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		@Override
+		public void cacheClosed(InternalCache cache) {
+			getApplicationEventPublisher().ifPresent(eventPublisher ->
+				eventPublisher.publishEvent(new CacheClosedEvent(cache)));
+		}
+	}
+
+	protected static class TestContextCacheLifecycleListenerAdapter
+			extends AbstractApplicationContextCacheLifecycleListenerAdapter {
+
+		private static final AtomicReference<TestContextCacheLifecycleListenerAdapter> INSTANCE =
+			new AtomicReference<>(null);
+
+		public static TestContextCacheLifecycleListenerAdapter getInstance() {
+			return INSTANCE.updateAndGet(instance -> instance != null ? instance
+				: newTestContextCacheLifecycleListener());
+		}
+
+		private static TestContextCacheLifecycleListenerAdapter newTestContextCacheLifecycleListener() {
+
+			TestContextCacheLifecycleListenerAdapter listener = new TestContextCacheLifecycleListenerAdapter();
+
+			GemFireCacheImpl.addCacheLifecycleListener(listener);
+
+			return listener;
+		}
+
+		private final Map<GemFireCache, Object> cacheReferences = Collections.synchronizedMap(new WeakHashMap<>());
+
+		public boolean isClosed(@Nullable GemFireCache cache) {
+			return cache == null || (cache.isClosed() && wasCacheClosed(cache));
+		}
+
+		protected boolean wasCacheClosed(@Nullable GemFireCache cache) {
+			return !this.cacheReferences.containsKey(cache);
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		@Override
+		public void cacheCreated(@Nullable InternalCache cache) {
+
+			if (cache != null) {
+				this.cacheReferences.put(cache, this);
+				super.cacheCreated(cache);
+			}
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		@Override
+		public void cacheClosed(@Nullable InternalCache cache) {
+
+			if (cache != null) {
+				this.cacheReferences.remove(cache);
+				super.cacheClosed(cache);
+			}
+		}
+	}
+
+	protected static class AbstractCacheEvent extends ApplicationEvent {
+
+		protected static <T> T requireNonNull(@NonNull T target, String message) {
+			Assert.notNull(target, message);
+			return target;
+		}
+
+		protected AbstractCacheEvent(@NonNull GemFireCache cache) {
+			super(requireNonNull(cache, "GemFireCache must not be null"));
+		}
+
+		public @NonNull GemFireCache getCache() {
+			return (GemFireCache) getSource();
+		}
+	}
+
+	public static class CacheCreatedEvent extends AbstractCacheEvent {
+
+		public CacheCreatedEvent(@NonNull GemFireCache cache) {
+			super(cache);
+		}
+	}
+
+	public static class CacheClosedEvent extends AbstractCacheEvent {
+
+		public CacheClosedEvent(@NonNull GemFireCache cache) {
+			super(cache);
+		}
 	}
 }

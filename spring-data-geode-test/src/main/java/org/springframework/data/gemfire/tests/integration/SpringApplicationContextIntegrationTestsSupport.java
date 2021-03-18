@@ -22,6 +22,7 @@ import org.junit.After;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.data.gemfire.util.ArrayUtils;
 
 /**
  * The {@link SpringApplicationContextIntegrationTestsSupport} class is an extension of {@link IntegrationTestsSupport}
@@ -54,7 +55,7 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 
-		applicationContext.register(annotatedClasses);
+		applicationContext.register(ArrayUtils.nullSafeArray(annotatedClasses, Class.class));
 		applicationContext.registerShutdownHook();
 		processBeforeRefresh(applicationContext);
 		applicationContext.refresh();
@@ -63,6 +64,9 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 	}
 
 	protected ConfigurableApplicationContext processBeforeRefresh(ConfigurableApplicationContext applicationContext) {
+
+		TestContextCacheLifecycleListenerAdapter.getInstance().setApplicationEventPublisher(applicationContext);
+
 		return applicationContext;
 	}
 
