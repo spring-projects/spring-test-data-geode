@@ -152,11 +152,6 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	@AfterClass
-	public static void clearAllBeanFactoryLocators() {
-		GemfireBeanFactoryLocator.clear();
-	}
-
-	@AfterClass
 	public static void clearAllJavaGemFireGeodeAndSpringDotPrefixedSystemProperties() {
 
 		List<String> allSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
@@ -164,6 +159,11 @@ public abstract class IntegrationTestsSupport {
 			.collect(Collectors.toList());
 
 		allSystemPropertyNames.forEach(System::clearProperty);
+	}
+
+	@AfterClass
+	public static void closeAllBeanFactoryLocators() {
+		GemfireBeanFactoryLocator.clear();
 	}
 
 	@AfterClass
