@@ -19,6 +19,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.lang.NonNull;
 
 /**
  * The {@link SpringBootApplicationIntegrationTestsSupport} class is an extension of Spring Test
@@ -48,7 +50,7 @@ public abstract class SpringBootApplicationIntegrationTestsSupport
 	}
 
 	@Override
-	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
+	protected @NonNull ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
 
 		return setApplicationContext(processBeforeRun(processBeforeBuild(
 			newSpringApplicationBuilder(annotatedClasses)
@@ -58,15 +60,15 @@ public abstract class SpringBootApplicationIntegrationTestsSupport
 				.run(getArguments()));
 	}
 
-	protected SpringApplicationBuilder newSpringApplicationBuilder(Class<?>... annotatedClasses) {
-		return new SpringApplicationBuilder(annotatedClasses);
+	protected @NonNull SpringApplicationBuilder newSpringApplicationBuilder(Class<?>... annotatedClasses) {
+		return new SpringApplicationBuilder(ArrayUtils.nullSafeArray(annotatedClasses, Class.class));
 	}
 
-	protected SpringApplicationBuilder processBeforeBuild(SpringApplicationBuilder springApplicationBuilder) {
+	protected @NonNull SpringApplicationBuilder processBeforeBuild(@NonNull SpringApplicationBuilder springApplicationBuilder) {
 		return springApplicationBuilder;
 	}
 
-	protected SpringApplication processBeforeRun(SpringApplication springApplication) {
+	protected @NonNull SpringApplication processBeforeRun(@NonNull SpringApplication springApplication) {
 		return springApplication;
 	}
 }

@@ -15,14 +15,20 @@
  */
 package org.springframework.data.gemfire.tests.integration;
 
+import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
+
 import java.util.Optional;
 
 import org.junit.After;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * The {@link SpringApplicationContextIntegrationTestsSupport} class is an extension of {@link IntegrationTestsSupport}
@@ -34,21 +40,22 @@ import org.springframework.data.gemfire.util.ArrayUtils;
  *
  * @author John Blum
  * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.ApplicationEventPublisher
+ * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.ConfigurableApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @see org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-public abstract class SpringApplicationContextIntegrationTestsSupport extends IntegrationTestsSupport {
+public abstract class SpringApplicationContextIntegrationTestsSupport extends IntegrationTestsSupport
+		implements ApplicationEventPublisherAware {
 
 	private volatile ConfigurableApplicationContext applicationContext;
 
 	@After
 	public void closeApplicationContext() {
-
-		Optional.ofNullable(this.applicationContext)
-			.ifPresent(ConfigurableApplicationContext::close);
+		getOptionalApplicationContext().ifPresent(ConfigurableApplicationContext::close);
 	}
 
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
@@ -63,14 +70,16 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		return setApplicationContext(applicationContext);
 	}
 
-	protected ConfigurableApplicationContext processBeforeRefresh(ConfigurableApplicationContext applicationContext) {
+	protected @NonNull ConfigurableApplicationContext processBeforeRefresh(
+			@NonNull ConfigurableApplicationContext applicationContext) {
 
-		TestContextCacheLifecycleListenerAdapter.getInstance().setApplicationEventPublisher(applicationContext);
+		setApplicationEventPublisher(applicationContext);
 
 		return applicationContext;
 	}
 
-	protected <T extends ConfigurableApplicationContext> T setApplicationContext(T applicationContext) {
+	protected @Nullable <T extends ConfigurableApplicationContext> T setApplicationContext(
+			@Nullable T applicationContext) {
 
 		this.applicationContext = applicationContext;
 
@@ -78,15 +87,37 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T extends ConfigurableApplicationContext> T getApplicationContext() {
+	protected @Nullable <T extends ConfigurableApplicationContext> T getApplicationContext() {
 		return (T) this.applicationContext;
 	}
 
+	protected <T extends ConfigurableApplicationContext> Optional<T> getOptionalApplicationContext() {
+		return Optional.ofNullable(getApplicationContext());
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher applicationEventPublisher) {
+
+		if (applicationEventPublisher != null) {
+			TestContextCacheLifecycleListenerAdapter.getInstance()
+				.setApplicationEventPublisher(applicationEventPublisher);
+		}
+	}
+
 	protected <T> T getBean(Class<T> requiredType) {
-		return getApplicationContext().getBean(requiredType);
+
+		return getOptionalApplicationContext()
+			.map(applicationContext -> applicationContext.getBean(requiredType))
+			.orElseThrow(() -> newIllegalStateException("An ApplicationContext was not initialized"));
 	}
 
 	protected <T> T getBean(String beanName, Class<T> requiredType) {
-		return getApplicationContext().getBean(beanName, requiredType);
+
+		return getOptionalApplicationContext()
+			.map(applicationContext -> applicationContext.getBean(beanName, requiredType))
+			.orElseThrow(() -> newIllegalStateException("An ApplicationContext was not initialized"));
 	}
 }
