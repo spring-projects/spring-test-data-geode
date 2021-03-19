@@ -13,7 +13,7 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.mock.annotation;
+package org.springframework.data.gemfire.tests.unit.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -29,8 +29,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * The {@link GemFireUnitTest} annotation marks a test class as a GemFire Unit Test
- * with GemFire Object mocking enabled.
+ * The {@link GemFireUnitTest} annotation marks a test class as an Apache Geode Unit Test
+ * with GemFire Mock Objects enabled.
  *
  * Additionally, this annotation enables Spring's {@link SpringRunner} JUnit Runner implementation
  * using JUnit's {@link RunWith} annotation.
