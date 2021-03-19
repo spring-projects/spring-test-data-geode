@@ -50,8 +50,6 @@ import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
 
-import org.apache.shiro.util.Assert;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -62,6 +60,7 @@ import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -77,6 +76,10 @@ import org.springframework.util.ReflectionUtils;
  * @see org.apache.geode.DataSerializer
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.distributed.Locator
+ * @see org.springframework.context.ApplicationEvent
+ * @see org.springframework.context.ApplicationEventPublisher
+ * @see org.springframework.context.ApplicationEventPublisherAware
+ * @see org.springframework.data.gemfire.support.GemfireBeanFactoryLocator
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 1.0.0
  */
@@ -90,7 +93,9 @@ public abstract class IntegrationTestsSupport {
 	protected static final long DEFAULT_WAIT_DURATION = TimeUnit.SECONDS.toMillis(30);
 	protected static final long DEFAULT_WAIT_INTERVAL = 500L; // milliseconds
 
+	protected static final String DATE_TIME_PATTERN = "yyyy-MM-dd-hh-mm-ss";
 	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.test.directory.delete-on-exit";
+	protected static final String DIRECTORY_NAME_FORMAT = "%1$s-%2$s";
 	protected static final String GEMFIRE_LOG_FILE = "gemfire-server.log";
 	protected static final String GEMFIRE_LOG_FILE_PROPERTY = "spring.data.gemfire.log.file";
 	protected static final String GEMFIRE_LOG_LEVEL = "error";
@@ -231,28 +236,27 @@ public abstract class IntegrationTestsSupport {
 
 	public static void stopGemFireLocatorWaitOnStopEvent(long duration) {
 
-		AtomicBoolean locatorStopped = new AtomicBoolean(false);
+		AtomicBoolean stopped = new AtomicBoolean(false);
 
 		waitOn(() -> {
 			try {
 				return Optional.ofNullable(Locator.getLocator())
-					.filter(it -> !locatorStopped.get())
+					.filter(it -> !stopped.get())
 					.map(IntegrationTestsSupport::stop)
 					.map(it -> {
-						locatorStopped.set(!Locator.hasLocator());
-						return it;
+						stopped.set(!Locator.hasLocator());
+						return stopped.get();
 					})
-					.map(it -> locatorStopped.get())
 					.orElse(true);
 			}
 			catch (Exception ignore) {
-				locatorStopped.set(true);
+				stopped.set(true);
 				return true;
 			}
 		}, duration);
 	}
 
-	private static Locator stop(Locator locator) {
+	private static @Nullable Locator stop(@Nullable Locator locator) {
 
 		return Optional.ofNullable(locator)
 			.map(it -> {
@@ -262,23 +266,28 @@ public abstract class IntegrationTestsSupport {
 			.orElse(locator);
 	}
 
-	protected static String asApplicationName(Class<?> type) {
+	protected static @NonNull String asApplicationName(@NonNull Class<?> type) {
 		return type.getSimpleName();
 	}
 
-	protected static String asDirectoryName(Class<?> type) {
-		return String.format("%1$s-%2$s", asApplicationName(type),
-			LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss")));
+	protected static @NonNull String asDirectoryName(@NonNull Class<?> type) {
+		return String.format(DIRECTORY_NAME_FORMAT, asApplicationName(type),
+			LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
 	}
 
-	protected static File createDirectory(String pathname) {
+	protected static @NonNull File createDirectory(@NonNull String pathname) {
 		return createDirectory(new File(pathname));
 	}
 
-	protected static File createDirectory(File directory) {
+	protected static @NonNull File createDirectory(@NonNull File directory) {
+
+		assertThat(directory)
+			.describedAs("A File reference to the directory to create must not be null")
+			.isNotNull();
 
 		assertThat(directory.isDirectory() || directory.mkdirs())
-			.describedAs(String.format("Failed to create directory [%s]", directory)).isTrue();
+			.describedAs(String.format("Failed to create directory [%s]", directory))
+			.isTrue();
 
 		if (isDeleteDirectoryOnExit()) {
 			directory.deleteOnExit();
@@ -297,30 +306,30 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected static String getClassNameAsPath(Class type) {
+	protected static @NonNull String getClassNameAsPath(@NonNull Class type) {
 		return type.getName().replaceAll("\\.", "/");
 	}
 
-	protected static String getClassNameAsPath(Object obj) {
+	protected static @NonNull String getClassNameAsPath(@NonNull Object obj) {
 		return getClassNameAsPath(obj.getClass());
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected static String getPackageNameAsPath(Class type) {
+	protected static @NonNull String getPackageNameAsPath(@NonNull Class type) {
 		return type.getPackage().getName().replaceAll("\\.", "/");
 	}
 
-	protected static String getPackageNameAsPath(Object obj) {
+	protected static @NonNull String getPackageNameAsPath(@NonNull Object obj) {
 		return getPackageNameAsPath(obj.getClass());
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected static String getContextXmlFileLocation(Class type) {
+	protected static @NonNull String getContextXmlFileLocation(@NonNull Class type) {
 		return getClassNameAsPath(type).concat("-context.xml");
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected static String getServerContextXmlFileLocation(Class type) {
+	protected static @NonNull String getServerContextXmlFileLocation(@NonNull Class type) {
 		return getClassNameAsPath(type).concat("-server-context.xml");
 	}
 
@@ -345,16 +354,16 @@ public abstract class IntegrationTestsSupport {
 			String.format("%s", CollectionUtils.toString(System.getProperties())));
 	}
 
-	protected static boolean waitOn(Condition condition) {
+	protected static boolean waitOn(@NonNull Condition condition) {
 		return waitOn(condition, DEFAULT_WAIT_DURATION);
 	}
 
-	protected static boolean waitOn(Condition condition, long duration) {
+	protected static boolean waitOn(@NonNull Condition condition, long duration) {
 		return waitOn(condition, duration, DEFAULT_WAIT_INTERVAL);
 	}
 
 	@SuppressWarnings("all")
-	protected static boolean waitOn(Condition condition, long duration, long interval) {
+	protected static boolean waitOn(@NonNull Condition condition, long duration, long interval) {
 
 		long resolvedInterval = Math.max(Math.min(interval, duration), 1);
 		long timeout = System.currentTimeMillis() + duration;
@@ -430,15 +439,15 @@ public abstract class IntegrationTestsSupport {
 
 		public static TestContextCacheLifecycleListenerAdapter getInstance() {
 			return INSTANCE.updateAndGet(instance -> instance != null ? instance
-				: newTestContextCacheLifecycleListener());
+				: newTestContextCacheLifecycleListenerAdapter());
 		}
 
-		private static TestContextCacheLifecycleListenerAdapter newTestContextCacheLifecycleListener() {
+		private static TestContextCacheLifecycleListenerAdapter newTestContextCacheLifecycleListenerAdapter() {
+			return registerCacheLifecycleListener(new TestContextCacheLifecycleListenerAdapter());
+		}
 
-			TestContextCacheLifecycleListenerAdapter listener = new TestContextCacheLifecycleListenerAdapter();
-
+		private static @NonNull <T extends CacheLifecycleListener> T registerCacheLifecycleListener(@NonNull T listener) {
 			GemFireCacheImpl.addCacheLifecycleListener(listener);
-
 			return listener;
 		}
 

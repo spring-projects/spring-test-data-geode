@@ -37,6 +37,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.SocketUtils;
+import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * The {@link ClientServerIntegrationTestsSupport} class is a abstract base class encapsulating common functionality
@@ -79,23 +82,18 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 
 	protected static int findAvailablePort() throws IOException {
 
-		ServerSocket serverSocket = null;
+		try (ServerSocket serverSocket = new ServerSocket()) {
 
-		try {
-			serverSocket = new ServerSocket();
 			serverSocket.setReuseAddress(true);
 			serverSocket.bind(new InetSocketAddress(0));
 
 			return serverSocket.getLocalPort();
 		}
-		finally {
-			SocketUtils.close(serverSocket);
-		}
 	}
 
 	protected static int findAndReserveAvailablePort() throws IOException {
 
-		int availablePort = 0;
+		int availablePort;
 
 		do {
 			availablePort = findAvailablePort();
@@ -105,7 +103,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		return availablePort;
 	}
 
-	protected static int intValue(Number number) {
+	protected static int intValue(@Nullable Number number) {
 		return number != null ? number.intValue() : 0;
 	}
 
@@ -117,44 +115,50 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		return Boolean.getBoolean(PROCESS_RUN_MANUAL_PROPERTY);
 	}
 
-	protected static ProcessWrapper run(Class<?> type, String... arguments) throws IOException {
+	protected static @Nullable ProcessWrapper run(Class<?> type, String... arguments) throws IOException {
 		return run(createDirectory(asDirectoryName(type)), type, arguments);
 	}
 
-	protected static ProcessWrapper run(File workingDirectory, Class<?> type, String... arguments) throws IOException {
+	protected static @Nullable ProcessWrapper run(File workingDirectory, Class<?> type, String... arguments)
+			throws IOException {
+
 		return isProcessRunAuto() ? launch(createDirectory(workingDirectory), type, arguments) : null;
 	}
 
-	protected static ProcessWrapper run(String classpath, Class<?> type, String... arguments) throws IOException {
+	protected static @Nullable ProcessWrapper run(String classpath, Class<?> type, String... arguments)
+			throws IOException {
+
 		return run(createDirectory(asDirectoryName(type)), classpath, type, arguments);
 	}
 
-	protected static ProcessWrapper run(File workingDirectory, String classpath, Class<?> type, String... arguments)
-			throws IOException {
+	protected static @Nullable ProcessWrapper run(File workingDirectory, String classpath, Class<?> type,
+			String... arguments) throws IOException {
 
 		return isProcessRunAuto() ? launch(createDirectory(workingDirectory), classpath, type, arguments) : null;
 	}
 
-	protected static AnnotationConfigApplicationContext runSpringApplication(Class<?> annotatedClass, String... args) {
+	protected static @NonNull AnnotationConfigApplicationContext runSpringApplication(Class<?> annotatedClass,
+			String... args) {
+
 		return runSpringApplication(asArray(annotatedClass), args);
 	}
 
-	protected static AnnotationConfigApplicationContext runSpringApplication(Class<?>[] annotatedClasses,
+	protected static @NonNull AnnotationConfigApplicationContext runSpringApplication(Class<?>[] annotatedClasses,
 			String... args) {
 
-		AnnotationConfigApplicationContext applicationContext =
-			new AnnotationConfigApplicationContext(annotatedClasses);
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 
+		applicationContext.register(ArrayUtils.nullSafeArray(annotatedClasses, Class.class));
 		applicationContext.registerShutdownHook();
 
 		return applicationContext;
 	}
 
-	protected static boolean stop(ProcessWrapper process) {
+	protected static boolean stop(@Nullable ProcessWrapper process) {
 		return stop(process, DEFAULT_WAIT_DURATION);
 	}
 
-	protected static boolean stop(ProcessWrapper process, long duration) {
+	protected static boolean stop(@Nullable ProcessWrapper process, long duration) {
 
 		return Optional.ofNullable(process)
 			.map(it -> {
@@ -171,20 +175,19 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 			.orElse(true);
 	}
 
-	protected static boolean waitForCacheServerToStart(CacheServer cacheServer) {
+	protected static boolean waitForCacheServerToStart(@NonNull CacheServer cacheServer) {
 		return waitForServerToStart(cacheServer.getBindAddress(), cacheServer.getPort(), DEFAULT_WAIT_DURATION);
 	}
 
-	protected static boolean waitForCacheServerToStart(CacheServer cacheServer, long duration) {
+	protected static boolean waitForCacheServerToStart(@NonNull CacheServer cacheServer, long duration) {
 		return waitForServerToStart(cacheServer.getBindAddress(), cacheServer.getPort(), duration);
 	}
 
-	@SuppressWarnings("all")
-	protected static boolean waitForServerToStart(String host, int port) {
+	protected static boolean waitForServerToStart(@NonNull String host, int port) {
 		return waitForServerToStart(host, port, DEFAULT_WAIT_DURATION);
 	}
 
-	protected static boolean waitForServerToStart(String host, int port, long duration) {
+	protected static boolean waitForServerToStart(@NonNull String host, int port, long duration) {
 
 		AtomicBoolean connected = new AtomicBoolean(false);
 
@@ -208,11 +211,11 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 		}, duration);
 	}
 
-	protected static int waitForProcessToStop(Process process, File directory) {
+	protected static int waitForProcessToStop(@NonNull Process process, File directory) {
 		return waitForProcessToStop(process, directory, DEFAULT_WAIT_DURATION);
 	}
 
-	protected static int waitForProcessToStop(Process process, File directory, long duration) {
+	protected static int waitForProcessToStop(@NonNull Process process, File directory, long duration) {
 
 		long timeout = System.currentTimeMillis() + duration;
 
