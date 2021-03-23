@@ -1,0 +1,4 @@
+# STDG TestExecutionListeners for the Spring TestContext Framework
+
+org.springframework.test.context.ContextCustomizerFactory=\
+	org.springframework.data.gemfire.tests.integration.test.context.GeodeContextCustomizerFactory
