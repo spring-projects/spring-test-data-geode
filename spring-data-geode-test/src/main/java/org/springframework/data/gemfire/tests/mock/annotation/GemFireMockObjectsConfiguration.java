@@ -118,7 +118,8 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 
 		return new BeanPostProcessor() {
 
-			public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
+			public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName)
+					throws BeansException {
 
 				if (bean instanceof GemfireRepository) {
 
@@ -136,6 +137,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 				return bean;
 			}
 
+			@SuppressWarnings("unchecked")
 			private Optional<Region<?, ?>> getRegion(@Nullable Object bean) {
 
 				return Optional.ofNullable(bean)

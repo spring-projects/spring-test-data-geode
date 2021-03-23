@@ -77,7 +77,7 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	@Nullable @Override
-	public Object postProcessBeforeInitialization(@NonNull Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
 
 		return isGemFireProperties(bean, beanName) ? set((Properties) bean)
 			: bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, isUsingSingletonCache())
@@ -86,7 +86,7 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	@Nullable @Override
-	public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
 
 		if (bean instanceof GemFireCache) {
 
