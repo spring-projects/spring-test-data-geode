@@ -13,7 +13,7 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.mock.test.context.event;
+package org.springframework.data.gemfire.tests.extensions.spring.test.context.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -38,11 +38,11 @@ import org.springframework.test.context.event.TestContextEvent;
  * @author John Blum
  * @see org.junit.Test
  * @see org.mockito.Mockito
- * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
+ * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
  * @see org.springframework.test.context.event.TestContextEvent
  * @since 0.0.16
  */
-public class TestContextEventTypeUnitTest {
+public class TestContextEventTypeUnitTests {
 
 	@Test
 	public void fromTestContextEventToEnum() {

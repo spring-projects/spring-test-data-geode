@@ -21,8 +21,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
-import org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -36,8 +37,8 @@ import org.springframework.test.context.event.TestContextEvent;
  * {@link Object Mock Objects} will be destroyed when this event occurs.
  *
  * @author John Blum
+ * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
- * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
  * @see org.springframework.test.context.TestContext
  * @see org.springframework.test.context.TestExecutionListener
  * @see org.springframework.test.context.event.TestContextEvent
@@ -77,7 +78,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @param eventType {@link TestContextEventType} to disable event handling for.
 	 * @return a boolean value indicating whether event handling for the given {@link TestContextEventType}
 	 * was successfully disabled.
-	 * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
+	 * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
 	 * @see #enableDestroyOnEventType(TestContextEventType)
 	 */
 	public boolean disableDestroyOnEventType(@Nullable TestContextEventType eventType) {
@@ -93,7 +94,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @param eventType {@link TestContextEventType} to enable event handling for.
 	 * @return a boolean value indicating whether event handling for the given {@link TestContextEventType}
 	 * was successfully enabled.
-	 * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
+	 * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
 	 * @see #disableDestroyOnEventType(TestContextEventType)
 	 */
 	public boolean enableDestroyOnEventType(@Nullable TestContextEventType eventType) {
@@ -107,7 +108,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 *
 	 * @param eventType {{@link TestContextEventType} to evaluate.
 	 * @return a boolean value indicating whether event handling for the given {@link TestContextEventType} is enabled.
-	 * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
+	 * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
 	 */
 	protected boolean isDestroyOnEventTypeEnabled(@Nullable TestContextEventType eventType) {
 		return this.destroyOnEventTypes.contains(eventType);
@@ -117,7 +118,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void beforeTestClass(TestContext testContext) {
+	public void beforeTestClass(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.BEFORE_TEST_CLASS)) {
 			destroyGemFireMockObjects();
@@ -128,7 +129,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void prepareTestInstance(TestContext testContext) {
+	public void prepareTestInstance(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.PREPARE_TEST_INSTANCE)) {
 			destroyGemFireMockObjects();
@@ -139,7 +140,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void beforeTestMethod(TestContext testContext) {
+	public void beforeTestMethod(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.BEFORE_TEST_METHOD)) {
 			destroyGemFireMockObjects();
@@ -150,7 +151,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void beforeTestExecution(TestContext testContext) {
+	public void beforeTestExecution(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.BEFORE_TEST_EXECUTION)) {
 			destroyGemFireMockObjects();
@@ -161,7 +162,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void afterTestExecution(TestContext testContext) {
+	public void afterTestExecution(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.AFTER_TEST_EXECUTION)) {
 			destroyGemFireMockObjects();
@@ -172,7 +173,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void afterTestMethod(TestContext testContext) {
+	public void afterTestMethod(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.AFTER_TEST_METHOD)) {
 			destroyGemFireMockObjects();
@@ -183,7 +184,7 @@ public class DestroyGemFireMockObjectsTestExecutionListener implements TestExecu
 	 * @inheritDoc
 	 */
 	@Override
-	public void afterTestClass(TestContext testContext) {
+	public void afterTestClass(@NonNull TestContext testContext) {
 
 		if (isDestroyOnEventTypeEnabled(TestContextEventType.AFTER_TEST_CLASS)) {
 			destroyGemFireMockObjects();

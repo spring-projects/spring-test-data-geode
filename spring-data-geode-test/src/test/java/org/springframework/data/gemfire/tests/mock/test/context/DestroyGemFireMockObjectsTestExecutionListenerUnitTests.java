@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType;
+import org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType;
 import org.springframework.test.context.TestContext;
 
 /**
@@ -37,8 +37,8 @@ import org.springframework.test.context.TestContext;
  * @see org.junit.Test
  * @see org.mockito.Mockito
  * @see org.mockito.junit.MockitoJUnitRunner
+ * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.event.TestContextEventType
  * @see org.springframework.data.gemfire.tests.mock.test.context.DestroyGemFireMockObjectsTestExecutionListener
- * @see org.springframework.data.gemfire.tests.mock.test.context.event.TestContextEventType
  * @since 0.0.16
  */
 @RunWith(MockitoJUnitRunner.class)

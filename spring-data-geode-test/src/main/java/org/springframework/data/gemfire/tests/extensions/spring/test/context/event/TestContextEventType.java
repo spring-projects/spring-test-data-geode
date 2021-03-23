@@ -13,7 +13,7 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.mock.test.context.event;
+package org.springframework.data.gemfire.tests.extensions.spring.test.context.event;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -46,7 +46,6 @@ public enum TestContextEventType {
 	AFTER_TEST_EXECUTION(AfterTestExecutionEvent.class),
 	AFTER_TEST_METHOD(AfterTestMethodEvent.class),
 	AFTER_TEST_CLASS(AfterTestClassEvent.class);
-
 
 	public static @Nullable TestContextEventType from(@Nullable TestContextEvent event) {
 
