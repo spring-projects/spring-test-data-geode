@@ -35,43 +35,45 @@ import org.springframework.core.annotation.AliasFor;
  *
  * Therefore, the following bean definitions for A & B are equivalent:
  *
+ * <pre>
  * <code>
- *
- * @Configuration
+ * {@literal Configuration}
  * public class ConfigurationOne {
  *
- *   @Bean
- *   @DependsOn("b")
+ *   {@literal Bean}
+ *   {@literal DependsOn DependsOn("b")}
  *   public A a() {
  *     return new A();
  *   }
  *
- *   @Bean
+ *   {@literal Bean}
  *   public B b() {
  *     return new B();
  *   }
  * }
  * </code>
- *
+ * </pre>
  *
  * And...
  *
+ * <pre>
  * <code>
- * @Configuration
+ * {@literal Configuration}
  * public class ConfigurationTwo {
  *
- *   @Bean
+ *   {@literal Bean}
  *   public A a() {
  *     return new A();
  *   }
  *
- *   @Bean
- *   @DependencyOf("a")
+ *   {@literal Bean}
+ *   {@literal DependencyOf DependencyOf("a")}
  *   public B b() {
  *     return new B();
  *   }
  * }
  * </code>
+ * </pre>
  *
  * One advantage of this approach is that bean A does not need to know all the beans it is possibly dependent on,
  * especially at runtime when additional collaborators or dependencies maybe added dynamically to the classpath,
