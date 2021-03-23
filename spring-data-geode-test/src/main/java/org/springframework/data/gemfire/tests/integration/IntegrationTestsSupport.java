@@ -395,7 +395,7 @@ public abstract class IntegrationTestsSupport {
 		boolean evaluate();
 	}
 
-	protected static abstract class AbstractApplicationContextCacheLifecycleListenerAdapter
+	protected static abstract class AbstractApplicationEventPublisherCacheLifecycleListenerAdapter
 			implements ApplicationEventPublisherAware, CacheLifecycleListener {
 
 		private ApplicationEventPublisher applicationEventPublisher;
@@ -431,8 +431,8 @@ public abstract class IntegrationTestsSupport {
 		}
 	}
 
-	protected static class TestContextCacheLifecycleListenerAdapter
-			extends AbstractApplicationContextCacheLifecycleListenerAdapter {
+	public static final class TestContextCacheLifecycleListenerAdapter
+			extends AbstractApplicationEventPublisherCacheLifecycleListenerAdapter {
 
 		private static final AtomicReference<TestContextCacheLifecycleListenerAdapter> INSTANCE =
 			new AtomicReference<>(null);
@@ -451,24 +451,30 @@ public abstract class IntegrationTestsSupport {
 			return listener;
 		}
 
-		private final Map<GemFireCache, Object> cacheReferences = Collections.synchronizedMap(new WeakHashMap<>());
+		private final Map<GemFireCache, Object> cacheInstances = Collections.synchronizedMap(new WeakHashMap<>());
+
+		private TestContextCacheLifecycleListenerAdapter() { }
 
 		public boolean isClosed(@Nullable GemFireCache cache) {
-			return cache == null || (cache.isClosed() && wasCacheClosed(cache));
+			return cache == null || (cache.isClosed() && isCacheClosed(cache));
 		}
 
-		protected boolean wasCacheClosed(@Nullable GemFireCache cache) {
-			return !this.cacheReferences.containsKey(cache);
+		private boolean isCacheClosed(@Nullable GemFireCache cache) {
+			return !isOpen(cache);
+		}
+
+		public boolean isOpen(@Nullable GemFireCache cache) {
+			return this.cacheInstances.containsKey(cache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
 		@Override
-		public void cacheCreated(@Nullable InternalCache cache) {
+		public void cacheCreated(@NonNull InternalCache cache) {
 
 			if (cache != null) {
-				this.cacheReferences.put(cache, this);
+				this.cacheInstances.put(cache, this);
 				super.cacheCreated(cache);
 			}
 		}
@@ -477,10 +483,10 @@ public abstract class IntegrationTestsSupport {
 		 * @inheritDoc
 		 */
 		@Override
-		public void cacheClosed(@Nullable InternalCache cache) {
+		public void cacheClosed(@NonNull InternalCache cache) {
 
 			if (cache != null) {
-				this.cacheReferences.remove(cache);
+				this.cacheInstances.remove(cache, this);
 				super.cacheClosed(cache);
 			}
 		}
