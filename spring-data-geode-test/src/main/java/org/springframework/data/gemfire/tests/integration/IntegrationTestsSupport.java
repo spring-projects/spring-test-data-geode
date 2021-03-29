@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
@@ -50,9 +51,16 @@ import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
 
+import org.apache.shiro.util.StringUtils;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
@@ -104,6 +112,9 @@ public abstract class IntegrationTestsSupport {
 	protected static final String SYSTEM_PROPERTIES_LOG_FILE = "system-properties.log";
 	protected static final String TEST_GEMFIRE_LOG_LEVEL = "error";
 
+	private static final AtomicReference<ConfigurableApplicationContext> applicationContextReference =
+		new AtomicReference<>(null);
+
 	private static final Predicate<String> JAVAX_NET_SSL_NAME_PREDICATE =
 		propertyName -> String.valueOf(propertyName).toLowerCase().startsWith("javax.net.ssl");
 
@@ -121,8 +132,20 @@ public abstract class IntegrationTestsSupport {
 		.or(GEODE_DOT_SYSTEM_PROPERTY_NAME_PREDICATE)
 		.or(SPRING_DOT_SYSTEM_PROPERTY_NAME_PREDICATE);
 
+	private static final Predicate<String> SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME =
+		StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME::equals;
+
+	private static final Predicate<String> SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME =
+		StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME::equals;
+
+	private static final Predicate<String> RETAINED_PROPERTY_SOURCE_NAMES = SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME
+		.or(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+
 	private static final TestContextCacheLifecycleListenerAdapter cacheLifecycleListener =
 		TestContextCacheLifecycleListenerAdapter.getInstance();
+
+	@Autowired(required = false)
+	private ConfigurableApplicationContext applicationContext;
 
 	@BeforeClass
 	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
@@ -170,6 +193,11 @@ public abstract class IntegrationTestsSupport {
 		}
 	}
 
+	@Before
+	public void referenceApplicationContext() {
+		applicationContextReference.set(this.applicationContext);
+	}
+
 	@AfterClass
 	public static void clearAllJavaGemFireGeodeAndSpringDotPrefixedSystemProperties() {
 
@@ -178,6 +206,28 @@ public abstract class IntegrationTestsSupport {
 			.collect(Collectors.toList());
 
 		allSystemPropertyNames.forEach(System::clearProperty);
+	}
+
+	@AfterClass
+	public static void clearNonStandardSpringEnvironmentPropertySources() {
+
+		Optional.ofNullable(applicationContextReference.get())
+			.map(ConfigurableApplicationContext::getEnvironment)
+			.map(ConfigurableEnvironment::getPropertySources)
+			.ifPresent(propertySources -> {
+				for (PropertySource<?> propertySource : propertySources) {
+					if (Objects.nonNull(propertySource)) {
+
+						String propertySourceName = propertySource.getName();
+
+						if (StringUtils.hasText(propertySourceName)) {
+							if (!RETAINED_PROPERTY_SOURCE_NAMES.test(propertySource.getName())) {
+								propertySources.remove(propertySourceName);
+							}
+						}
+					}
+				}
+			});
 	}
 
 	@AfterClass
