@@ -16,23 +16,34 @@
 package org.springframework.data.gemfire.tests.integration;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.junit.AfterClass;
 
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.gemfire.config.annotation.CacheServerApplication;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.config.annotation.EnablePdx;
 import org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 import org.springframework.data.gemfire.util.ArrayUtils;
+import org.springframework.data.gemfire.util.SpringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -106,7 +117,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	@EnablePdx
 	@ClientCacheApplication(logLevel = GEMFIRE_LOG_LEVEL)
-	protected static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
+	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
 
 	@EnablePdx
 	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport", logLevel = GEMFIRE_LOG_LEVEL)
@@ -118,6 +129,73 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 				new AnnotationConfigApplicationContext(BaseGemFireServerConfiguration.class);
 
 			applicationContext.registerShutdownHook();
+		}
+	}
+
+	@Configuration
+	public static class SpringApplicationTerminatorConfiguration {
+
+		@Bean
+		public SpringApplicationTerminatorConfigurer springApplicationTerminatorConfigurer() {
+			return SpringApplicationTerminatorConfigurer.EMPTY;
+		}
+
+		@EventListener(classes = ContextRefreshedEvent.class)
+		public void configureTerminator(@NonNull ContextRefreshedEvent event) {
+
+			Function<ApplicationContext, SpringApplicationTerminatorConfigurer> safeSpringApplicationTerminatorConfigurerResolver =
+				applicationContext -> SpringUtils.safeGetValue(() ->
+					applicationContext.getBean(SpringApplicationTerminatorConfigurer.class),
+						(SpringApplicationTerminatorConfigurer) null);
+
+			Runnable springApplicationTerminatorRunnable = () -> System.exit(-1);
+
+			ThreadFactory springApplicationTerminatorThreadFactory = runnable -> {
+
+				Thread springApplicationTerminatorThread =
+					new Thread(runnable, "Spring Application Terminator Thread");
+
+				springApplicationTerminatorThread.setDaemon(true);
+				springApplicationTerminatorThread.setPriority(Thread.NORM_PRIORITY);
+
+				return springApplicationTerminatorThread;
+			};
+
+			Optional.ofNullable(event)
+				.map(ContextRefreshedEvent::getApplicationContext)
+				.map(safeSpringApplicationTerminatorConfigurerResolver)
+				.filter(SpringApplicationTerminatorConfigurer::isNotEmpty)
+				.filter(this::delayIsGreaterThanZero)
+				.ifPresent(configurer ->
+					Executors.newScheduledThreadPool(1, springApplicationTerminatorThreadFactory)
+						.schedule(springApplicationTerminatorRunnable, configurer.delay().toMillis(),
+							TimeUnit.MILLISECONDS)
+				);
+		}
+
+		private boolean delayIsGreaterThanZero(@NonNull SpringApplicationTerminatorConfigurer configurer) {
+
+			return Optional.ofNullable(configurer)
+				.map(SpringApplicationTerminatorConfigurer::delay)
+				.map(delay -> Duration.ZERO.compareTo(delay) > 0)
+				.orElse(false);
+		}
+	}
+
+	public interface SpringApplicationTerminatorConfigurer {
+
+		SpringApplicationTerminatorConfigurer EMPTY = new SpringApplicationTerminatorConfigurer() { };
+
+		default boolean isEmpty() {
+			return EMPTY.equals(this);
+		}
+
+		default boolean isNotEmpty() {
+			return !isEmpty();
+		}
+
+		default Duration delay() {
+			return Duration.ZERO;
 		}
 	}
 }
