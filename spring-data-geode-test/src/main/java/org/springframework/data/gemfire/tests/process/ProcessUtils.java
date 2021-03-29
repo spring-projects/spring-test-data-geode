@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.process;
 
 import java.io.BufferedReader;
@@ -110,7 +109,6 @@ public abstract class ProcessUtils {
 		return readPid(pidFile);
 	}
 
-	@SuppressWarnings("all")
 	protected static File findPidFile(File workingDirectory) {
 
 		Assert.isTrue(FileSystemUtils.isDirectory(workingDirectory),
@@ -129,7 +127,6 @@ public abstract class ProcessUtils {
 		return null;
 	}
 
-	@SuppressWarnings("all")
 	public static int readPid(File pidFile) {
 
 		Assert.isTrue(pidFile != null && pidFile.isFile(),
@@ -161,7 +158,6 @@ public abstract class ProcessUtils {
 		}
 	}
 
-	@SuppressWarnings("all")
 	public static void writePid(File pidFile, int pid) throws IOException {
 
 		Assert.isTrue(pidFile != null && (pidFile.isFile() || pidFile.createNewFile()),
