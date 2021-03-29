@@ -63,11 +63,25 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 
 	private final AtomicReference<Properties> gemfireProperties = new AtomicReference<>(new Properties());
 
-	public static GemFireMockObjectsBeanPostProcessor newInstance() {
+	/**
+	 * Factory method used to construct a new instance of {@link GemFireMockObjectsBeanPostProcessor} initialized to
+	 * use a non-Singleton cache.
+	 *
+	 * @return a new instance of {@link GemFireMockObjectsBeanPostProcessor}.
+	 * @see #newInstance(boolean)
+	 */
+	public static @NonNull GemFireMockObjectsBeanPostProcessor newInstance() {
 		return newInstance(DEFAULT_USE_SINGLETON_CACHE);
 	}
 
-	public static GemFireMockObjectsBeanPostProcessor newInstance(boolean useSingletonCache) {
+	/**
+	 * Factory method used to construct a new instance of {@link GemFireMockObjectsBeanPostProcessor} initialized with
+	 * the given boolean parameter to configure the use of a non/Singleton cache.
+	 *
+	 * @param useSingletonCache boolean value indicating whether to use a Singleton cache.
+	 * @return a new instance of {@link GemFireMockObjectsBeanPostProcessor}.
+	 */
+	public static @NonNull GemFireMockObjectsBeanPostProcessor newInstance(boolean useSingletonCache) {
 
 		GemFireMockObjectsBeanPostProcessor beanPostProcessor = new GemFireMockObjectsBeanPostProcessor();
 
@@ -76,17 +90,25 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 		return beanPostProcessor;
 	}
 
-	@Nullable @Override
-	public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public @Nullable Object postProcessBeforeInitialization(@Nullable Object bean, @NonNull String beanName)
+			throws BeansException {
 
 		return isGemFireProperties(bean, beanName) ? set((Properties) bean)
-			: bean instanceof CacheFactoryBean ? spyOnCacheFactoryBean((CacheFactoryBean) bean, isUsingSingletonCache())
-			: bean instanceof PoolFactoryBean ? mockThePoolFactoryBean((PoolFactoryBean) bean)
+			: isCacheFactoryBean(bean) ? spyOnCacheFactoryBean((CacheFactoryBean) bean, isUsingSingletonCache())
+			: isPoolFactoryBean(bean) ? mockPoolFactoryBean((PoolFactoryBean) bean)
 			: bean;
 	}
 
-	@Nullable @Override
-	public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public @Nullable Object postProcessAfterInitialization(@Nullable Object bean, @NonNull String beanName)
+			throws BeansException {
 
 		if (bean instanceof GemFireCache) {
 
@@ -100,33 +122,41 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 		return bean;
 	}
 
-	private boolean isGemFireProperties(Object bean, String beanName) {
+	private boolean isCacheFactoryBean(@Nullable Object bean) {
+		return bean instanceof CacheFactoryBean;
+	}
+
+	private boolean isGemFireProperties(@Nullable Object bean, @Nullable String beanName) {
 		return bean instanceof Properties && GEMFIRE_PROPERTIES_BEAN_NAME.equals(beanName);
+	}
+
+	private boolean isPoolFactoryBean(@Nullable Object bean) {
+		return bean instanceof PoolFactoryBean;
 	}
 
 	protected boolean isUsingSingletonCache() {
 		return this.useSingletonCache;
 	}
 
-	private Object set(Properties gemfireProperties) {
+	private @Nullable Object set(@Nullable Properties gemfireProperties) {
 
 		this.gemfireProperties.set(gemfireProperties);
 
 		return gemfireProperties;
 	}
 
-	protected Properties getGemFireProperties() {
+	protected @Nullable Properties getGemFireProperties() {
 		return this.gemfireProperties.get();
 	}
 
-	private Object spyOnCacheFactoryBean(CacheFactoryBean bean, boolean useSingletonCache) {
+	private @NonNull Object spyOnCacheFactoryBean(@NonNull CacheFactoryBean bean, boolean useSingletonCache) {
 
 		return bean instanceof ClientCacheFactoryBean
 			? SpyingClientCacheFactoryInitializer.spyOn((ClientCacheFactoryBean) bean, useSingletonCache)
 			: SpyingCacheFactoryInitializer.spyOn(bean, useSingletonCache);
 	}
 
-	private Object mockThePoolFactoryBean(PoolFactoryBean bean) {
+	private @NonNull Object mockPoolFactoryBean(@NonNull PoolFactoryBean bean) {
 		return MockingPoolFactoryInitializer.mock(bean);
 	}
 
