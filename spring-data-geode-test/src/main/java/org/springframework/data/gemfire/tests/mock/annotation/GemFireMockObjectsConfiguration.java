@@ -91,6 +91,9 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 			});
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected @NonNull Class<? extends Annotation> getAnnotationType() {
 		return EnableGemFireMockObjects.class;
 	}
@@ -104,21 +107,21 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 	}
 
 	@Bean
-	public ApplicationListener<ApplicationEvent> destroyGemFireMockObjectsApplicationListener() {
+	public @NonNull ApplicationListener<ApplicationEvent> destroyGemFireMockObjectsApplicationListener() {
 		return DestroyGemFireMockObjectsApplicationListener.newInstance(getConfiguredDestroyEventTypes());
 	}
 
 	@Bean
-	public BeanPostProcessor gemfireMockObjectsBeanPostProcessor() {
+	public @NonNull BeanPostProcessor gemfireMockObjectsBeanPostProcessor() {
 		return GemFireMockObjectsBeanPostProcessor.newInstance(isUseSingletonCacheConfigured());
 	}
 
 	@Bean
-	public BeanPostProcessor gemfireRepositoryBeanPostProcessor() {
+	public @NonNull BeanPostProcessor gemfireRepositoryBeanPostProcessor() {
 
 		return new BeanPostProcessor() {
 
-			public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName)
+			public @Nullable Object postProcessAfterInitialization(@Nullable Object bean, @NonNull String beanName)
 					throws BeansException {
 
 				if (bean instanceof GemfireRepository) {
@@ -168,14 +171,14 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 		}
 
 		@Override
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public @Nullable Object invoke(@NonNull MethodInvocation invocation) throws Throwable {
 
 			Method method = invocation.getMethod();
 
 			return isCountMethod(method) ? Long.valueOf(getRegion().size()) : invocation.proceed();
 		}
 
-		private boolean isCountMethod(Method method) {
+		private boolean isCountMethod(@NonNull Method method) {
 			return method != null && COUNT_METHOD_NAME.equals(method.getName());
 		}
 	}
