@@ -88,7 +88,7 @@
 		<log4j.version>2.12.1</log4j.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.20</lombok.version>
-		<mockito.version>3.9.0</mockito.version>
+		<mockito.version>3.10.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<pivotal-gemfire.version>9.10.7</pivotal-gemfire.version>
 		<spring.version>5.3.6</spring.version>
