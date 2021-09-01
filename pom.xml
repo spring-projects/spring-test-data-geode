@@ -83,7 +83,7 @@
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<apache-geode.version>1.13.2</apache-geode.version>
-		<assertj.version>3.19.0</assertj.version>
+		<assertj.version>3.20.2</assertj.version>
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.12.1</log4j.version>
 		<logback.version>1.2.3</logback.version>
