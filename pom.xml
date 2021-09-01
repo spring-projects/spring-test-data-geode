@@ -90,7 +90,7 @@
 		<lombok.version>1.18.20</lombok.version>
 		<mockito.version>3.12.4</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<pivotal-gemfire.version>9.10.7</pivotal-gemfire.version>
+		<pivotal-gemfire.version>9.10.9</pivotal-gemfire.version>
 		<spring.version>5.3.8</spring.version>
 		<spring-boot.version>2.5.1</spring-boot.version>
 		<spring-data-bom.version>2021.0.2-SNAPSHOT</spring-data-bom.version>
