@@ -92,7 +92,7 @@
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<pivotal-gemfire.version>9.10.9</pivotal-gemfire.version>
 		<spring.version>5.3.9</spring.version>
-		<spring-boot.version>2.5.1</spring-boot.version>
+		<spring-boot.version>2.5.4</spring-boot.version>
 		<spring-data-bom.version>2021.0.2-SNAPSHOT</spring-data-bom.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
