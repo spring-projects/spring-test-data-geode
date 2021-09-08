@@ -89,6 +89,7 @@ import org.apache.geode.cache.DiskStore;
 import org.apache.geode.cache.DiskStoreFactory;
 import org.apache.geode.cache.EntryEvent;
 import org.apache.geode.cache.EntryNotFoundException;
+import org.apache.geode.cache.EvictionAction;
 import org.apache.geode.cache.EvictionAttributes;
 import org.apache.geode.cache.EvictionAttributesMutator;
 import org.apache.geode.cache.ExpirationAction;
@@ -154,6 +155,8 @@ import org.apache.lucene.analysis.Analyzer;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.IndexType;
+import org.springframework.data.gemfire.RegionShortcutWrapper;
+import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
 import org.springframework.data.gemfire.server.SubscriptionEvictionPolicy;
 import org.springframework.data.gemfire.tests.mock.support.MockObjectInvocationException;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
@@ -161,6 +164,8 @@ import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
 import org.springframework.data.util.ReflectionUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -390,24 +395,25 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	@SuppressWarnings("unchecked")
 	private static DataPolicy convert(ClientRegionShortcut clientRegionShortcut) {
 
-		return Optional.ofNullable(clientRegionShortcut).map(shortcut -> {
+		return Optional.ofNullable(clientRegionShortcut)
+			.map(shortcut -> {
 
-			switch(shortcut) {
-				case CACHING_PROXY:
-				case CACHING_PROXY_HEAP_LRU:
-				case CACHING_PROXY_OVERFLOW:
-				case LOCAL:
-				case LOCAL_HEAP_LRU:
-				case LOCAL_OVERFLOW:
-					return DataPolicy.NORMAL;
-				case LOCAL_PERSISTENT:
-				case LOCAL_PERSISTENT_OVERFLOW:
-					return DataPolicy.PERSISTENT_REPLICATE;
-				case PROXY:
-					return DataPolicy.EMPTY;
-				default:
-					return null;
-			}
+				switch(shortcut) {
+					case CACHING_PROXY:
+					case CACHING_PROXY_HEAP_LRU:
+					case CACHING_PROXY_OVERFLOW:
+					case LOCAL:
+					case LOCAL_HEAP_LRU:
+					case LOCAL_OVERFLOW:
+						return DataPolicy.NORMAL;
+					case LOCAL_PERSISTENT:
+					case LOCAL_PERSISTENT_OVERFLOW:
+						return DataPolicy.PERSISTENT_REPLICATE;
+					case PROXY:
+						return DataPolicy.EMPTY;
+					default:
+						return null;
+				}
 
 		}).orElse(DataPolicy.DEFAULT);
 	}
@@ -423,41 +429,42 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	@SuppressWarnings("unchecked")
 	private static DataPolicy convert(RegionShortcut regionShortcut) {
 
-		return Optional.ofNullable(regionShortcut).map(shortcut -> {
+		return Optional.ofNullable(regionShortcut)
+			.map(shortcut -> {
 
-			switch (shortcut) {
-				case LOCAL:
-				case LOCAL_HEAP_LRU:
-				case LOCAL_OVERFLOW:
-					return DataPolicy.NORMAL;
-				case PARTITION:
-				case PARTITION_HEAP_LRU:
-				case PARTITION_OVERFLOW:
-				case PARTITION_PROXY:
-				case PARTITION_PROXY_REDUNDANT:
-				case PARTITION_REDUNDANT:
-				case PARTITION_REDUNDANT_HEAP_LRU:
-				case PARTITION_REDUNDANT_OVERFLOW:
-					return DataPolicy.PARTITION;
-				case PARTITION_PERSISTENT:
-				case PARTITION_PERSISTENT_OVERFLOW:
-				case PARTITION_REDUNDANT_PERSISTENT:
-				case PARTITION_REDUNDANT_PERSISTENT_OVERFLOW:
-					return DataPolicy.PERSISTENT_PARTITION;
-				case REPLICATE:
-				case REPLICATE_HEAP_LRU:
-				case REPLICATE_OVERFLOW:
-					return DataPolicy.REPLICATE;
-				case LOCAL_PERSISTENT:
-				case LOCAL_PERSISTENT_OVERFLOW:
-				case REPLICATE_PERSISTENT:
-				case REPLICATE_PERSISTENT_OVERFLOW:
-					return DataPolicy.PERSISTENT_REPLICATE;
-				case REPLICATE_PROXY:
-					return DataPolicy.EMPTY;
-				default:
-					return null;
-			}
+				switch (shortcut) {
+					case LOCAL:
+					case LOCAL_HEAP_LRU:
+					case LOCAL_OVERFLOW:
+						return DataPolicy.NORMAL;
+					case PARTITION:
+					case PARTITION_HEAP_LRU:
+					case PARTITION_OVERFLOW:
+					case PARTITION_PROXY:
+					case PARTITION_PROXY_REDUNDANT:
+					case PARTITION_REDUNDANT:
+					case PARTITION_REDUNDANT_HEAP_LRU:
+					case PARTITION_REDUNDANT_OVERFLOW:
+						return DataPolicy.PARTITION;
+					case PARTITION_PERSISTENT:
+					case PARTITION_PERSISTENT_OVERFLOW:
+					case PARTITION_REDUNDANT_PERSISTENT:
+					case PARTITION_REDUNDANT_PERSISTENT_OVERFLOW:
+						return DataPolicy.PERSISTENT_PARTITION;
+					case REPLICATE:
+					case REPLICATE_HEAP_LRU:
+					case REPLICATE_OVERFLOW:
+						return DataPolicy.REPLICATE;
+					case LOCAL_PERSISTENT:
+					case LOCAL_PERSISTENT_OVERFLOW:
+					case REPLICATE_PERSISTENT:
+					case REPLICATE_PERSISTENT_OVERFLOW:
+						return DataPolicy.PERSISTENT_REPLICATE;
+					case REPLICATE_PROXY:
+						return DataPolicy.EMPTY;
+					default:
+						return null;
+				}
 
 		}).orElse(DataPolicy.DEFAULT);
 	}
@@ -599,11 +606,115 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * @see org.apache.geode.cache.RegionAttributes
 	 */
 	@SuppressWarnings("unchecked")
+	@NonNull
 	private static <K, V> RegionAttributes<K, V> resolveRegionAttributes(String regionAttributesId) {
 
 		return (RegionAttributes<K, V>) Optional.ofNullable(regionAttributes.get(regionAttributesId))
 			.orElseThrow(() -> newIllegalStateException("RegionAttributes with ID [%s] cannot be found",
 				regionAttributesId));
+	}
+
+	/**
+	 * Constructs, configures and initializes {@link RegionAttributes} from a given {@link ClientRegionShortcut}.
+	 *
+	 * @param <K> {@link Class type} of the {@link Region} key.
+	 * @param <V> {@link Class type} of the {@link Region} value.
+	 * @param clientRegionShortcut {@link ClientRegionShortcut} used to construct, configure and initialize
+	 * {@link RegionAttributes}.
+	 * @return a {@link RegionAttributes} object created from the given {@link ClientRegionShortcut}
+	 * or {@literal null} if the {@link ClientRegionShortcut} is {@literal null}.
+	 * @see org.apache.geode.cache.client.ClientRegionShortcut
+	 * @see org.apache.geode.cache.RegionAttributes
+	 */
+	@SuppressWarnings("unchecked")
+	private static <K, V> RegionAttributes<K, V> resolveRegionAttributesFromClientRegionShortcut(
+			@Nullable ClientRegionShortcut clientRegionShortcut) {
+
+		RegionAttributes<K, V> mockRegionAttributes = null;
+
+		if (clientRegionShortcut != null) {
+
+			ClientRegionShortcutWrapper clientRegionShortcutWrapper =
+				ClientRegionShortcutWrapper.valueOf(clientRegionShortcut);
+
+			mockRegionAttributes = mock(RegionAttributes.class, withSettings().lenient());
+
+			doReturn(convert(clientRegionShortcut)).when(mockRegionAttributes).getDataPolicy();
+
+			if (clientRegionShortcutWrapper.isHeapLru()) {
+				doReturn(EvictionAttributes.createLRUHeapAttributes())
+					.when(mockRegionAttributes).getEvictionAttributes();
+			}
+			else if (clientRegionShortcutWrapper.isOverflow()) {
+				doReturn(EvictionAttributes.createLRUHeapAttributes(null, EvictionAction.OVERFLOW_TO_DISK))
+					.when(mockRegionAttributes).getEvictionAttributes();
+			}
+		}
+
+		return mockRegionAttributes;
+	}
+
+	/**
+	 * Constructs, configures and initializes {@link RegionAttributes} from a given {@link RegionShortcut}.
+	 *
+	 * @param <K> {@link Class type} of the {@link Region} key.
+	 * @param <V> {@link Class type} of the {@link Region} value.
+	 * @param regionShortcut {@link RegionShortcut} used to construct, configure and initialize {@link RegionAttributes}.
+	 * @return a {@link RegionAttributes} object created from the given {@link RegionShortcut} or {@literal null}
+	 * if the {@link RegionShortcut} is {@literal null}.
+	 * @see org.apache.geode.cache.RegionAttributes
+	 * @see org.apache.geode.cache.RegionShortcut
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private static <K, V> RegionAttributes<K, V> resolveRegionAttributesFromRegionShortcut(
+			@Nullable RegionShortcut regionShortcut) {
+
+		RegionAttributes<K, V> mockRegionAttributes = null;
+
+		if (regionShortcut != null) {
+
+			RegionShortcutWrapper regionShortcutWrapper = RegionShortcutWrapper.valueOf(regionShortcut);
+
+			mockRegionAttributes = mock(RegionAttributes.class, withSettings().lenient());
+
+			doReturn(convert(regionShortcut)).when(mockRegionAttributes).getDataPolicy();
+
+			if (regionShortcutWrapper.isHeapLru()) {
+				doReturn(EvictionAttributes.createLRUHeapAttributes())
+					.when(mockRegionAttributes).getEvictionAttributes();
+			}
+			else if (regionShortcutWrapper.isOverflow()) {
+				doReturn(EvictionAttributes.createLRUHeapAttributes(null, EvictionAction.OVERFLOW_TO_DISK))
+					.when(mockRegionAttributes).getEvictionAttributes();
+			}
+
+			if (regionShortcutWrapper.isLocal()) {
+				doReturn(Scope.LOCAL).when(mockRegionAttributes).getScope();
+			}
+
+			if (regionShortcutWrapper.isPartition()) {
+
+				PartitionAttributes<K, V> mockPartitionAttributes =
+					mock(PartitionAttributes.class, withSettings().lenient());
+
+				if (regionShortcut.isProxy()) {
+					doReturn(0).when(mockPartitionAttributes).getLocalMaxMemory();
+				}
+
+				if (regionShortcutWrapper.isRedundant()) {
+					doReturn(1).when(mockPartitionAttributes).getRedundantCopies();
+				}
+
+				doReturn(mockPartitionAttributes).when(mockRegionAttributes).getPartitionAttributes();
+			}
+
+			if (regionShortcutWrapper.isReplicate()) {
+				doReturn(Scope.DISTRIBUTED_ACK).when(mockRegionAttributes).getScope();
+			}
+		}
+
+		return mockRegionAttributes;
 	}
 
 	/**
@@ -1032,19 +1143,21 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	public static <K, V> ClientRegionFactory<K, V> mockClientRegionFactory(ClientCache mockClientCache,
 			ClientRegionShortcut clientRegionShortcut) {
 
-		return mockClientRegionFactory(mockClientCache, clientRegionShortcut, null);
+		return mockClientRegionFactory(mockClientCache,
+			resolveRegionAttributesFromClientRegionShortcut(clientRegionShortcut),
+				clientRegionShortcut);
 	}
 
 	public static <K, V> ClientRegionFactory<K, V> mockClientRegionFactory(ClientCache mockClientCache,
 			String regionAttributesId) {
 
-		return mockClientRegionFactory(mockClientCache, null,
-			resolveRegionAttributes(regionAttributesId));
+		return mockClientRegionFactory(mockClientCache, resolveRegionAttributes(regionAttributesId),
+			null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <K, V> ClientRegionFactory<K, V> mockClientRegionFactory(ClientCache mockClientCache,
-			ClientRegionShortcut clientRegionShortcut, RegionAttributes<K, V> regionAttributes) {
+			RegionAttributes<K, V> regionAttributes, ClientRegionShortcut clientRegionShortcut) {
 
 		ClientRegionFactory<K, V> mockClientRegionFactory =
 			mock(ClientRegionFactory.class, mockObjectIdentifier("MockClientRegionFactory"));
@@ -1375,6 +1488,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		DistributedMember mockDistributedMember = mockDistributedMember();
 
 		DistributedSystem mockDistributedSystem = mock(DistributedSystem.class);
+
+		doAnswer(invocation -> gemfireProperties.get().getProperty(DistributionConfig.NAME_NAME))
+			.when(mockDistributedSystem).getName();
 
 		when(mockDistributedSystem.getDistributedMember()).thenReturn(mockDistributedMember);
 		when(mockDistributedSystem.getProperties()).thenAnswer(invocation -> gemfireProperties.get());
@@ -2854,20 +2970,20 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	public static <K, V> RegionFactory<K, V> mockRegionFactory(Cache mockCache,
 			RegionAttributes<K, V> regionAttributes) {
 
-		return mockRegionFactory(mockCache, null, regionAttributes);
+		return mockRegionFactory(mockCache, regionAttributes, null);
 	}
 
 	public static <K, V> RegionFactory<K, V> mockRegionFactory(Cache mockCache, RegionShortcut regionShortcut) {
-		return mockRegionFactory(mockCache, regionShortcut, null);
+		return mockRegionFactory(mockCache, resolveRegionAttributesFromRegionShortcut(regionShortcut), regionShortcut);
 	}
 
 	public static <K, V> RegionFactory<K, V> mockRegionFactory(Cache mockCache, String regionAttributesId) {
-		return mockRegionFactory(mockCache, null, resolveRegionAttributes(regionAttributesId));
+		return mockRegionFactory(mockCache, resolveRegionAttributes(regionAttributesId), null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <K, V> RegionFactory<K, V> mockRegionFactory(Cache mockCache, RegionShortcut regionShortcut,
-			RegionAttributes<K, V> regionAttributes) {
+	public static <K, V> RegionFactory<K, V> mockRegionFactory(Cache mockCache, RegionAttributes<K, V> regionAttributes,
+			RegionShortcut regionShortcut) {
 
 		RegionFactory<K, V> mockRegionFactory = mock(RegionFactory.class,
 			mockObjectIdentifier("MockRegionFactory"));
