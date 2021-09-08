@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.process;
 
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
@@ -102,7 +101,7 @@ public abstract class ProcessExecutor {
 		command.add(type.getName());
 		command.addAll(programArguments);
 
-		return command.toArray(new String[command.size()]);
+		return command.toArray(new String[0]);
 	}
 
 	protected static Collection<? extends String> getSpringGemFireSystemProperties() {
