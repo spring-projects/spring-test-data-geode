@@ -115,6 +115,7 @@ import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.cache.client.Pool;
 import org.apache.geode.cache.client.PoolFactory;
 import org.apache.geode.cache.client.PoolManager;
+import org.apache.geode.cache.client.SocketFactory;
 import org.apache.geode.cache.control.ResourceManager;
 import org.apache.geode.cache.execute.RegionFunctionContext;
 import org.apache.geode.cache.lucene.LuceneIndex;
@@ -1782,6 +1783,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicLong idleTimeout = new AtomicLong(PoolFactory.DEFAULT_IDLE_TIMEOUT);
 		AtomicLong pingInterval = new AtomicLong(PoolFactory.DEFAULT_PING_INTERVAL);
 
+		AtomicReference<SocketFactory> socketFactory = new AtomicReference<>(PoolFactory.DEFAULT_SOCKET_FACTORY);
 		AtomicReference<String> serverGroup = new AtomicReference<>(PoolFactory.DEFAULT_SERVER_GROUP);
 
 		List<InetSocketAddress> locators = new ArrayList<>();
@@ -1839,6 +1841,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockPoolFactory.setSocketConnectTimeout(anyInt()))
 			.thenAnswer(newSetter(socketConnectTimeout, mockPoolFactory));
 
+		when(mockPoolFactory.setSocketFactory(any(SocketFactory.class)))
+			.thenAnswer(newSetter(socketFactory, () -> mockPoolFactory));
+
 		when(mockPoolFactory.setStatisticInterval(anyInt()))
 			.thenAnswer(newSetter(statisticInterval, mockPoolFactory));
 
@@ -1893,6 +1898,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getServers()).thenReturn(servers);
 			when(mockPool.getSocketBufferSize()).thenReturn(socketBufferSize.get());
 			when(mockPool.getSocketConnectTimeout()).thenReturn(socketConnectTimeout.get());
+			when(mockPool.getSocketFactory()).thenReturn(socketFactory.get());
 			when(mockPool.getStatisticInterval()).thenReturn(statisticInterval.get());
 			when(mockPool.getSubscriptionAckInterval()).thenReturn(subscriptionAckInterval.get());
 			when(mockPool.getSubscriptionEnabled()).thenReturn(subscriptionEnabled.get());
@@ -3456,6 +3462,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			mockPoolFactory.setSocketConnectTimeout(invocation.getArgument(0));
 			return clientCacheFactorySpy;
 		}).when(clientCacheFactorySpy).setPoolSocketConnectTimeout(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setSocketFactory(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolSocketFactory(any(SocketFactory.class));
 
 		doAnswer(invocation -> {
 			mockPoolFactory.setStatisticInterval(invocation.getArgument(0));
