@@ -55,7 +55,7 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 	@After
 	public void closeApplicationContext() {
-		getOptionalApplicationContext().ifPresent(ConfigurableApplicationContext::close);
+		closeApplicationContext(this.applicationContext);
 	}
 
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {

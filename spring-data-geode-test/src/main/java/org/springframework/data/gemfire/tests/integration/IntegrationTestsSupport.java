@@ -54,6 +54,7 @@ import org.apache.geode.internal.net.SocketCreatorFactory;
 import org.apache.shiro.util.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -246,6 +247,14 @@ public abstract class IntegrationTestsSupport {
 		stream(nullSafeArray(InternalDataSerializer.getSerializers(), DataSerializer.class))
 			.map(DataSerializer::getId)
 			.forEach(InternalDataSerializer::unregister);
+	}
+
+	public static void closeApplicationContext(@Nullable ApplicationContext applicationContext) {
+
+		Optional.ofNullable(applicationContext)
+			.filter(ConfigurableApplicationContext.class::isInstance)
+			.map(ConfigurableApplicationContext.class::cast)
+			.ifPresent(ConfigurableApplicationContext::close);
 	}
 
 	public static void closeGemFireCacheWaitOnCacheClosedEvent() {
