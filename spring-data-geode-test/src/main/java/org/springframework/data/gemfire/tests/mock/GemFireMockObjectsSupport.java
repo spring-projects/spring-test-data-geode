@@ -138,6 +138,7 @@ import org.apache.geode.cache.query.types.ObjectType;
 import org.apache.geode.cache.server.CacheServer;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
 import org.apache.geode.cache.server.ServerLoadProbe;
+import org.apache.geode.cache.util.GatewayConflictResolver;
 import org.apache.geode.cache.wan.GatewayEventFilter;
 import org.apache.geode.cache.wan.GatewayEventSubstitutionFilter;
 import org.apache.geode.cache.wan.GatewayReceiver;
@@ -869,6 +870,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicInteger messageSyncInterval = new AtomicInteger();
 		AtomicInteger searchTimeout = new AtomicInteger();
 
+		AtomicReference<GatewayConflictResolver> gatewayConflictResolver = new AtomicReference<>();
+
 		List<CacheServer> cacheServers = new ArrayList<>();
 
 		when(mockCache.addCacheServer()).thenAnswer(invocation -> {
@@ -880,6 +883,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockCacheServer;
 		});
 
+		doAnswer(newSetter(gatewayConflictResolver, () -> null))
+			.when(mockCache).setGatewayConflictResolver(any(GatewayConflictResolver.class));
+
 		doAnswer(newSetter(lockLease, null)).when(mockCache).setLockLease(anyInt());
 		doAnswer(newSetter(lockTimeout, null)).when(mockCache).setLockTimeout(anyInt());
 		doAnswer(newSetter(messageSyncInterval, null)).when(mockCache).setMessageSyncInterval(anyInt());
@@ -889,6 +895,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockCache.getAsyncEventQueues())
 			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(asyncEventQueues.values())));
 		when(mockCache.getCacheServers()).thenAnswer(invocation -> Collections.unmodifiableList(cacheServers));
+		when(mockCache.getGatewayConflictResolver()).thenAnswer(newGetter(gatewayConflictResolver));
 		when(mockCache.getGatewayReceivers()).thenAnswer(invocation -> Collections.unmodifiableSet(gatewayReceivers));
 		when(mockCache.getGatewaySenders())
 			.thenAnswer(invocation -> Collections.unmodifiableSet(new HashSet<>(gatewaySenders.values())));
