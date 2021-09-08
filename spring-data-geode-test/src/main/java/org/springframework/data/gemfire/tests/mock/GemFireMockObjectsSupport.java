@@ -1771,6 +1771,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicInteger minConnections = new AtomicInteger(PoolFactory.DEFAULT_MIN_CONNECTIONS);
 		AtomicInteger readTimeout = new AtomicInteger(PoolFactory.DEFAULT_READ_TIMEOUT);
 		AtomicInteger retryAttempts = new AtomicInteger(PoolFactory.DEFAULT_RETRY_ATTEMPTS);
+		AtomicInteger serverConnectionTimeout = new AtomicInteger(PoolFactory.DEFAULT_SERVER_CONNECTION_TIMEOUT);
 		AtomicInteger socketBufferSize = new AtomicInteger(PoolFactory.DEFAULT_SOCKET_BUFFER_SIZE);
 		AtomicInteger socketConnectTimeout = new AtomicInteger(PoolFactory.DEFAULT_SOCKET_CONNECT_TIMEOUT);
 		AtomicInteger statisticInterval = new AtomicInteger(PoolFactory.DEFAULT_STATISTIC_INTERVAL);
@@ -1825,6 +1826,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		when(mockPoolFactory.setRetryAttempts(anyInt()))
 			.thenAnswer(newSetter(retryAttempts, mockPoolFactory));
+
+		when(mockPoolFactory.setServerConnectionTimeout(anyInt()))
+			.thenAnswer(newSetter(serverConnectionTimeout, mockPoolFactory));
 
 		when(mockPoolFactory.setServerGroup(anyString()))
 			.thenAnswer(newSetter(serverGroup, () -> mockPoolFactory));
@@ -1884,6 +1888,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getPRSingleHopEnabled()).thenReturn(prSingleHopEnabled.get());
 			when(mockPool.getReadTimeout()).thenReturn(readTimeout.get());
 			when(mockPool.getRetryAttempts()).thenReturn(retryAttempts.get());
+			when(mockPool.getServerConnectionTimeout()).thenReturn(serverConnectionTimeout.get());
 			when(mockPool.getServerGroup()).thenReturn(serverGroup.get());
 			when(mockPool.getServers()).thenReturn(servers);
 			when(mockPool.getSocketBufferSize()).thenReturn(socketBufferSize.get());
@@ -3431,6 +3436,11 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			mockPoolFactory.setRetryAttempts(invocation.getArgument(0));
 			return clientCacheFactorySpy;
 		}).when(clientCacheFactorySpy).setPoolRetryAttempts(anyInt());
+
+		doAnswer(invocation -> {
+			mockPoolFactory.setServerConnectionTimeout(invocation.getArgument(0));
+			return clientCacheFactorySpy;
+		}).when(clientCacheFactorySpy).setPoolServerConnectionTimeout(anyInt());
 
 		doAnswer(invocation -> {
 			mockPoolFactory.setServerGroup(invocation.getArgument(0));
