@@ -70,7 +70,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	public static void startGemFireServer(@NonNull Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
 
-		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAvailablePort()));
+		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAndReserveAvailablePort()));
 
 		List<String> argumentList = new ArrayList<>(Arrays.asList(ArrayUtils.nullSafeArray(arguments, String.class)));
 
