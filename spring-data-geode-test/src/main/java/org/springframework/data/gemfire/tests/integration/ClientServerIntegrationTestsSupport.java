@@ -155,6 +155,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 
 		applicationContext.register(ArrayUtils.nullSafeArray(annotatedClasses, Class.class));
 		applicationContext.registerShutdownHook();
+		applicationContext.refresh();
 
 		return applicationContext;
 	}
