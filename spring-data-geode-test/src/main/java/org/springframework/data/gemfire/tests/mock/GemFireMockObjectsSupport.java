@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1596,7 +1597,16 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockGatewayReceiver.getHost()).thenAnswer(newGetter(hostnameForSenders));
 			when(mockGatewayReceiver.getHostnameForSenders()).thenAnswer(newGetter(hostnameForSenders));
 			when(mockGatewayReceiver.getMaximumTimeBetweenPings()).thenAnswer(newGetter(maximumTimeBetweenPings));
-			when(mockGatewayReceiver.getPort()).thenReturn(0);
+
+			when(mockGatewayReceiver.getPort()).thenAnswer(portInvocation -> {
+
+				Random randomPort = new Random(System.currentTimeMillis());
+
+				int port = startPort.get() + randomPort.nextInt(endPort.get() - startPort.get());;
+
+				return port;
+			});
+
 			when(mockGatewayReceiver.getSocketBufferSize()).thenAnswer(newGetter(socketBufferSize));
 			when(mockGatewayReceiver.getStartPort()).thenAnswer(newGetter(startPort));
 
