@@ -278,8 +278,10 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	private static final String CACHE_FACTORY_INTERNAL_CACHE_BUILDER_FIELD_NAME = "internalCacheBuilder";
 	private static final String CLIENT_CACHE_FACTORY_DS_PROPS_FIELD_NAME = "dsProps";
 	private static final String INTERNAL_CACHE_BUILDER_CONFIG_PROPERTIES_FIELD_NAME = "configProperties";
-	private static final String GEMFIRE_SYSTEM_PROPERTIES_PREFIX = "gemfire.";
+	private static final String GEMFIRE_SYSTEM_PROPERTY_PREFIX = "gemfire.";
 	private static final String FROM_KEYWORD = "FROM";
+	private static final String REPEATING_REGION_SEPARATOR = Region.SEPARATOR + "{2,}";
+	private static final String USE_SINGLETON_CACHE_PROPERTY = "spring.data.gemfire.test.cache.singleton";
 	private static final String WHERE_KEYWORD = "WHERE";
 
 	private static final String[] GEMFIRE_OBJECT_BASED_PROPERTIES = {
@@ -288,7 +290,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		"security-post-processor",
 	};
 
-	private static final String REPEATING_REGION_SEPARATOR = Region.SEPARATOR + "{2,}";
+	private static final String[] SPRING_DATA_GEODE_TEST_PROPERTIES = {
+		USE_SINGLETON_CACHE_PROPERTY,
+	};
 
 	/**
 	 * Destroys all mock object state.
@@ -307,6 +311,15 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		unregisterManagedPools();
 		closePools();
 		destroyGemFireObjects();
+		clearSpringDataGeodeTestProperties();
+	}
+
+	/**
+	 * Clears all {@literal spring.data.gemfire.test.*} {@link System#getProperties() System Properties}.
+	 */
+	static void clearSpringDataGeodeTestProperties() {
+		Arrays.stream(ArrayUtils.nullSafeArray(SPRING_DATA_GEODE_TEST_PROPERTIES, String.class))
+			.forEach(property -> System.clearProperty(property));
 	}
 
 	/**
@@ -342,6 +355,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		cachedGemFireObjects.clear();
 	}
 
+	/**
+	 * Unrigsters all {@link Pool Pools} registered with Apache Geode and managed by Spring.
+	 */
 	static synchronized void unregisterManagedPools() {
 
 		CollectionUtils.nullSafeMap(PoolManager.getAll()).values().stream()
@@ -506,8 +522,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		return Optional.ofNullable(propertyName)
 			.filter(StringUtils::hasText)
-			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
-			.map(it -> it.substring(GEMFIRE_SYSTEM_PROPERTIES_PREFIX.length()))
+			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTY_PREFIX))
+			.map(it -> it.substring(GEMFIRE_SYSTEM_PROPERTY_PREFIX.length()))
 			.orElse(propertyName);
 	}
 
@@ -3306,8 +3322,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		return mockResourceManager;
 	}
 
+	public static boolean resolveUseSingletonCache() {
+		return Boolean.parseBoolean(System.getProperty(USE_SINGLETON_CACHE_PROPERTY,
+			String.valueOf(DEFAULT_USE_SINGLETON_CACHE)));
+	}
+
 	public static CacheFactory spyOn(CacheFactory cacheFactory) {
-		return spyOn(cacheFactory, DEFAULT_USE_SINGLETON_CACHE);
+		return spyOn(cacheFactory, resolveUseSingletonCache());
 	}
 
 	public static CacheFactory spyOn(CacheFactory cacheFactory, boolean useSingletonCache) {
@@ -3359,7 +3380,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	public static ClientCacheFactory spyOn(ClientCacheFactory clientCacheFactory) {
-		return spyOn(clientCacheFactory, DEFAULT_USE_SINGLETON_CACHE);
+		return spyOn(clientCacheFactory, resolveUseSingletonCache());
 	}
 
 	public static ClientCacheFactory spyOn(ClientCacheFactory clientCacheFactory, boolean useSingletonCache) {
@@ -3603,7 +3624,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		List<String> gemfireSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
 			.filter(StringUtils::hasText)
-			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTIES_PREFIX))
+			.filter(it -> it.startsWith(GEMFIRE_SYSTEM_PROPERTY_PREFIX))
 			.collect(Collectors.toList());
 
 		gemfireSystemPropertyNames.stream().forEach(propertyName ->
