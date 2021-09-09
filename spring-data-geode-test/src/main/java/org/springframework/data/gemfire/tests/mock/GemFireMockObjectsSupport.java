@@ -270,7 +270,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final Map<String, RegionAttributes<Object, Object>> regionAttributes = new ConcurrentHashMap<>();
 
-	private static final Set<GatewayReceiver> gatewayReceivers = new ConcurrentSkipListSet<>();
+	private static final Set<GatewayReceiver> gatewayReceivers = Collections.synchronizedSet(new HashSet<>());
 
 	private static final Set<String> registeredPoolNames = new ConcurrentSkipListSet<>();
 
