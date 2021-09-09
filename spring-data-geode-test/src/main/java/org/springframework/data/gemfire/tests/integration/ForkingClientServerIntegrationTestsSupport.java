@@ -81,6 +81,12 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		waitForServerToStart("localhost", availablePort);
 	}
 
+	public static void startGeodeServer(@NonNull Class<?> geodeServerConfigurationClass, String... arguments)
+			throws IOException {
+
+		startGemFireServer(geodeServerConfigurationClass, arguments);
+	}
+
 	protected static int setAndGetCacheServerPortProperty(int port) {
 
 		System.setProperty(GEMFIRE_CACHE_SERVER_PORT_PROPERTY, String.valueOf(port));
