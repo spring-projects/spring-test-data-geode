@@ -1594,7 +1594,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockGatewayReceiver.getEndPort()).thenAnswer(newGetter(endPort));
 			when(mockGatewayReceiver.getGatewayTransportFilters()).thenReturn(gatewayTransportFilters);
 			when(mockGatewayReceiver.getHost()).thenAnswer(newGetter(hostnameForSenders));
-			//when(mockGatewayReceiver.getHostnameForSenders()).thenAnswer(newGetter(hostnameForSenders));
+			when(mockGatewayReceiver.getHostnameForSenders()).thenAnswer(newGetter(hostnameForSenders));
 			when(mockGatewayReceiver.getMaximumTimeBetweenPings()).thenAnswer(newGetter(maximumTimeBetweenPings));
 			when(mockGatewayReceiver.getPort()).thenReturn(0);
 			when(mockGatewayReceiver.getSocketBufferSize()).thenAnswer(newGetter(socketBufferSize));
