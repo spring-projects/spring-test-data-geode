@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
@@ -113,6 +114,10 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 
 	protected static boolean isProcessRunManual() {
 		return Boolean.getBoolean(PROCESS_RUN_MANUAL_PROPERTY);
+	}
+
+	protected static void block() {
+		new Scanner(System.in).nextLine();
 	}
 
 	protected static @Nullable ProcessWrapper run(Class<?> type, String... arguments) throws IOException {
