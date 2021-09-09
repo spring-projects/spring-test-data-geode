@@ -1583,7 +1583,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		when(mockGatewayReceiverFactory.create()).thenAnswer(invocation -> {
 
-			AtomicBoolean running = new AtomicBoolean(false);
+			AtomicBoolean running = new AtomicBoolean(!manualStart.get());
 
 			GatewayReceiver mockGatewayReceiver = mock(GatewayReceiver.class);
 
