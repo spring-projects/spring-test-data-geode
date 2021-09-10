@@ -22,6 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Test;
 
@@ -33,7 +36,13 @@ import org.apache.geode.cache.RegionService;
 import org.apache.geode.cache.asyncqueue.AsyncEventListener;
 import org.apache.geode.cache.asyncqueue.AsyncEventQueue;
 import org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory;
+import org.apache.geode.cache.lucene.LuceneIndex;
+import org.apache.geode.cache.lucene.LuceneIndexFactory;
+import org.apache.geode.cache.lucene.LuceneSerializer;
+import org.apache.geode.cache.lucene.LuceneService;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
+
+import org.apache.lucene.analysis.Analyzer;
 
 /**
  * Unit Tests for {@link GemFireMockObjectsSupport}.
@@ -127,6 +136,46 @@ public class GemFireMockObjectsSupportUnitTests {
 		assertThat(mockClientSubscriptionConfig.getCapacity()).isEqualTo(1024);
 		assertThat(mockClientSubscriptionConfig.getDiskStoreName()).isEqualTo("TestDiskStore");
 		assertThat(mockClientSubscriptionConfig.getEvictionPolicy()).isEqualTo("entry");
+	}
+
+	@Test
+	public void mockLuceneFunctionality() {
+
+		Cache mockCache = mock(Cache.class);
+
+		LuceneService mockLuceneService = GemFireMockObjectsSupport.mockLuceneService(mockCache);
+
+		assertThat(mockLuceneService).isNotNull();
+		assertThat(mockLuceneService.getAllIndexes()).isEmpty();
+		assertThat(mockLuceneService.getCache()).isEqualTo(mockCache);
+
+		LuceneSerializer<?> mockLuceneSerializer = mock(LuceneSerializer.class);
+
+		LuceneIndexFactory mockLuceneIndexFactory = mockLuceneService.createIndexFactory();
+
+		assertThat(mockLuceneIndexFactory).isNotNull();
+
+		Analyzer mockAnalyzer = mock(Analyzer.class);
+
+		Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
+
+		fieldAnalyzers.put("fieldZero", mockAnalyzer);
+
+		mockLuceneIndexFactory.setFields("FieldOne", "FieldTwo");
+		mockLuceneIndexFactory.setLuceneSerializer(mockLuceneSerializer);
+		mockLuceneIndexFactory.addField("FieldThree");
+		mockLuceneIndexFactory.setFields(fieldAnalyzers);
+		mockLuceneIndexFactory.create("MockLuceneIndex", "/Test");
+
+		LuceneIndex mockLuceneIndex = mockLuceneService.getIndex("MockLuceneIndex", "/Test");
+
+		assertThat(mockLuceneIndex).isNotNull();
+		assertThat(mockLuceneIndex.getRegionPath()).isEqualTo("/Test");
+		assertThat(mockLuceneIndex.getName()).isEqualTo("MockLuceneIndex");
+		assertThat(mockLuceneIndex.getLuceneSerializer()).isEqualTo(mockLuceneSerializer);
+		assertThat(mockLuceneIndex.getFieldNames()).containsExactlyInAnyOrder("FieldOne", "FieldTwo", "FieldThree");
+		assertThat(mockLuceneIndex.getFieldAnalyzers()).isEqualTo(fieldAnalyzers);
+		assertThat(mockLuceneService.getAllIndexes()).containsExactly(mockLuceneIndex);
 	}
 
 	@Test

@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -2362,7 +2363,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockLuceneIndexFactory;
 		});
 
-		when(mockLuceneIndexFactory.setFields(any(String[].class))).thenAnswer(invocation -> {
+		when(mockLuceneIndexFactory.setFields(ArgumentMatchers.<String[]>any())).thenAnswer(invocation -> {
 
 			Object[] fieldsArgument = invocation.getArguments();
 
@@ -2378,27 +2379,21 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockLuceneIndexFactory;
 		});
 
-		when(mockLuceneIndexFactory.setFields(any(Map.class))).thenAnswer(invocation -> {
+		when(mockLuceneIndexFactory.setFields(anyMap())).thenAnswer(invocation -> {
 
 			Map<String, Analyzer> fieldAnalyzersArgument = invocation.getArgument(0);
 
 			fieldAnalyzers.clear();
-			fieldAnalyzers.putAll(CollectionUtils.nullSafeMap(fieldAnalyzers));
+			fieldAnalyzers.putAll(CollectionUtils.nullSafeMap(fieldAnalyzersArgument));
 
 			return mockLuceneIndexFactory;
 		});
 
 		when(mockLuceneIndexFactory.setLuceneSerializer(any(LuceneSerializer.class))).thenAnswer(invocation -> {
 
-			Optional.ofNullable(invocation.<LuceneSerializer>getArgument(0))
-				.map(it -> {
-					luceneSerializer.set(it);
-					return it;
-				})
-				.orElseGet(() -> {
-					luceneSerializer.set(null);
-					return null;
-				});
+			LuceneSerializer<?> luceneSerializerArgument = invocation.getArgument(0);
+
+			luceneSerializer.set(luceneSerializerArgument);
 
 			return mockLuceneIndexFactory;
 		});
