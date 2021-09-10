@@ -34,7 +34,6 @@ import static org.springframework.data.gemfire.tests.util.IOUtils.doSafeIo;
 import static org.springframework.data.gemfire.tests.util.ObjectUtils.rethrowAsRuntimeException;
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 import static org.springframework.data.gemfire.util.CollectionUtils.asSet;
-import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeMap;
 import static org.springframework.data.gemfire.util.CollectionUtils.nullSafeSet;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.NOT_SUPPORTED;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalArgumentException;
@@ -2338,7 +2337,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		LuceneIndexFactory mockLuceneIndexFactory = mock(LuceneIndexFactory.class);
 
-		AtomicReference<LuceneSerializer> luceneSerializerReference = new AtomicReference<>(null);
+		AtomicReference<LuceneSerializer> luceneSerializer = new AtomicReference<>(null);
 
 		Map<String, Analyzer> fieldAnalyzers = new ConcurrentHashMap<>();
 
@@ -2363,16 +2362,18 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockLuceneIndexFactory;
 		});
 
-		when(mockLuceneIndexFactory.setFields(ArgumentMatchers.<String[]>any())).thenAnswer(invocation -> {
+		when(mockLuceneIndexFactory.setFields(any(String[].class))).thenAnswer(invocation -> {
 
 			Object[] fieldsArgument = invocation.getArguments();
 
+			String[] fieldNames = Arrays.stream(ArrayUtils.nullSafeArray(fieldsArgument, Object.class))
+				.filter(Objects::nonNull)
+				.map(String::valueOf)
+				.toArray(size -> new String[size]);
+
 			fields.clear();
 
-			Arrays.stream(nullSafeArray(fieldsArgument, Object.class))
-				.filter(field -> field instanceof String)
-				.map(String::valueOf)
-				.forEach(fields::add);
+			Collections.addAll(fields, fieldNames);
 
 			return mockLuceneIndexFactory;
 		});
@@ -2382,7 +2383,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			Map<String, Analyzer> fieldAnalyzersArgument = invocation.getArgument(0);
 
 			fieldAnalyzers.clear();
-			fieldAnalyzers.putAll(nullSafeMap(fieldAnalyzers));
+			fieldAnalyzers.putAll(CollectionUtils.nullSafeMap(fieldAnalyzers));
 
 			return mockLuceneIndexFactory;
 		});
@@ -2390,12 +2391,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockLuceneIndexFactory.setLuceneSerializer(any(LuceneSerializer.class))).thenAnswer(invocation -> {
 
 			Optional.ofNullable(invocation.<LuceneSerializer>getArgument(0))
-				.map(luceneSerializer -> {
-					luceneSerializerReference.set(luceneSerializer);
-					return luceneSerializer;
+				.map(it -> {
+					luceneSerializer.set(it);
+					return it;
 				})
 				.orElseGet(() -> {
-					luceneSerializerReference.set(null);
+					luceneSerializer.set(null);
 					return null;
 				});
 
@@ -2413,7 +2414,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			when(mockLuceneIndex.getFieldAnalyzers()).thenReturn(Collections.unmodifiableMap(fieldAnalyzers));
 			when(mockLuceneIndex.getFieldNames()).thenAnswer(in -> fields.toArray(new String[fields.size()]));
-			when(mockLuceneIndex.getLuceneSerializer()).thenAnswer(in -> luceneSerializerReference.get());
+			when(mockLuceneIndex.getLuceneSerializer()).thenAnswer(in -> luceneSerializer.get());
 			when(mockLuceneIndex.getName()).thenReturn(indexName);
 			when(mockLuceneIndex.getRegionPath()).thenReturn(regionPath);
 
