@@ -3096,112 +3096,148 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			new ExpirationAttributes(0, ExpirationAction.INVALIDATE);
 
 		AtomicBoolean cloningEnabled = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getCloningEnabled).orElse(false));
+			.map(RegionAttributes::getCloningEnabled)
+			.orElse(false));
 
 		AtomicBoolean concurrencyChecksEnabled = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getConcurrencyChecksEnabled).orElse(true));
+			.map(RegionAttributes::getConcurrencyChecksEnabled)
+			.orElse(true));
 
 		AtomicBoolean diskSynchronous = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::isDiskSynchronous).orElse(true));
+			.map(RegionAttributes::isDiskSynchronous)
+			.orElse(true));
 
 		AtomicBoolean enableAsyncConflation = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getEnableAsyncConflation).orElse(false));
+			.map(RegionAttributes::getEnableAsyncConflation)
+			.orElse(false));
 
 		AtomicBoolean enableSubscriptionConflation = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getEnableSubscriptionConflation).orElse(false));
+			.map(RegionAttributes::getEnableSubscriptionConflation)
+			.orElse(false));
 
 		AtomicBoolean ignoreJta = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getIgnoreJTA).orElse(false));
+			.map(RegionAttributes::getIgnoreJTA)
+			.orElse(false));
 
 		AtomicBoolean indexMaintenanceSynchronous = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getIndexMaintenanceSynchronous).orElse(true));
+			.map(RegionAttributes::getIndexMaintenanceSynchronous)
+			.orElse(true));
 
 		AtomicBoolean lockGrantor = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::isLockGrantor).orElse(false));
+			.map(RegionAttributes::isLockGrantor)
+			.orElse(false));
 
 		AtomicBoolean multicastEnabled = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getMulticastEnabled).orElse(false));
+			.map(RegionAttributes::getMulticastEnabled)
+			.orElse(false));
 
 		AtomicBoolean offHeap = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getOffHeap).orElse(false));
+			.map(RegionAttributes::getOffHeap)
+			.orElse(false));
 
 		AtomicBoolean statisticsEnabled = new AtomicBoolean(optionalRegionAttributes
-			.map(RegionAttributes::getStatisticsEnabled).orElse(false));
+			.map(RegionAttributes::getStatisticsEnabled)
+			.orElse(false));
 
 		AtomicInteger concurrencyLevel = new AtomicInteger(optionalRegionAttributes
-			.map(RegionAttributes::getConcurrencyLevel).orElse(16));
+			.map(RegionAttributes::getConcurrencyLevel)
+			.orElse(16));
 
 		AtomicInteger initialCapacity = new AtomicInteger(optionalRegionAttributes
-			.map(RegionAttributes::getInitialCapacity).orElse(16));
+			.map(RegionAttributes::getInitialCapacity)
+			.orElse(16));
 
 		AtomicReference<CacheLoader> cacheLoader = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getCacheLoader).orElse(null));
+			.map(RegionAttributes::getCacheLoader)
+			.orElse(null));
 
 		AtomicReference<CacheWriter> cacheWriter = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getCacheWriter).orElse(null));
+			.map(RegionAttributes::getCacheWriter)
+			.orElse(null));
 
 		AtomicReference<Compressor> compressor = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getCompressor).orElse(null));
+			.map(RegionAttributes::getCompressor)
+			.orElse(null));
 
 		AtomicReference<CustomExpiry<K, V>> customEntryIdleTimeout = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getCustomEntryIdleTimeout).orElse(null));
+			.map(RegionAttributes::getCustomEntryIdleTimeout)
+			.orElse(null));
 
 		AtomicReference<CustomExpiry<K, V>> customEntryTimeToLive = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getCustomEntryTimeToLive).orElse(null));
+			.map(RegionAttributes::getCustomEntryTimeToLive)
+			.orElse(null));
 
 		AtomicReference<DataPolicy> dataPolicy = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getDataPolicy).orElseGet(() -> convert(regionShortcut)));
+			.map(RegionAttributes::getDataPolicy)
+			.orElseGet(() -> convert(regionShortcut)));
 
 		AtomicReference<String> diskStoreName = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getDiskStoreName).orElse(null));
+			.map(RegionAttributes::getDiskStoreName)
+			.orElse(null));
 
 		AtomicReference<ExpirationAttributes> entryIdleTimeout = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getEntryIdleTimeout).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
+			.map(RegionAttributes::getEntryIdleTimeout)
+			.orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<ExpirationAttributes> entryTimeToLive = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getEntryTimeToLive).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
+			.map(RegionAttributes::getEntryTimeToLive)
+			.orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<EvictionAttributes> evictionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getEvictionAttributes).orElseGet(EvictionAttributes::createLRUEntryAttributes));
+			.map(RegionAttributes::getEvictionAttributes)
+			.orElseGet(EvictionAttributes::createLRUEntryAttributes));
 
 		AtomicReference<Class<K>> keyConstraint = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getKeyConstraint).orElse(null));
+			.map(RegionAttributes::getKeyConstraint)
+			.orElse(null));
 
 		AtomicReference<Float> loadFactor = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getLoadFactor).orElse(0.75f));
+			.map(RegionAttributes::getLoadFactor)
+			.orElse(0.75f));
 
 		AtomicReference<MembershipAttributes> membershipAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getMembershipAttributes).orElseGet(MembershipAttributes::new));
+			.map(RegionAttributes::getMembershipAttributes)
+			.orElseGet(MembershipAttributes::new));
 
 		AtomicReference<PartitionAttributes<K, V>> partitionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getPartitionAttributes).orElse(null));
+			.map(RegionAttributes::getPartitionAttributes)
+			.orElse(null));
 
 		AtomicReference<String> poolName = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getPoolName).orElse(null));
+			.map(RegionAttributes::getPoolName)
+			.orElse(null));
 
 		AtomicReference<ExpirationAttributes> regionIdleTimeout = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getRegionIdleTimeout).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
+			.map(RegionAttributes::getRegionIdleTimeout)
+			.orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<ExpirationAttributes> regionTimeToLive = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getRegionTimeToLive).orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
+			.map(RegionAttributes::getRegionTimeToLive)
+			.orElse(DEFAULT_EXPIRATION_ATTRIBUTES));
 
 		AtomicReference<Scope> scope = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getScope).orElse(Scope.DISTRIBUTED_NO_ACK));
+			.map(RegionAttributes::getScope)
+			.orElse(Scope.DISTRIBUTED_NO_ACK));
 
 		AtomicReference<SubscriptionAttributes> subscriptionAttributes = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getSubscriptionAttributes).orElseGet(SubscriptionAttributes::new));
+			.map(RegionAttributes::getSubscriptionAttributes)
+			.orElseGet(SubscriptionAttributes::new));
 
 		AtomicReference<Class<V>> valueConstraint = new AtomicReference<>(optionalRegionAttributes
-			.map(RegionAttributes::getValueConstraint).orElse(null));
+			.map(RegionAttributes::getValueConstraint)
+			.orElse(null));
 
 		List<CacheListener> cacheListeners = new ArrayList<>(Arrays.asList(nullSafeArray(optionalRegionAttributes
-			.map(RegionAttributes::getCacheListeners).orElse(null), CacheListener.class)));
+			.map(RegionAttributes::getCacheListeners)
+			.orElse(null), CacheListener.class)));
 
 		Set<String> asyncEventQueueIds = new HashSet<>(nullSafeSet(optionalRegionAttributes
-			.map(RegionAttributes::getAsyncEventQueueIds).orElse(null)));
+			.map(RegionAttributes::getAsyncEventQueueIds)
+			.orElse(null)));
 
 		Set<String> gatewaySenderIds = new HashSet<>(nullSafeSet(optionalRegionAttributes
-			.map(RegionAttributes::getGatewaySenderIds).orElse(null)));
+			.map(RegionAttributes::getGatewaySenderIds)
+			.orElse(null)));
 
 		when(mockRegionFactory.addAsyncEventQueueId(anyString()))
 			.thenAnswer(newAdder(asyncEventQueueIds, mockRegionFactory));
