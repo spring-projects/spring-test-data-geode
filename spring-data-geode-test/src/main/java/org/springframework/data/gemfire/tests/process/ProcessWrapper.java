@@ -220,12 +220,16 @@ public class ProcessWrapper {
 	}
 
 	public void signal() {
+		signal("\n");
+	}
+
+	public void signal(Object value) {
 
 		try {
 
 			OutputStream outputStream = this.process.getOutputStream();
 
-			outputStream.write("\n".getBytes());
+			outputStream.write(String.valueOf(value).getBytes());
 			outputStream.flush();
 		}
 		catch (IOException cause) {
@@ -238,7 +242,6 @@ public class ProcessWrapper {
 		}
 	}
 
-	/* (non-Javadoc) */
 	public void signalStop() {
 
 		try {
