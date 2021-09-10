@@ -99,6 +99,7 @@ import org.apache.geode.cache.ExpirationAction;
 import org.apache.geode.cache.ExpirationAttributes;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.cache.LoaderHelper;
+import org.apache.geode.cache.MembershipAttributes;
 import org.apache.geode.cache.PartitionAttributes;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.RegionAttributes;
@@ -203,6 +204,7 @@ import org.springframework.util.StringUtils;
  * @see org.apache.geode.cache.EvictionAttributesMutator
  * @see org.apache.geode.cache.ExpirationAttributes
  * @see org.apache.geode.cache.GemFireCache
+ * @see org.apache.geode.cache.MembershipAttributes
  * @see org.apache.geode.cache.PartitionAttributes
  * @see org.apache.geode.cache.Region
  * @see org.apache.geode.cache.RegionAttributes
@@ -2730,6 +2732,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionAttributes.getInitialCapacity()).thenAnswer(newGetter(baseRegionAttributes::getInitialCapacity));
 		when(mockRegionAttributes.getKeyConstraint()).thenAnswer(newGetter(baseRegionAttributes::getKeyConstraint));
 		when(mockRegionAttributes.getLoadFactor()).thenAnswer(newGetter(baseRegionAttributes::getLoadFactor));
+		when(mockRegionAttributes.getMembershipAttributes()).thenAnswer(newGetter(baseRegionAttributes::getMembershipAttributes));
 		when(mockRegionAttributes.getMulticastEnabled()).thenAnswer(newGetter(baseRegionAttributes::getMulticastEnabled));
 		when(mockRegionAttributes.getOffHeap()).thenAnswer(newGetter(baseRegionAttributes::getOffHeap));
 		when(mockRegionAttributes.getPartitionAttributes()).thenAnswer(newGetter(baseRegionAttributes::getPartitionAttributes));
@@ -3167,6 +3170,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicReference<Float> loadFactor = new AtomicReference<>(optionalRegionAttributes
 			.map(RegionAttributes::getLoadFactor).orElse(0.75f));
 
+		AtomicReference<MembershipAttributes> membershipAttributes = new AtomicReference<>(optionalRegionAttributes
+			.map(RegionAttributes::getMembershipAttributes).orElseGet(MembershipAttributes::new));
+
 		AtomicReference<PartitionAttributes<K, V>> partitionAttributes = new AtomicReference<>(optionalRegionAttributes
 			.map(RegionAttributes::getPartitionAttributes).orElse(null));
 
@@ -3274,6 +3280,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		when(mockRegionFactory.setLockGrantor(anyBoolean())).thenAnswer(newSetter(lockGrantor, mockRegionFactory));
 
+		when(mockRegionFactory.setMembershipAttributes(any(MembershipAttributes.class)))
+			.thenAnswer(newSetter(membershipAttributes, () -> mockRegionFactory));
+
 		when(mockRegionFactory.setMulticastEnabled(anyBoolean()))
 			.thenAnswer(newSetter(multicastEnabled, mockRegionFactory));
 
@@ -3332,6 +3341,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionAttributes.getKeyConstraint()).thenAnswer(newGetter(keyConstraint));
 		when(mockRegionAttributes.getLoadFactor()).thenAnswer(newGetter(loadFactor));
 		when(mockRegionAttributes.isLockGrantor()).thenAnswer(newGetter(lockGrantor));
+		when(mockRegionAttributes.getMembershipAttributes()).thenAnswer(newGetter(membershipAttributes));
 		when(mockRegionAttributes.getMulticastEnabled()).thenAnswer(newGetter(multicastEnabled));
 		when(mockRegionAttributes.getOffHeap()).thenAnswer(newGetter(offHeap));
 		when(mockRegionAttributes.getPartitionAttributes()).thenAnswer(newGetter(partitionAttributes));
