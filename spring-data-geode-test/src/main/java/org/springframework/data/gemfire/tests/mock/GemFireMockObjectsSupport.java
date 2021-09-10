@@ -79,9 +79,11 @@ import org.mockito.stubbing.Answer;
 
 import org.apache.geode.cache.AttributesMutator;
 import org.apache.geode.cache.Cache;
+import org.apache.geode.cache.CacheCallback;
 import org.apache.geode.cache.CacheFactory;
 import org.apache.geode.cache.CacheListener;
 import org.apache.geode.cache.CacheLoader;
+import org.apache.geode.cache.CacheTransactionManager;
 import org.apache.geode.cache.CacheWriter;
 import org.apache.geode.cache.CacheWriterException;
 import org.apache.geode.cache.CustomExpiry;
@@ -106,6 +108,9 @@ import org.apache.geode.cache.RegionService;
 import org.apache.geode.cache.RegionShortcut;
 import org.apache.geode.cache.Scope;
 import org.apache.geode.cache.SubscriptionAttributes;
+import org.apache.geode.cache.TransactionId;
+import org.apache.geode.cache.TransactionListener;
+import org.apache.geode.cache.TransactionWriter;
 import org.apache.geode.cache.asyncqueue.AsyncEventListener;
 import org.apache.geode.cache.asyncqueue.AsyncEventQueue;
 import org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory;
@@ -783,6 +788,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		AtomicBoolean copyOnRead = new AtomicBoolean(false);
 
+		CacheTransactionManager mockCacheTransactionManager = mockCacheTransactionManager();
+
 		DistributedSystem mockDistributedSystem = mockDistributedSystem();
 
 		ResourceManager mockResourceManager = mockResourceManager();
@@ -791,6 +798,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		doAnswer(newSetter(regionAttributes, null))
 			.when(mockGemFireCache).setRegionAttributes(anyString(), any(RegionAttributes.class));
+
+		when(mockGemFireCache.getCacheTransactionManager()).thenReturn(mockCacheTransactionManager);
 
 		when(mockGemFireCache.getCopyOnRead()).thenAnswer(newGetter(copyOnRead));
 
@@ -1163,6 +1172,52 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		doAnswer(newSetter(running, false, null)).when(mockCacheServer).stop();
 
 		return mockCacheServer;
+	}
+
+	public static CacheTransactionManager mockCacheTransactionManager() {
+
+		CacheTransactionManager mockCacheTransactionManager = mock(CacheTransactionManager.class);
+
+		AtomicBoolean distributed = new AtomicBoolean(false);
+
+		AtomicReference<TransactionWriter> transactionWriter = new AtomicReference<>(null);
+
+		List<TransactionListener> transactionListeners = new CopyOnWriteArrayList<>();
+
+		doReturn(false).when(mockCacheTransactionManager).exists();
+		doReturn(false).when(mockCacheTransactionManager).exists(any(TransactionId.class));
+		doAnswer(newGetter(distributed)).when(mockCacheTransactionManager).isDistributed();
+		doReturn(false).when(mockCacheTransactionManager).isSuspended(any(TransactionId.class));
+
+		doAnswer(invocation -> transactionListeners.add(invocation.getArgument(0)))
+			.when(mockCacheTransactionManager).addListener(any(TransactionListener.class));
+
+		doAnswer(invocation -> transactionListeners.toArray(new TransactionListener[0]))
+			.when(mockCacheTransactionManager).getListeners();
+
+		doAnswer(newGetter(transactionWriter)).when(mockCacheTransactionManager).getWriter();
+
+		doAnswer(invocation -> {
+
+			TransactionListener[] newTransactionListeners = invocation.getArgument(0);
+
+			transactionListeners.forEach(CacheCallback::close);
+			transactionListeners.clear();
+
+			Collections.addAll(transactionListeners, newTransactionListeners);
+
+			return null;
+
+		}).when(mockCacheTransactionManager).initListeners(any(TransactionListener[].class));
+
+		doAnswer(invocation -> transactionListeners.remove(invocation.getArgument(0)))
+			.when(mockCacheTransactionManager).removeListener(any(TransactionListener.class));
+
+		doAnswer(newSetter(distributed, null)).when(mockCacheTransactionManager).setDistributed(anyBoolean());
+
+		doAnswer(newSetter(transactionWriter)).when(mockCacheTransactionManager).setWriter(any(TransactionWriter.class));
+
+		return mockCacheTransactionManager;
 	}
 
 	public static <K, V> ClientRegionFactory<K, V> mockClientRegionFactory(ClientCache mockClientCache,
