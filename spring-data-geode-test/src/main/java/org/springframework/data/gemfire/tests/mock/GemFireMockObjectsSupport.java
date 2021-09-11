@@ -1112,8 +1112,13 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		AtomicReference<String> hostnameForClients = new AtomicReference<>(CacheServer.DEFAULT_HOSTNAME_FOR_CLIENTS);
 		AtomicReference<ServerLoadProbe> serverLoadProbe = new AtomicReference<>(null);
 
+		AtomicReference<String[]> groups = new AtomicReference<>(CacheServer.DEFAULT_GROUPS);
+
 		doAnswer(newSetter(bindAddress, () -> null))
 			.when(mockCacheServer).setBindAddress(anyString());
+
+		doAnswer(newSetter(groups, () -> null))
+			.when(mockCacheServer).setGroups(any(String[].class));
 
 		doAnswer(newSetter(hostnameForClients, () -> null))
 			.when(mockCacheServer).setHostnameForClients(anyString());
@@ -1154,6 +1159,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockCacheServer.getClientSession(any(DistributedMember.class)))
 			.thenThrow(newUnsupportedOperationException(NOT_SUPPORTED));
 		when(mockCacheServer.getClientSession(anyString())).thenThrow(newUnsupportedOperationException(NOT_SUPPORTED));
+		when(mockCacheServer.getGroups()).thenAnswer(newGetter(groups));
 		when(mockCacheServer.getHostnameForClients()).thenAnswer(newGetter(hostnameForClients));
 		when(mockCacheServer.getInterestRegistrationListeners()).thenReturn(Collections.emptySet());
 		when(mockCacheServer.getLoadPollInterval()).thenAnswer(newGetter(loadPollInterval));
