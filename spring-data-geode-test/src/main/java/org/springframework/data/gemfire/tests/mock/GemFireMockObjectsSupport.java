@@ -163,6 +163,7 @@ import org.apache.geode.pdx.PdxSerializer;
 import org.apache.lucene.analysis.Analyzer;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.IndexType;
 import org.springframework.data.gemfire.RegionShortcutWrapper;
 import org.springframework.data.gemfire.client.ClientRegionShortcutWrapper;
@@ -2318,11 +2319,32 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockIndex.getFromClause()).thenReturn(fromClause);
 		when(mockIndex.getIndexedExpression()).thenReturn(expression);
 		when(mockIndex.getProjectionAttributes()).thenReturn(expression);
-		when(mockIndex.getRegion()).thenAnswer(invocation -> regions.get(fromClause));
 		when(mockIndex.getStatistics()).thenReturn(mockIndexStaticts);
 		when(mockIndex.getType()).thenReturn(indexType.getGemfireIndexType());
 
+		doAnswer(invocation -> {
+
+			String regionName = fromClauseToRegionPath(fromClause);
+
+			return regions.get(regionName);
+
+		}).when(mockIndex).getRegion();
+
 		return mockIndex;
+	}
+
+	private static String fromClauseToRegionPath(String fromClause) {
+
+		String regionName = String.valueOf(fromClause);
+
+		int indexOfDot = regionName.indexOf(".");
+		int indexOfSpace = regionName.indexOf(" ");
+
+		regionName = regionName.startsWith(Region.SEPARATOR) ? regionName : GemfireUtils.toRegionPath(regionName);
+		regionName = indexOfSpace > -1 ? regionName.substring(0, indexOfSpace) : regionName;
+		regionName = indexOfDot > -1 ? regionName.substring(0, indexOfDot) : regionName;
+
+		return regionName;
 	}
 
 	private static IndexStatistics mockIndexStatistics(String name) {
