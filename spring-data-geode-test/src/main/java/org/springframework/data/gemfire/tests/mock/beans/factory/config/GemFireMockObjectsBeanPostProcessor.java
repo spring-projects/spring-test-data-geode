@@ -46,6 +46,7 @@ import org.springframework.lang.Nullable;
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.cache.client.ClientCacheFactory
  * @see org.apache.geode.cache.client.PoolFactory
+ * @see org.apache.geode.distributed.DistributedSystem
  * @see org.springframework.beans.factory.config.BeanPostProcessor
  * @see org.springframework.data.gemfire.CacheFactoryBean
  * @see org.springframework.data.gemfire.client.ClientCacheFactoryBean
@@ -116,7 +117,14 @@ public class GemFireMockObjectsBeanPostProcessor implements BeanPostProcessor {
 
 			DistributedSystem distributedSystem = gemfireCache.getDistributedSystem();
 
-			doReturn(getGemFireProperties()).when(distributedSystem).getProperties();
+			Properties distributedSystemProperties = distributedSystem.getProperties();
+
+			if (distributedSystemProperties != null) {
+				distributedSystemProperties.putAll(getGemFireProperties());
+			}
+			else {
+				doReturn(getGemFireProperties()).when(distributedSystem).getProperties();
+			}
 		}
 
 		return bean;
