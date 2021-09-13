@@ -182,14 +182,18 @@ import org.springframework.util.StringUtils;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
- * Apache Geode or VMware GemFire Mock Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region}, etc).
+ * Apache Geode or VMware (Pivotal) GemFire Mock Objects (e.g. {@link Cache}, {@link ClientCache}, {@link Region},
+ * and so on).
  *
  * @author John Blum
  * @see java.io.File
  * @see java.io.InputStream
  * @see java.net.InetAddress
+ * @see java.net.InetSocketAddress
  * @see java.util.Objects
+ * @see java.util.Optional
  * @see java.util.Properties
+ * @see java.util.Random
  * @see java.util.UUID
  * @see org.apache.geode.cache.AttributesMutator
  * @see org.apache.geode.cache.Cache
@@ -1592,12 +1596,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		DistributedMember mockDistributedMember = mock(DistributedMember.class);
 
 		when(mockDistributedMember.getGroups()).thenAnswer(invocation ->
-			new ArrayList<>(StringUtils.commaDelimitedListToSet(gemfireProperties.get().getProperty("groups"))));
+			new ArrayList<>(StringUtils.commaDelimitedListToSet(gemfireProperties.get()
+				.getProperty(DistributionConfig.GROUPS_NAME))));
 
 		when(mockDistributedMember.getHost())
 			.thenReturn(ObjectUtils.doOperationSafely(() -> InetAddress.getLocalHost().getHostName(), null));
 
-		when(mockDistributedMember.getName()).thenAnswer(invocation -> gemfireProperties.get().getProperty("name"));
+		when(mockDistributedMember.getName()).thenAnswer(invocation -> gemfireProperties.get()
+			.getProperty(DistributionConfig.NAME_NAME));
 
 		return mockDistributedMember;
 	}
