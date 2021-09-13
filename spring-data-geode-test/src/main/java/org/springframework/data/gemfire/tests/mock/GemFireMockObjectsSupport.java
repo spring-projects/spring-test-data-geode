@@ -264,6 +264,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	private static final boolean DEFAULT_USE_SINGLETON_CACHE = false;
 
+	private static final AtomicReference<GemFireCache> cacheReference = new AtomicReference<>(null);
 	private static final AtomicReference<GemFireCache> singletonCache = new AtomicReference<>(null);
 	private static final AtomicReference<Properties> gemfireProperties = new AtomicReference<>(new Properties());
 
@@ -308,6 +309,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 */
 	public static void destroy() {
 
+		cacheReference.set(null);
 		singletonCache.set(null);
 		gemfireProperties.set(new Properties());
 		asyncEventQueues.clear();
@@ -556,6 +558,18 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	/**
+	 * Stores a reference to the given {@link GemFireCache} object.
+	 *
+	 * @param <T> {@link Class type} of {@link GemFireCache} (e.g. client or peer).
+	 * @param gemfireCache reference to the {@link GemFireCache} object to store; maybe {@literal null}.
+	 * @return the given {@link GemFireCache} object.
+	 * @see org.apache.geode.cache.GemFireCache
+	 */
+	private static @Nullable  <T extends GemFireCache> T referTo(@Nullable T gemfireCache) {
+		return (T) cacheReference.updateAndGet(currentCacheReference -> gemfireCache);
+	}
+
+	/**
 	 * Remembers the given mock {@link GemFireCache} object, which may be a {@link ClientCache} or a peer {@link Cache}.
 	 *
 	 * @param <T> {@link Class sub-type} of the {@link GemFireCache} instance.
@@ -605,6 +619,21 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		assertThat(regions).containsValue((Region) mockRegion);
 
 		return mockRegion;
+	}
+
+	/**
+	 * Resolves any {@link GemFireCache} object created by the Spring Test for Apache Geode mock objects test framework.
+	 *
+	 * If {@literal Singleton} caches are not used (default is {@literal false}), then the reference will store the last
+	 * mock {@link GemFireCache} object created by the Apache Geode mock objects test framework.
+	 *
+	 * @param <T> {@link Class type} of {@link GemFireCache} (e.g. client or peer).
+	 * @return a reference to any (and the last) {@ink GemFireCache} object created by this test framework.
+	 * @see org.apache.geode.cache.GemFireCache
+	 * @see java.util.Optional
+	 */
+	private static <T extends GemFireCache> Optional<T> resolveAnyGemFireCache() {
+		return Optional.ofNullable((T) cacheReference.get());
 	}
 
 	/**
@@ -879,14 +908,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockClientCache.createClientRegionFactory(anyString())).thenAnswer(invocation ->
 			mockClientRegionFactory(mockClientCache, invocation.<String>getArgument(0)));
 
-		return mockQueryService(mockCacheApi(mockClientCache));
+		return referTo(mockQueryService(mockCacheApi(mockClientCache)));
 	}
 
 	public static GemFireCache mockGemFireCache() {
 
 		GemFireCache mockGemFireCache = mock(GemFireCache.class);
 
-		return mockQueryService(mockCacheApi(mockGemFireCache));
+		return referTo(mockQueryService(mockCacheApi(mockGemFireCache)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -961,11 +990,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 		}).when(mockCache).getGatewaySender(anyString());
 
-		return mockQueryService(
-			mockGatewaySenderFactory(
-				mockGatewayReceiverFactory(
-					mockAsyncEventQueueFactory(
-						mockCacheApi(mockCache)))));
+		return referTo(
+			mockQueryService(
+				mockGatewaySenderFactory(
+					mockGatewayReceiverFactory(
+						mockAsyncEventQueueFactory(
+							mockCacheApi(mockCache))))));
 	}
 
 	public static Cache mockAsyncEventQueueFactory(Cache mockCache) {
