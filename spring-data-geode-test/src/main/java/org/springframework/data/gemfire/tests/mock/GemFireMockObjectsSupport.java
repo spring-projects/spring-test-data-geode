@@ -1995,6 +1995,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 			Pool mockPool = mock(Pool.class, name);
 
+			AtomicReference<QueryService> queryService = new AtomicReference<>(null);
+
 			AtomicBoolean destroyed = new AtomicBoolean(false);
 
 			doAnswer(invocationOnMock -> {
@@ -2032,6 +2034,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			when(mockPool.getSubscriptionMessageTrackingTimeout()).thenReturn(subscriptionMessageTrackingTimeout.get());
 			when(mockPool.getSubscriptionRedundancy()).thenReturn(subscriptionRedundancy.get());
 			when(mockPool.getThreadLocalConnections()).thenReturn(threadLocalConnections.get());
+
+			doAnswer(getQueryServiceInvocation ->
+				resolveAnyGemFireCache()
+					.map(GemFireCache::getQueryService)
+					.orElseGet(() -> queryService.updateAndGet(it -> it != null ? it : mockQueryService()))
+			).when(mockPool).getQueryService();
 
 			register(mockPool);
 
@@ -3697,6 +3705,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 				ClientCache mockClientCache = mockClientCache();
 
 				Pool mockDefaultPool = mockPoolFactory.create("DEFAULT");
+
+				doAnswer(invocation -> mockClientCache.getQueryService()).when(mockDefaultPool).getQueryService();
 
 				when(mockClientCache.getCurrentServers()).thenAnswer(invocation ->
 					Collections.unmodifiableSet(new HashSet<>(mockClientCache.getDefaultPool().getServers())));
