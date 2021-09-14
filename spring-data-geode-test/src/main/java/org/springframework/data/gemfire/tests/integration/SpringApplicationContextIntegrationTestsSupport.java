@@ -15,10 +15,6 @@
  */
 package org.springframework.data.gemfire.tests.integration;
 
-import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
-
-import java.util.Optional;
-
 import org.junit.After;
 
 import org.springframework.context.ApplicationContext;
@@ -28,7 +24,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 /**
  * The {@link SpringApplicationContextIntegrationTestsSupport} class is an extension of {@link IntegrationTestsSupport}
@@ -51,11 +46,9 @@ import org.springframework.lang.Nullable;
 public abstract class SpringApplicationContextIntegrationTestsSupport extends IntegrationTestsSupport
 		implements ApplicationEventPublisherAware {
 
-	private volatile ConfigurableApplicationContext applicationContext;
-
 	@After
 	public void closeApplicationContext() {
-		closeApplicationContext(this.applicationContext);
+		closeApplicationContext(getApplicationContext());
 	}
 
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
@@ -78,23 +71,6 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		return applicationContext;
 	}
 
-	protected @Nullable <T extends ConfigurableApplicationContext> T setApplicationContext(
-			@Nullable T applicationContext) {
-
-		this.applicationContext = applicationContext;
-
-		return applicationContext;
-	}
-
-	@SuppressWarnings("unchecked")
-	protected @Nullable <T extends ConfigurableApplicationContext> T getApplicationContext() {
-		return (T) this.applicationContext;
-	}
-
-	protected <T extends ConfigurableApplicationContext> Optional<T> getOptionalApplicationContext() {
-		return Optional.ofNullable(getApplicationContext());
-	}
-
 	/**
 	 * @inheritDoc
 	 */
@@ -109,15 +85,15 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 
 	protected <T> T getBean(Class<T> requiredType) {
 
-		return getOptionalApplicationContext()
-			.map(applicationContext -> applicationContext.getBean(requiredType))
-			.orElseThrow(() -> newIllegalStateException("An ApplicationContext was not initialized"));
+		ConfigurableApplicationContext applicationContext = requireApplicationContext();
+
+		return applicationContext.getBean(requiredType);
 	}
 
 	protected <T> T getBean(String beanName, Class<T> requiredType) {
 
-		return getOptionalApplicationContext()
-			.map(applicationContext -> applicationContext.getBean(beanName, requiredType))
-			.orElseThrow(() -> newIllegalStateException("An ApplicationContext was not initialized"));
+		ConfigurableApplicationContext applicationContext = requireApplicationContext();
+
+		return applicationContext.getBean(beanName, requiredType);
 	}
 }

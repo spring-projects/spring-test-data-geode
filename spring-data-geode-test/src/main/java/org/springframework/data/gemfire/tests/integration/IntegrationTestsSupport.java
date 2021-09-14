@@ -18,6 +18,7 @@ package org.springframework.data.gemfire.tests.integration;
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
+import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,14 +81,18 @@ import org.springframework.util.ReflectionUtils;
  * @see java.io.File
  * @see java.time.LocalDateTime
  * @see java.util.concurrent.TimeUnit
- * @see java.util.concurrent.atomic.AtomicBoolean
  * @see java.util.function.Predicate
  * @see org.apache.geode.DataSerializer
  * @see org.apache.geode.cache.GemFireCache
  * @see org.apache.geode.distributed.Locator
+ * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationEventPublisher
  * @see org.springframework.context.ApplicationEventPublisherAware
+ * @see org.springframework.context.ConfigurableApplicationContext
+ * @see org.springframework.core.env.ConfigurableEnvironment
+ * @see org.springframework.core.env.PropertySource
+ * @see org.springframework.core.env.StandardEnvironment
  * @see org.springframework.data.gemfire.support.GemfireBeanFactoryLocator
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 1.0.0
@@ -147,6 +152,68 @@ public abstract class IntegrationTestsSupport {
 
 	@Autowired(required = false)
 	private ConfigurableApplicationContext applicationContext;
+
+	/**
+	 * Sets a reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 *
+	 * @param <T> specific {@link Class type} of {@link ConfigurableApplicationContext}.
+	 * @param applicationContext reference to the current, configured Spring {@link ConfigurableApplicationContext}.
+	 * @return the given reference to the Spring {@link ConfigurableApplicationContext}.
+	 * @see org.springframework.context.ConfigurableApplicationContext
+	 * @see #getOptionalApplicationContext()
+	 * @see #getApplicationContext()
+	 */
+	protected @Nullable <T extends ConfigurableApplicationContext> T setApplicationContext(
+			@Nullable T applicationContext) {
+
+		this.applicationContext = applicationContext;
+
+		return applicationContext;
+	}
+
+	/**
+	 * Gets a reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 *
+	 * @param <T> specific {@link Class type} of {@link ConfigurableApplicationContext}.
+	 * @return a reference to the configured Spring {@link ConfigurableApplicationContext}; maybe {@literal null}.
+	 * @see org.springframework.context.ConfigurableApplicationContext
+	 * @see #setApplicationContext(ConfigurableApplicationContext)
+	 * @see #getOptionalApplicationContext()
+	 */
+	@SuppressWarnings("unchecked")
+	protected @Nullable <T extends ConfigurableApplicationContext> T getApplicationContext() {
+		return (T) this.applicationContext;
+	}
+
+	/**
+	 * Gets an {@link Optional} reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 *
+	 * @param <T> specific {@link Class type} of {@link ConfigurableApplicationContext}.
+	 * @return an {@link Optional} reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 * @see org.springframework.context.ConfigurableApplicationContext
+	 * @see #setApplicationContext(ConfigurableApplicationContext)
+	 * @see #getApplicationContext()
+	 * @see java.util.Optional
+	 */
+	protected <T extends ConfigurableApplicationContext> Optional<T> getOptionalApplicationContext() {
+		return Optional.ofNullable(getApplicationContext());
+	}
+
+	/**
+	 * Gets a required reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 *
+	 * @param <T> specific {@link Class type} of {@link ConfigurableApplicationContext}.
+	 * @return an {@literal non-null} reference to the configured Spring {@link ConfigurableApplicationContext}.
+	 * @throws IllegalStateException if the Spring {@link ConfigurableApplicationContext} was not initialized.
+	 * @see org.springframework.context.ConfigurableApplicationContext
+	 * @see #setApplicationContext(ConfigurableApplicationContext)
+	 * @see #getOptionalApplicationContext()
+	 * @see #getApplicationContext()
+	 */
+	protected <T extends ConfigurableApplicationContext> T requireApplicationContext() {
+		return this.<T>getOptionalApplicationContext()
+			.orElseThrow(() -> newIllegalStateException("An ApplicationContext was not initialized"));
+	}
 
 	@BeforeClass
 	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
