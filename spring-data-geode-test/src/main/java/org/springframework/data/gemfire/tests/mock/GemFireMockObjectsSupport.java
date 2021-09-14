@@ -124,6 +124,7 @@ import org.apache.geode.cache.client.PoolFactory;
 import org.apache.geode.cache.client.PoolManager;
 import org.apache.geode.cache.client.SocketFactory;
 import org.apache.geode.cache.control.ResourceManager;
+import org.apache.geode.cache.execute.FunctionService;
 import org.apache.geode.cache.execute.RegionFunctionContext;
 import org.apache.geode.cache.lucene.LuceneIndex;
 import org.apache.geode.cache.lucene.LuceneIndexFactory;
@@ -323,6 +324,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		regions.clear();
 		regionAttributes.clear();
 
+		unregisterFunctions();
 		unregisterManagedPools();
 		closePools();
 		destroyGemFireObjects();
@@ -331,10 +333,12 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	/**
 	 * Clears all {@literal spring.data.gemfire.test.*} {@link System#getProperties() System Properties}.
+	 *
+	 * @see java.lang.System#getProperties()
 	 */
 	static void clearSpringDataGeodeTestProperties() {
 		Arrays.stream(ArrayUtils.nullSafeArray(SPRING_DATA_GEODE_TEST_PROPERTIES, String.class))
-			.forEach(property -> System.clearProperty(property));
+			.forEach(System::clearProperty);
 	}
 
 	/**
@@ -354,6 +358,8 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 
 	/**
 	 * Destroys all {@link DisposableBean} based {@link Object GemFire objects}.
+	 *
+	 * @see org.springframework.beans.factory.DisposableBean
 	 */
 	static synchronized void destroyGemFireObjects() {
 
@@ -371,7 +377,22 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	}
 
 	/**
+	 * Unregisters all {@link Function Functions} registered with the {@link FunctionService} by Spring.
+	 *
+	 * @see org.apache.geode.cache.execute.Function
+	 * @see org.apache.geode.cache.execute.FunctionService
+	 */
+	static synchronized void unregisterFunctions() {
+
+		CollectionUtils.nullSafeMap(FunctionService.getRegisteredFunctions())
+			.forEach((functionId, function) -> FunctionService.unregisterFunction(functionId));
+	}
+
+	/**
 	 * Unrigsters all {@link Pool Pools} registered with Apache Geode and managed by Spring.
+	 *
+	 * @see org.apache.geode.cache.client.Pool
+	 * @see org.apache.geode.cache.client.PoolManager
 	 */
 	static synchronized void unregisterManagedPools() {
 
