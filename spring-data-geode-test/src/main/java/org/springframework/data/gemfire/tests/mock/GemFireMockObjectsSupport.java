@@ -590,6 +590,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * @return the given {@link GemFireCache} object.
 	 * @see org.apache.geode.cache.GemFireCache
 	 */
+	@SuppressWarnings("unchecked")
 	private static @Nullable  <T extends GemFireCache> T referTo(@Nullable T gemfireCache) {
 		return (T) cacheReference.updateAndGet(currentCacheReference -> gemfireCache);
 	}
