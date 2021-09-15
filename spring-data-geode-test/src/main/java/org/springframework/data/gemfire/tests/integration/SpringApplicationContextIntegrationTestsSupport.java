@@ -16,6 +16,7 @@
 package org.springframework.data.gemfire.tests.integration;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import org.junit.After;
 
@@ -54,12 +55,18 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 	}
 
 	protected ConfigurableApplicationContext newApplicationContext(Class<?>... annotatedClasses) {
+		return newApplicationContext(this::processBeforeRefresh, annotatedClasses);
+	}
+
+	protected ConfigurableApplicationContext newApplicationContext(
+			Function<ConfigurableApplicationContext, ConfigurableApplicationContext> applicationContextInitializer,
+			Class<?>... annotatedClasses) {
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 
 		applicationContext.register(ArrayUtils.nullSafeArray(annotatedClasses, Class.class));
 		applicationContext.registerShutdownHook();
-		processBeforeRefresh(applicationContext);
+		applicationContextInitializer.apply(applicationContext);
 		applicationContext.refresh();
 
 		return setApplicationContext(applicationContext);
