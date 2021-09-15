@@ -85,6 +85,13 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		}
 	}
 
+	protected boolean containsBean(String beanName) {
+
+		ConfigurableApplicationContext applicationContext = requireApplicationContext();
+
+		return applicationContext.containsBean(beanName);
+	}
+
 	protected <T> T getBean(Class<T> requiredType) {
 
 		ConfigurableApplicationContext applicationContext = requireApplicationContext();
