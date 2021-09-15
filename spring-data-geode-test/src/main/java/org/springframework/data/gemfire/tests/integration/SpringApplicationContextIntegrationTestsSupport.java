@@ -15,6 +15,8 @@
  */
 package org.springframework.data.gemfire.tests.integration;
 
+import java.util.Map;
+
 import org.junit.After;
 
 import org.springframework.context.ApplicationContext;
@@ -95,5 +97,12 @@ public abstract class SpringApplicationContextIntegrationTestsSupport extends In
 		ConfigurableApplicationContext applicationContext = requireApplicationContext();
 
 		return applicationContext.getBean(beanName, requiredType);
+	}
+
+	protected <T> Map<String, T> getBeansOfType(Class<T> requiredType) {
+
+		ConfigurableApplicationContext applicationContext = requireApplicationContext();
+
+		return applicationContext.getBeansOfType(requiredType);
 	}
 }
