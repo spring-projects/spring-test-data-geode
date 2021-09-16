@@ -21,6 +21,7 @@ import static org.springframework.data.gemfire.util.ArrayUtils.nullSafeArray;
 import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -66,6 +67,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
+import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
 import org.springframework.lang.NonNull;
@@ -301,6 +303,16 @@ public abstract class IntegrationTestsSupport {
 	@AfterClass
 	public static void closeAllBeanFactoryLocators() {
 		GemfireBeanFactoryLocator.clear();
+	}
+
+	@AfterClass
+	public static void deleteAllGemFireProcessIdFiles() {
+
+		FileFilter fileFilter = file -> file != null
+			&& file.getName().startsWith("vf.gf")
+			&& file.getName().endsWith(".pid");
+
+		FileSystemUtils.deleteRecursive(FileSystemUtils.WORKING_DIRECTORY, fileFilter);
 	}
 
 	@AfterClass
