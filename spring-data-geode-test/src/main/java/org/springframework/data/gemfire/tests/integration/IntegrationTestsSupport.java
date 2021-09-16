@@ -216,7 +216,7 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	@BeforeClass
-	public static void closeAnyGemFireCacheInstanceBeforeTestExecution() {
+	public static void closeAnyGemFireCacheBeforeTestExecution() {
 		closeGemFireCacheWaitOnCacheClosedEvent();
 	}
 
