@@ -34,6 +34,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ import org.junit.Before;
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.apache.geode.cache.execute.FunctionService;
 import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
 import org.apache.geode.internal.cache.CacheLifecycleListener;
@@ -363,6 +365,20 @@ public abstract class IntegrationTestsSupport {
 		Arrays.stream(ArrayUtils.nullSafeArray(InternalDataSerializer.getSerializers(), DataSerializer.class))
 			.map(DataSerializer::getId)
 			.forEach(InternalDataSerializer::unregister);
+	}
+
+	/**
+	 * Unregisters all Apache Geode {@link Function Functions} from Apache Geode's {@link FunctionService}
+	 * after test (class/suite) execution.
+	 *
+	 * @see org.apache.geode.cache.execute.Function
+	 * @see org.apache.geode.cache.execute.FunctionService
+	 */
+	@AfterClass
+	public static void unregisterFunctions() {
+
+		CollectionUtils.nullSafeMap(FunctionService.getRegisteredFunctions())
+			.forEach((functionId, function) -> FunctionService.unregisterFunction(functionId));
 	}
 
 	/**
