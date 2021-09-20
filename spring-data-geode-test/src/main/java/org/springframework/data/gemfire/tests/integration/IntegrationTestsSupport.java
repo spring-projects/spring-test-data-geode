@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.junit.AfterClass;
@@ -85,6 +86,7 @@ import org.springframework.util.ReflectionUtils;
  * @see java.io.File
  * @see java.time.LocalDateTime
  * @see java.util.concurrent.TimeUnit
+ * @see java.util.function.Function
  * @see java.util.function.Predicate
  * @see org.apache.geode.DataSerializer
  * @see org.apache.geode.cache.GemFireCache
@@ -415,12 +417,20 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	public static void closeGemFireCacheWaitOnCacheClosedEvent(long duration) {
+		closeGemFireCacheWaitOnCacheClosedEvent(GemfireUtils::resolveGemFireCache, duration);
+	}
+
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier) {
+		closeGemFireCacheWaitOnCacheClosedEvent(cacheSupplier, DEFAULT_WAIT_DURATION);
+	}
+
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier, long duration) {
 
 		AtomicBoolean closed = new AtomicBoolean(false);
 
 		waitOn(() -> {
 			try {
-				return Optional.ofNullable(GemfireUtils.resolveGemFireCache())
+				return Optional.ofNullable(cacheSupplier.get())
 					.filter(cache -> !closed.get())
 					.map(IntegrationTestsSupport::close)
 					.map(cacheLifecycleListener::isClosed)
