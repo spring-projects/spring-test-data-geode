@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
 import org.apache.geode.cache.GemFireCache;
+import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.execute.FunctionService;
 import org.apache.geode.distributed.Locator;
 import org.apache.geode.internal.InternalDataSerializer;
@@ -424,7 +425,33 @@ public abstract class IntegrationTestsSupport {
 		closeGemFireCacheWaitOnCacheClosedEvent(cacheSupplier, DEFAULT_WAIT_DURATION);
 	}
 
-	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier, long duration) {
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier,
+			@NonNull Function<GemFireCache, GemFireCache> cacheClosingFunction) {
+
+		closeGemFireCacheWaitOnCacheClosedEvent(cacheSupplier, cacheClosingFunction, DEFAULT_WAIT_DURATION);
+	}
+
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier,
+			long duration) {
+
+		Function<GemFireCache, GemFireCache> cacheClosingFunction = cacheToClose -> {
+
+			if (GemfireUtils.isClient(cacheToClose)) {
+				((ClientCache) cacheToClose).close(false);
+			}
+			else {
+				cacheToClose.close();
+			}
+
+			return cacheToClose;
+		};
+
+		closeGemFireCacheWaitOnCacheClosedEvent(cacheSupplier, cacheClosingFunction, duration);
+
+	}
+
+	public static void closeGemFireCacheWaitOnCacheClosedEvent(@NonNull Supplier<GemFireCache> cacheSupplier,
+			@NonNull Function<GemFireCache, GemFireCache> cacheClosingFunction, long duration) {
 
 		AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -432,7 +459,7 @@ public abstract class IntegrationTestsSupport {
 			try {
 				return Optional.ofNullable(cacheSupplier.get())
 					.filter(cache -> !closed.get())
-					.map(IntegrationTestsSupport::close)
+					.map(cacheClosingFunction)
 					.map(cacheLifecycleListener::isClosed)
 					.orElse(true);
 			}
@@ -441,15 +468,6 @@ public abstract class IntegrationTestsSupport {
 				return true;
 			}
 		}, duration);
-	}
-
-	private static @Nullable GemFireCache close(@Nullable GemFireCache cache) {
-
-		return Optional.ofNullable(cache)
-			.map(it -> {
-				it.close();
-				return it;
-			}).orElse(cache);
 	}
 
 	public static void stopGemFireLocatorWaitOnStopEvent() {
