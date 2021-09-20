@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
+import org.springframework.data.gemfire.util.JavaVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -85,6 +86,7 @@ public abstract class ProcessExecutor {
 		command.add(JAVA_EXE.getAbsolutePath());
 		command.add("-server");
 		command.add("-ea");
+		addJavaRuntimeEnvironmentSpecificJvmOptions(command);
 		command.add("-classpath");
 		command.add(StringUtils.hasText(classpath) ? classpath : JAVA_CLASSPATH);
 		command.addAll(getSpringGemFireSystemProperties());
@@ -102,6 +104,20 @@ public abstract class ProcessExecutor {
 		command.addAll(programArguments);
 
 		return command.toArray(new String[0]);
+	}
+
+	private static List<String> addJavaRuntimeEnvironmentSpecificJvmOptions(List<String> command) {
+
+		if (JavaVersion.current().isNewerThanOrEqualTo(JavaVersion.SEVENTEEN)) {
+			command.add("--add-opens");
+			command.add("java.base/java.lang=ALL-UNNAMED");
+			command.add("--add-opens");
+			command.add("java.base/java.nio=ALL-UNNAMED");
+			command.add("--add-opens");
+			command.add("java.base/java.util=ALL-UNNAMED");
+		}
+
+		return command;
 	}
 
 	protected static Collection<? extends String> getSpringGemFireSystemProperties() {
