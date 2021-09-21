@@ -108,7 +108,7 @@ public abstract class ProcessExecutor {
 
 	private static List<String> addJavaRuntimeEnvironmentSpecificJvmOptions(List<String> command) {
 
-		if (JavaVersion.current().isNewerThanOrEqualTo(JavaVersion.SEVENTEEN)) {
+		if (JavaVersion.current().isNewerThanOrEqualTo(JavaVersion.SIXTEEN)) {
 			command.add("--add-opens");
 			command.add("java.base/java.lang=ALL-UNNAMED");
 			command.add("--add-opens");
