@@ -15,29 +15,39 @@
  */
 package org.springframework.data.gemfire.tests.objects.geode.cache;
 
+import static org.springframework.data.gemfire.util.RuntimeExceptionFactory.newIllegalStateException;
+
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.apache.geode.cache.Region;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * Spring {@link BeanPostProcessor} used to initialize an Apache Geode {@link Region} with data.
+ * Spring {@link Component} used to initialize an Apache Geode {@link Region} with data.
  *
  * @author John Blum
  * @see java.util.Map
  * @see java.util.function.Function
  * @see org.apache.geode.cache.Region
  * @see org.springframework.beans.factory.config.BeanPostProcessor
+ * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.event.ContextRefreshedEvent
+ * @see org.springframework.context.event.EventListener
+ * @see org.springframework.stereotype.Component
  * @since 0.0.26
  */
+@Component
 @SuppressWarnings("unused")
-public class RegionDataInitializingPostProcessor<T> implements BeanPostProcessor {
+public class RegionDataInitializingPostProcessor<T> {
 
 	public static <T> EntityIdentifierBuilder<T> withRegion(@NonNull String regionBeanName) {
 		return new EntityIdentifierBuilder<>(new RegionDataInitializingPostProcessor<>(regionBeanName));
@@ -72,15 +82,31 @@ public class RegionDataInitializingPostProcessor<T> implements BeanPostProcessor
 		return bean instanceof Region && getRegionBeanName().equals(beanName);
 	}
 
-	@Override
+	@EventListener(ContextRefreshedEvent.class)
+	public void initializeTargetRegionWithData(@NonNull ContextRefreshedEvent event) {
+
+		resolveTargetRegion(event)
+			.ifPresent(resolvedTargetRegion -> resolvedTargetRegion.putAll(getRegionData()));
+	}
+
+	protected Optional<ApplicationContext> resolveApplicationContext(@NonNull ContextRefreshedEvent event) {
+
+		return Optional.ofNullable(event)
+			.map(ContextRefreshedEvent::getApplicationContext)
+			.map(Optional::of)
+			.orElseThrow(() ->
+				newIllegalStateException("Failed to resolve ApplicationContext from ContextRefreshedEvent [%s]", event));
+	}
+
 	@SuppressWarnings("unchecked")
-	public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
+	protected Optional<Region<Object, T>> resolveTargetRegion(@NonNull ContextRefreshedEvent event) {
 
-		if (isTargetRegion(bean, beanName)) {
-			((Region<Object, T>) bean).putAll(getRegionData());
-		}
+		Region<Object, T> resolvedTargetRegion = resolveApplicationContext(event)
+			.map(applicationContext -> applicationContext.getBean(getRegionBeanName(), Region.class))
+			.orElseThrow(() -> newIllegalStateException("Failed to resolve Region bean [%s] from ApplicationContext",
+				getRegionBeanName()));
 
-		return bean;
+		return Optional.of(resolvedTargetRegion);
 	}
 
 	public RegionDataInitializingPostProcessor<T> store(T entity) {
