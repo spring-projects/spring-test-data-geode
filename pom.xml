@@ -13,7 +13,7 @@
 
 	<groupId>org.springframework.data</groupId>
 	<artifactId>spring-test-data-geode-build</artifactId>
-	<version>0.0.26</version>
+	<version>0.0.27-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
