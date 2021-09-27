@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
-import org.springframework.data.gemfire.util.JavaVersion;
+import org.springframework.data.gemfire.tests.util.JavaVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
