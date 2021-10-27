@@ -13,7 +13,7 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.integration.test.context;
+package org.springframework.data.gemfire.tests.extensions.spring.test.context;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,7 +33,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  * @see org.springframework.test.context.ContextCustomizer
  * @since 0.0.23
  */
-public class GeodeContextCustomizer implements ContextCustomizer {
+public class DependencyOfAnnotationContextCustomizer implements ContextCustomizer {
 
 	/**
 	 * @inheritDoc

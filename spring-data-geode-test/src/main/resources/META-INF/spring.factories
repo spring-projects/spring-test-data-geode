@@ -1,4 +1,4 @@
 # Spring Test for Apache Geode (STDG) framework configuration for the Spring TestContext Framework.
 
 org.springframework.test.context.ContextCustomizerFactory=\
-	org.springframework.data.gemfire.tests.integration.test.context.GeodeContextCustomizerFactory
+	org.springframework.data.gemfire.tests.extensions.spring.test.context.DependencyOfAnnotationContextCustomizerFactory

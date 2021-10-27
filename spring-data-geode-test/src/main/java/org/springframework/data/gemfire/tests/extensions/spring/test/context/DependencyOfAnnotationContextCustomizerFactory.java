@@ -13,7 +13,7 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package org.springframework.data.gemfire.tests.integration.test.context;
+package org.springframework.data.gemfire.tests.extensions.spring.test.context;
 
 import java.util.List;
 
@@ -25,18 +25,18 @@ import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.TestContext;
 
 /**
- * Spring {@link ContextCustomizerFactory} implementation to create a {@link GeodeContextCustomizer}
+ * Spring {@link ContextCustomizerFactory} implementation to create a {@link DependencyOfAnnotationContextCustomizer}
  * used to customize the Spring {@link ConfigurableApplicationContext} created by
  * the Spring {@link TestContext} framework.
  *
  * @author John Blum
  * @see org.springframework.context.ConfigurableApplicationContext
- * @see org.springframework.data.gemfire.tests.integration.test.context.GeodeContextCustomizer
+ * @see org.springframework.data.gemfire.tests.extensions.spring.test.context.DependencyOfAnnotationContextCustomizer
  * @see org.springframework.test.context.ContextCustomizer
  * @see org.springframework.test.context.ContextCustomizerFactory
  * @since 0.0.23
  */
-public class GeodeContextCustomizerFactory implements ContextCustomizerFactory {
+public class DependencyOfAnnotationContextCustomizerFactory implements ContextCustomizerFactory {
 
 	/**
 	 * @inheritDoc
@@ -45,6 +45,6 @@ public class GeodeContextCustomizerFactory implements ContextCustomizerFactory {
 	public @NonNull ContextCustomizer createContextCustomizer(@NonNull Class<?> testClass,
 			@NonNull List<ContextConfigurationAttributes> configAttributes) {
 
-		return new GeodeContextCustomizer();
+		return new DependencyOfAnnotationContextCustomizer();
 	}
 }
