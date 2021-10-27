@@ -29,10 +29,11 @@ import org.springframework.lang.Nullable;
  * @see java.util.function.Function
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ConfigurableApplicationContext
+ * @see org.springframework.data.gemfire.util.SpringUtils
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-public abstract class SpringUtils {
+public abstract class SpringUtils extends org.springframework.data.gemfire.util.SpringUtils {
 
 	public static final Function<ConfigurableApplicationContext, Boolean> APPLICATION_CONTEXT_CLOSING_FUNCTION =
 		applicationContext -> {
@@ -45,6 +46,13 @@ public abstract class SpringUtils {
 			return false;
 		};
 
+	/**
+	 * Closes the given optionally provided {@link ApplicationContext}.
+	 *
+	 * @param applicationContext {@link ApplicationContext} to close.
+	 * @return a boolean value indicating whether the {@link ApplicationContext} could be closed successfully or not.
+	 * @see org.springframework.context.ApplicationContext
+	 */
 	public static boolean closeApplicationContext(@Nullable ApplicationContext applicationContext) {
 
 		return Optional.ofNullable(applicationContext)
