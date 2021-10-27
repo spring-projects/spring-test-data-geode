@@ -72,7 +72,9 @@ public class ConfigurableCacheAwareContextLoaderDelegate extends DefaultCacheAwa
 
 			String cacheEnabledProperty = SpringProperties.getProperty(SPRING_TEST_CONTEXT_CACHE_ENABLED_PROPERTY);
 
-			boolean resolvedCacheEnabled = !StringUtils.hasText(cacheEnabledProperty) && defaultCacheEnabled;
+			boolean resolvedCacheEnabled =
+				(!StringUtils.hasText(cacheEnabledProperty) || Boolean.parseBoolean(cacheEnabledProperty))
+					&& defaultCacheEnabled;
 
 			return resolvedCacheEnabled;
 		};
@@ -90,7 +92,7 @@ public class ConfigurableCacheAwareContextLoaderDelegate extends DefaultCacheAwa
 				: loadContextInternal(mergedContextConfiguration);
 		}
 		catch (Exception cause) {
-			throw newIllegalStateException(cause, "Failed to load ApplicationContext for configuration [%s]",
+			throw newIllegalStateException(cause, "Failed to load ApplicationContext for context configuration [%s]",
 				mergedContextConfiguration);
 		}
 	}
