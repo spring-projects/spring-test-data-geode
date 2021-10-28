@@ -59,7 +59,7 @@ public class CloseApplicationContextAfterTestClassTestExecutionListener extends 
 	 */
 	@Override
 	public int getOrder() {
-		return -1000;
+		return 100_000;
 	}
 
 	protected boolean isSpringTestContextCloseEnabled() {
