@@ -40,14 +40,24 @@ import org.springframework.data.gemfire.tests.util.IOUtils;
 import org.springframework.data.gemfire.tests.util.ThreadUtils;
 import org.springframework.data.gemfire.tests.util.ThrowableUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * The ProcessWrapper class is a wrapper for a Process object representing an OS process and the ProcessBuilder used
- * to construct and start the process.
+ * The {@link ProcessWrapper} class is a wrapper for a {@link Process} object representing an Operating System (OS)
+ * process and the {@link ProcessBuilder} used to construct and start the {@link Process}.
  *
  * @author John Blum
- * @see Process
- * @see ProcessBuilder
+ * @see java.io.File
+ * @see java.io.InputStream
+ * @see java.io.OutputStream
+ * @see java.lang.Process
+ * @see java.lang.ProcessBuilder
+ * @see java.util.concurrent.Executor
+ * @see java.util.concurrent.Executors
+ * @see java.util.concurrent.ExecutorService
+ * @see java.util.concurrent.Future
+ * @see org.springframework.data.gemfire.tests.process.ProcessConfiguration
+ * @see org.springframework.data.gemfire.tests.process.ProcessInputStreamListener
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
@@ -55,21 +65,29 @@ public class ProcessWrapper {
 
 	protected static final boolean DEFAULT_DAEMON_THREAD = true;
 
+	protected static final int DEFAULT_PORT = -1;
+
 	protected static final long DEFAULT_WAIT_TIME_MILLISECONDS = TimeUnit.SECONDS.toMillis(15);
+
+	protected static final String DEFAULT_HOST = "localhost";
 
 	private final List<ProcessInputStreamListener> listeners = new CopyOnWriteArrayList<>();
 
 	protected final Logger log = Logger.getLogger(getClass().getName());
 
+	private int port = DEFAULT_PORT;
+
 	private final Process process;
 
 	private final ProcessConfiguration processConfiguration;
+
+	private String host = DEFAULT_HOST;
 
 	public ProcessWrapper(Process process, ProcessConfiguration processConfiguration) {
 
 		Assert.notNull(process, "Process is required");
 
-		Assert.notNull(processConfiguration, "The context and configuration meta-data providing details"
+		Assert.notNull(processConfiguration, "The context and configuration metadata providing details"
 			+ " about the environment in which the process is running and how the process was configured and executed"
 			+ " is required");
 
@@ -149,6 +167,10 @@ public class ProcessWrapper {
 		return this.processConfiguration.getEnvironment();
 	}
 
+	public String getHost() {
+		return this.host;
+	}
+
 	public int getPid() {
 		return ProcessUtils.findAndReadPid(getWorkingDirectory());
 	}
@@ -161,6 +183,10 @@ public class ProcessWrapper {
 		catch (PidNotFoundException ignore) {
 			return -1;
 		}
+	}
+
+	public int getPort() {
+		return this.port;
 	}
 
 	public boolean isRedirectingErrorStream() {
@@ -193,6 +219,11 @@ public class ProcessWrapper {
 		}
 	}
 
+	public ProcessWrapper listeningOn(int port) {
+		this.port = Math.max(port, DEFAULT_PORT);
+		return this;
+	}
+
 	public String readLogFile() throws IOException {
 
 		File[] logFiles = FileSystemUtils.listFiles(getWorkingDirectory(),
@@ -217,6 +248,11 @@ public class ProcessWrapper {
 
 	public void registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+	}
+
+	public ProcessWrapper runningOn(String host) {
+		this.host = StringUtils.hasText(host) ? host : DEFAULT_HOST;
+		return this;
 	}
 
 	public void signal() {
