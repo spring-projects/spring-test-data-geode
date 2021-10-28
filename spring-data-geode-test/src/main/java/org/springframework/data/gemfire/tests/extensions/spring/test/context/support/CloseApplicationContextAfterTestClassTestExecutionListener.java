@@ -24,6 +24,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * Spring {@link TestContext} framework {@link org.springframework.test.context.TestExecutionListener} used to
@@ -38,10 +39,11 @@ import org.springframework.test.context.TestExecutionListener;
  * @see org.springframework.test.annotation.DirtiesContext
  * @see org.springframework.test.context.TestContext
  * @see org.springframework.test.context.TestExecutionListener
+ * @see org.springframework.test.context.support.AbstractTestExecutionListener
  * @since 1.0.0
  */
 @SuppressWarnings("all")
-public class CloseApplicationContextAfterTestClassTestExecutionListener implements TestExecutionListener {
+public class CloseApplicationContextAfterTestClassTestExecutionListener extends AbstractTestExecutionListener {
 
 	protected static final boolean DEFAULT_SPRING_TEST_CONTEXT_CLOSED = false;
 
@@ -51,6 +53,14 @@ public class CloseApplicationContextAfterTestClassTestExecutionListener implemen
 		DirtiesContext.HierarchyMode.CURRENT_LEVEL;
 
 	private final AtomicReference<Boolean> springTestContextCloseEnabled = new AtomicReference<>();
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public int getOrder() {
+		return -1000;
+	}
 
 	protected boolean isSpringTestContextCloseEnabled() {
 		return this.springTestContextCloseEnabled.updateAndGet(closeEnabled -> closeEnabled != null ? closeEnabled
@@ -85,7 +95,7 @@ public class CloseApplicationContextAfterTestClassTestExecutionListener implemen
 	public void afterTestClass(@NonNull TestContext testContext) throws Exception {
 
 		if (isSpringTestContextCloseEnabled()) {
-			TestExecutionListener.super.afterTestClass(testContext);
+			super.afterTestClass(testContext);
 			testContext.markApplicationContextDirty(DEFAULT_HIERARCHY_MODE);
 		}
 	}
