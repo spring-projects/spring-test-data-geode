@@ -47,6 +47,29 @@ public abstract class SpringUtils extends org.springframework.data.gemfire.util.
 		};
 
 	/**
+	 * Determines whether the given {@link ApplicationContext} is still {@literal active}.
+	 *
+	 * An {@link ApplicationContext} is considered to be {@literal active} if the {@literal refresh} method
+	 * has been called but the {@link ApplicationContext} has not be {@literal closed} yet.
+	 *
+	 * @param applicationContext {@link ApplicationContext} to evaluate.
+	 * @return a boolean value indicating if the given {@link ApplicationContext} is still {@literal active}.
+	 * Returns {@literal false} if the {@link ApplicationContext} is {@literal null}, is not an instance of
+	 * {@link ConfigurableApplicationContext} (which is required to evaluate the {@literal active} state)
+	 * or the {@link ConfigurableApplicationContext#isActive()} methods returns {@literal false} (which occurs after
+	 * the {@link ConfigurableApplicationContext#close()} method has been called.
+	 * @see org.springframework.context.ApplicationContext
+	 */
+	public static boolean isApplicationContextActive(@Nullable ApplicationContext applicationContext) {
+
+		return Optional.ofNullable(applicationContext)
+			.filter(ConfigurableApplicationContext.class::isInstance)
+			.map(ConfigurableApplicationContext.class::cast)
+			.map(ConfigurableApplicationContext::isActive)
+			.orElse(false);
+	}
+
+	/**
 	 * Closes the given optionally provided {@link ApplicationContext}.
 	 *
 	 * @param applicationContext {@link ApplicationContext} to close.
