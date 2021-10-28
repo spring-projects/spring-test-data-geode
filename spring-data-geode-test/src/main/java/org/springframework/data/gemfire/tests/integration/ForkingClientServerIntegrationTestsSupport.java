@@ -15,6 +15,7 @@
  */
 package org.springframework.data.gemfire.tests.integration;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Duration;
@@ -42,6 +43,7 @@ import org.springframework.data.gemfire.config.annotation.CacheServerApplication
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.config.annotation.EnablePdx;
 import org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration;
+import org.springframework.data.gemfire.tests.process.JavaProcessRunner;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.gemfire.util.SpringUtils;
@@ -60,6 +62,8 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.data.gemfire.config.annotation.EnablePdx
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration
+ * @see org.springframework.data.gemfire.tests.process.JavaProcessRunner
+ * @see org.springframework.data.gemfire.tests.process.ProcessRunner
  * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
  * @since 1.0.0
  */
@@ -68,8 +72,97 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	private static ProcessWrapper gemfireServer;
 
-	public static ProcessWrapper startGemFireServer(@NonNull Class<?> gemfireServerConfigurationClass, String... arguments)
-			throws IOException {
+	public static @NonNull ProcessWrapper startGemFireServer(@NonNull Class<?> gemfireServerMainClass,
+			@NonNull String... arguments) throws IOException {
+
+		return startGemFireServer(new JavaProcessRunner() {
+
+			@Override
+			public Class<?> getMainClass() {
+				return gemfireServerMainClass;
+			}
+
+			@Override
+			public ProcessWrapper run(String... arguments) throws IOException {
+				return ForkingClientServerIntegrationTestsSupport.run(getMainClass(), arguments);
+			}
+		}, arguments);
+	}
+
+	public static @NonNull ProcessWrapper startGemFireServer(@NonNull File workingDirectory,
+			@NonNull Class<?> gemfireServerMainClass, @NonNull String... arguments) throws IOException {
+
+		return startGemFireServer(new JavaProcessRunner() {
+
+			@Override
+			public Class<?> getMainClass() {
+				return gemfireServerMainClass;
+			}
+
+			@Override
+			public File getWorkingDirectory() {
+				return workingDirectory;
+			}
+
+			@Override
+			public ProcessWrapper run(String... arguments) throws IOException {
+				return ForkingClientServerIntegrationTestsSupport.run(getWorkingDirectory(), getMainClass(), arguments);
+			}
+		}, arguments);
+	}
+
+	public static @NonNull ProcessWrapper startGemFireServer(@NonNull String classpath,
+			@NonNull Class<?> gemfireServerMainClass, @NonNull String... arguments) throws IOException {
+
+		return startGemFireServer(new JavaProcessRunner() {
+
+			@Override
+			public String getClassPath() {
+				return classpath;
+			}
+
+			@Override
+			public Class<?> getMainClass() {
+				return gemfireServerMainClass;
+			}
+
+			@Override
+			public ProcessWrapper run(String... arguments) throws IOException {
+				return ForkingClientServerIntegrationTestsSupport.run(getClassPath(), getMainClass(), arguments);
+			}
+		}, arguments);
+	}
+
+	public static @NonNull ProcessWrapper startGemFireServer(@NonNull File workingDirectory, @NonNull String classpath,
+			@NonNull Class<?> gemfireServerMainClass, @NonNull String... arguments) throws IOException {
+
+		return startGemFireServer(new JavaProcessRunner() {
+
+			@Override
+			public String getClassPath() {
+				return classpath;
+			}
+
+			@Override
+			public Class<?> getMainClass() {
+				return gemfireServerMainClass;
+			}
+
+			@Override
+			public File getWorkingDirectory() {
+				return workingDirectory;
+			}
+
+			@Override
+			public ProcessWrapper run(String... arguments) throws IOException {
+				return ForkingClientServerIntegrationTestsSupport.run(getWorkingDirectory(),
+					getClassPath(), getMainClass(), arguments);
+			}
+		}, arguments);
+	}
+
+	private static @NonNull ProcessWrapper startGemFireServer(@NonNull JavaProcessRunner processRunner,
+			@NonNull String... arguments) throws IOException {
 
 		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAndReserveAvailablePort()));
 
@@ -77,8 +170,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
 
-		ProcessWrapper gemfireServerProcessWrapper =
-			run(gemfireServerConfigurationClass, argumentList.toArray(new String[0]));
+		ProcessWrapper gemfireServerProcessWrapper = processRunner.run(argumentList);
 
 		gemfireServerProcessWrapper = gemfireServerProcessWrapper
 			.runningOn(InetAddress.getLocalHost().getHostAddress())
@@ -90,10 +182,28 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 		return gemfireServerProcessWrapper;
 	}
 
-	public static ProcessWrapper startGeodeServer(@NonNull Class<?> geodeServerConfigurationClass, String... arguments)
+	public static ProcessWrapper startGeodeServer(@NonNull Class<?> geodeServerMainClass, String... arguments)
 			throws IOException {
 
-		return startGemFireServer(geodeServerConfigurationClass, arguments);
+		return startGemFireServer(geodeServerMainClass, arguments);
+	}
+
+	public static ProcessWrapper startGeodeServer(@NonNull File workingDirectory,
+			@NonNull Class<?> geodeServerMainClass, String... arguments) throws IOException {
+
+		return startGemFireServer(workingDirectory, geodeServerMainClass, arguments);
+	}
+
+	public static ProcessWrapper startGeodeServer(@NonNull String classpath,
+			@NonNull Class<?> geodeServerMainClass, String... arguments) throws IOException {
+
+		return startGemFireServer(classpath, geodeServerMainClass, arguments);
+	}
+
+	public static ProcessWrapper startGeodeServer(@NonNull File workingDirectory, @NonNull String classpath,
+			@NonNull Class<?> geodeServerMainClass, String... arguments) throws IOException {
+
+		return startGemFireServer(workingDirectory, classpath, geodeServerMainClass, arguments);
 	}
 
 	protected static int setAndGetCacheServerPortProperty(int port) {
@@ -132,7 +242,9 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	@EnablePdx
 	@ClientCacheApplication(logLevel = GEMFIRE_LOG_LEVEL)
-	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
+	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration {
+
+	}
 
 	@EnablePdx
 	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport", logLevel = GEMFIRE_LOG_LEVEL)
@@ -160,8 +272,8 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 			Function<ApplicationContext, SpringApplicationTerminatorConfigurer> safeSpringApplicationTerminatorConfigurerResolver =
 				applicationContext -> SpringUtils.safeGetValue(() ->
-					applicationContext.getBean(SpringApplicationTerminatorConfigurer.class),
-						(SpringApplicationTerminatorConfigurer) null);
+						applicationContext.getBean(SpringApplicationTerminatorConfigurer.class),
+					(SpringApplicationTerminatorConfigurer) null);
 
 			Runnable springApplicationTerminatorRunnable = () -> System.exit(-1);
 
@@ -199,7 +311,8 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	public interface SpringApplicationTerminatorConfigurer {
 
-		SpringApplicationTerminatorConfigurer EMPTY = new SpringApplicationTerminatorConfigurer() { };
+		SpringApplicationTerminatorConfigurer EMPTY = new SpringApplicationTerminatorConfigurer() {
+		};
 
 		default boolean isEmpty() {
 			return EMPTY.equals(this);
