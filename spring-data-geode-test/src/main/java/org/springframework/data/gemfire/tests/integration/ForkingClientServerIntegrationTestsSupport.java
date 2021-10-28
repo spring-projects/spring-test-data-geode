@@ -16,6 +16,7 @@
 package org.springframework.data.gemfire.tests.integration;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +68,7 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	private static ProcessWrapper gemfireServer;
 
-	public static void startGemFireServer(@NonNull Class<?> gemfireServerConfigurationClass, String... arguments)
+	public static ProcessWrapper startGemFireServer(@NonNull Class<?> gemfireServerConfigurationClass, String... arguments)
 			throws IOException {
 
 		int availablePort = setAndGetPoolPortProperty(setAndGetCacheServerPortProperty(findAndReserveAvailablePort()));
@@ -76,15 +77,23 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 		argumentList.add(String.format("-D%s=%d", GEMFIRE_CACHE_SERVER_PORT_PROPERTY, availablePort));
 
-		setGemFireServerProcess(run(gemfireServerConfigurationClass, argumentList.toArray(new String[0])));
+		ProcessWrapper gemfireServerProcessWrapper =
+			run(gemfireServerConfigurationClass, argumentList.toArray(new String[0]));
 
+		gemfireServerProcessWrapper = gemfireServerProcessWrapper
+			.runningOn(InetAddress.getLocalHost().getHostAddress())
+			.listeningOn(availablePort);
+
+		setGemFireServerProcess(gemfireServerProcessWrapper);
 		waitForServerToStart("localhost", availablePort);
+
+		return gemfireServerProcessWrapper;
 	}
 
-	public static void startGeodeServer(@NonNull Class<?> geodeServerConfigurationClass, String... arguments)
+	public static ProcessWrapper startGeodeServer(@NonNull Class<?> geodeServerConfigurationClass, String... arguments)
 			throws IOException {
 
-		startGemFireServer(geodeServerConfigurationClass, arguments);
+		return startGemFireServer(geodeServerConfigurationClass, arguments);
 	}
 
 	protected static int setAndGetCacheServerPortProperty(int port) {
