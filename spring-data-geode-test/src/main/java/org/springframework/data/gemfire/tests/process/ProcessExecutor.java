@@ -52,60 +52,80 @@ public abstract class ProcessExecutor {
 	protected static final String SPRING_GEMFIRE_SYSTEM_PROPERTY_PREFIX = "spring.gemfire.";
 
 	/**
-	 * Launch (run) the given Java {@link Class} (program) passing in the given array of {@link Object arguments}
-	 * to the program.
+	 * Launch (run/execute) the given Java {@link Class} (program) passing in the given array of {@link String arguments}
+	 * to the program at runtime.
 	 *
 	 * @param type Java {@link Class} (program) to launch in a forked JVM process.
-	 * @param args array of {@link Object} arguments to the pass to the Java program.
-	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM.
-	 * @throws IOException if the Java program could not be lauched (run).
+	 * @param arguments array of {@link String} arguments to the pass to the Java program.
+	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM process.
+	 * @throws IOException if the Java program could not be launched (run).
 	 * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
 	 * @see #launch(File, Class, String...)
 	 * @see java.lang.Class
 	 */
-	public static ProcessWrapper launch(Class<?> type, String... args) throws IOException {
-		return launch(FileSystemUtils.WORKING_DIRECTORY, type, args);
+	public static ProcessWrapper launch(Class<?> type, String... arguments) throws IOException {
+		return launch(FileSystemUtils.WORKING_DIRECTORY, type, arguments);
 	}
 
 	/**
-	 * Launch (run) the given Java {@link Class} (program) in the specified {@link File working directory} and pass in
-	 * the given array of {@link Object arguments} to the program.
+	 * Launch (run/execute) the given Java {@link Class} (program) in the specified {@link File working directory}
+	 * and pass in the given array of {@link String arguments} to the program at runtime.
 	 *
 	 * @param type Java {@link Class} (program) to launch in a forked JVM process.
 	 * @param workingDirectory {@link File} referring to the working directory of the forked JVM process.
-	 * @param args array of {@link Object} arguments to the pass to the Java program.
-	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM.
-	 * @throws IOException if the Java program could not be lauched (run).
+	 * @param arguments array of {@link String} arguments to the pass to the Java program.
+	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM process.
+	 * @throws IOException if the Java program could not be launched (run).
 	 * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
 	 * @see #launch(File, String, Class, String...)
 	 * @see java.lang.Class
 	 * @see java.io.File
 	 */
-	public static ProcessWrapper launch(File workingDirectory, Class<?> type, String... args) throws IOException {
-		return launch(workingDirectory, JAVA_CLASSPATH, type, args);
+	public static ProcessWrapper launch(File workingDirectory, Class<?> type, String... arguments) throws IOException {
+		return launch(workingDirectory, JAVA_CLASSPATH, type, arguments);
 	}
 
 	/**
-	 * Launch (run) the given Java {@link Class} (program) in the specified {@link File working directory}, using the
-	 * given {@link String CLASSPATH} and pass in the given array of {@link Object arguments} to the program.
+	 * Launch (run/execute) the given Java {@link Class} (program) with the specified {@link String JVM classpath}
+	 * in the {@link File current working directory} and pass in the given array of {@link Object arguments}
+	 * to the program at runtime.
 	 *
 	 * @param type Java {@link Class} (program) to launch in a forked JVM process.
-	 * @param workingDirectory {@link File} referring to the working directory of the forked JVM process.
 	 * @param classpath {@link String} containing the classpath elements to pass to the JVM to run the Java program.
-	 * @param args array of {@link Object} arguments to the pass to the Java program.
-	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM.
-	 * @throws IOException if the Java program could not be lauched (run).
+	 * @param arguments array of {@link String} arguments to the pass to the Java program.
+	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM process.
+	 * @throws IOException if the Java program could not be launched (run).
+	 * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
+	 * @see #launch(File, String, Class, String...)
+	 * @see java.lang.Class
+	 * @see java.io.File
+	 */
+	public static ProcessWrapper launch(String classpath, Class<?> type, String... arguments) throws IOException {
+		return launch(FileSystemUtils.WORKING_DIRECTORY, classpath, type, arguments);
+	}
+
+	/**
+	 * Launch (run/execute) the given Java {@link Class} (program) in the specified {@link File working directory},
+	 * using the given {@link String Java CLASSPATH} and pass in the given array of {@link String arguments}
+	 * to the program at runtime.
+	 *
+	 * @param type Java {@link Class} (program) to launch in a forked JVM process.
+	 * @param workingDirectory {@link File} referring to the {@literal working directory} of the forked JVM process.
+	 * @param classpath {@link String} containing the classpath elements to pass to the JVM to run the Java program.
+	 * @param arguments array of {@link String} arguments to the pass to the Java program.
+	 * @return a {@link ProcessWrapper} wrapping the Java {@link Process} representing the forked JVM process.
+	 * @throws IOException if the Java program could not be launched (run).
 	 * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
 	 * @see #buildCommand(String, Class, String...)
 	 * @see java.lang.ProcessBuilder
 	 * @see java.lang.Class
 	 * @see java.io.File
 	 */
-	public static ProcessWrapper launch(File workingDirectory, String classpath, Class<?> type, String... args)
+	public static ProcessWrapper launch(File workingDirectory, String classpath, Class<?> type, String... arguments)
 			throws IOException {
 
 		ProcessBuilder processBuilder = new ProcessBuilder()
-			.command(buildCommand(classpath, type, args))
+			.command(buildCommand(classpath, type, arguments))
 			.directory(validateDirectory(workingDirectory))
 			.redirectErrorStream(true);
 
