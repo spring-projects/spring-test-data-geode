@@ -246,8 +246,9 @@ public class ProcessWrapper {
 		return listener != null && listeners.add(listener);
 	}
 
-	public void registerShutdownHook() {
+	public ProcessWrapper registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+		return this;
 	}
 
 	public ProcessWrapper runningOn(String host) {
