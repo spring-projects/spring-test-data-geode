@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.data.build</groupId>
 		<artifactId>spring-data-parent</artifactId>
-		<version>2.5.6</version>
+		<version>2.5.7</version>
 	</parent>
 
 	<groupId>org.springframework.data</groupId>
@@ -93,7 +93,7 @@
 		<pivotal-gemfire.version>9.10.11</pivotal-gemfire.version>
 		<spring.version>5.3.13</spring.version>
 		<spring-boot.version>2.5.7</spring-boot.version>
-		<spring-data-bom.version>2021.0.6</spring-data-bom.version>
+		<spring-data-bom.version>2021.0.7</spring-data-bom.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
