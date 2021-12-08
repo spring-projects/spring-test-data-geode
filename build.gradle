@@ -41,6 +41,12 @@ allprojects {
   }
 }
 
+subprojects {
+  plugins.withType(JavaPlugin) {
+    sourceCompatibility = JavaVersion.VERSION_17
+  }
+}
+
 description = 'Spring Test Framework for Apache Geode and VMware Tanzu GemFire using Spring Data.'
 
 //ext['spring.version'] = "$springVersion"
