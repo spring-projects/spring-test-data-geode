@@ -9,13 +9,13 @@ description = "Spring Test Framework for Apache Geode"
 
 dependencies {
 
-	compile "edu.umd.cs.mtc:multithreadedtc"
-	compile "junit:junit"
-	compile "org.assertj:assertj-core"
-	compile "org.mockito:mockito-core"
-	compile "org.projectlombok:lombok"
-	compile "org.springframework:spring-test"
-	compile "org.springframework.data:spring-data-geode"
+	implementation "edu.umd.cs.mtc:multithreadedtc"
+	implementation "junit:junit"
+	implementation "org.assertj:assertj-core"
+	implementation "org.mockito:mockito-core"
+	implementation "org.projectlombok:lombok"
+	implementation "org.springframework:spring-test"
+	implementation "org.springframework.data:spring-data-geode"
 
 	compileOnly "com.google.code.findbugs:jsr305:$findbugsVersion"
 
