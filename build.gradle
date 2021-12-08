@@ -1,11 +1,13 @@
 buildscript {
-  dependencies {
-    classpath 'io.spring.gradle:spring-build-conventions:0.0.38'
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+  ext {
+    snapshotBuild = version.endsWith('SNAPSHOT')
+    releaseBuild = version.endsWith('RELEASE')
+    milestoneBuild = !(releaseBuild || snapshotBuild)
   }
   repositories {
     mavenCentral()
     gradlePluginPortal()
+    maven { url 'https://repo.spring.io/plugins-release' }
     maven {
       url 'https://repo.spring.io/plugins-snapshot'
       if (project.hasProperty('artifactoryUsername')) {
@@ -15,6 +17,9 @@ buildscript {
         }
       }
     }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
   }
 }
 
@@ -52,10 +57,6 @@ description = 'Spring Test Framework for Apache Geode and VMware Tanzu GemFire u
 //ext['spring.version'] = "$springVersion"
 ext['spring-framework.version'] = "$springVersion"
 ext['spring-data-bom.version'] = "$springDataBomVersion"
-
-ext.releaseBuild = version.endsWith('RELEASE')
-ext.snapshotBuild = version.endsWith('SNAPSHOT')
-ext.milestoneBuild = !(releaseBuild || snapshotBuild)
 
 ext.MAVEN_POM_EDITOR_GRADLE = "$rootDir/gradle/maven-pom-editor.gradle"
 
