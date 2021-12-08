@@ -53,12 +53,6 @@ ext.milestoneBuild = !(releaseBuild || snapshotBuild)
 
 ext.MAVEN_POM_EDITOR_GRADLE = "$rootDir/gradle/maven-pom-editor.gradle"
 
-project.checkstyle.sourceSets.forEach { it -> it.excludes '**/target', '**/out', '**/build' }
-
-//project.tasks.findByName('checkstyleNohttp').configure {
-//	exclude '**/target/**/*', '**/out/**/*', '**/build/**/*'
-//}
-
-tasks.withType(Checkstyle) {
-  exclude '**/target/**/*', '**/out/**/*', '**/build/**/*'
+nohttp {
+  source.exclude "**/target/**"
 }
