@@ -916,8 +916,9 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 		when(mockRegionService.createPdxInstanceFactory(anyString()))
 			.thenThrow(newUnsupportedOperationException(NOT_SUPPORTED));
 
-		when(mockRegionService.rootRegions()).thenAnswer(invocation ->
-			regions.values().stream().filter(GemFireMockObjectsSupport::isRootRegion).collect(Collectors.toSet()));
+		when(mockRegionService.rootRegions()).thenAnswer(invocation -> regions.values().stream()
+			.filter(GemFireMockObjectsSupport::isRootRegion)
+			.collect(Collectors.toSet()));
 
 		return mockRegionService;
 	}
