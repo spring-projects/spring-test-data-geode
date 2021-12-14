@@ -1,8 +1,12 @@
+// Define version dependency properties
+ext['jakartaAnnotationApiVersion'] = '2.0.0'
+
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
 	}
 	dependencies {
+		dependency "jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationApiVersion"
 		dependency "antlr:antlr:$antlrVersion"
 		dependency "edu.umd.cs.mtc:multithreadedtc:$multithreadedtcVersion"
 		dependency "junit:junit:$junitVersion"
