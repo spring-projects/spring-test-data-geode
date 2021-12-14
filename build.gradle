@@ -61,5 +61,5 @@ ext['spring-data-bom.version'] = "$springDataBomVersion"
 ext.MAVEN_POM_EDITOR_GRADLE = "$rootDir/gradle/maven-pom-editor.gradle"
 
 nohttp {
-  source.exclude "**/target/**"
+  source.exclude "**/target/**", "buildSrc/build/**"
 }
