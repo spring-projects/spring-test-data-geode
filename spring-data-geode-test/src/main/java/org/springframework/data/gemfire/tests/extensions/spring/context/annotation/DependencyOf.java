@@ -33,7 +33,7 @@ import org.springframework.core.annotation.AliasFor;
  * However, with the {@link DependencyOf} annotation, a bean B can say it is a required dependency for bean A,
  * or rather that bean A depends on bean B.
  *
- * Therefore, the following bean definitions for A & B are equivalent:
+ * Therefore, the following bean definitions for A and B are equivalent:
  *
  * <pre>
  * <code>
