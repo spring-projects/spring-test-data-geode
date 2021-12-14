@@ -54,6 +54,7 @@ pipeline {
 			}
 		}
 
+/*
 		stage ('Deploy Docs') {
 			options {
 				timeout(time: 15, unit: "MINUTES")
@@ -76,6 +77,7 @@ pipeline {
 				}
 			}
 		}
+ */
 
 		stage ('Deploy Artifacts') {
 			options {
