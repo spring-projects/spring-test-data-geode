@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
