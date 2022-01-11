@@ -52,7 +52,7 @@ subprojects {
   }
 }
 
-description = 'Spring Test Framework for Apache Geode and VMware Tanzu GemFire using Spring Data.'
+description = 'Spring Test Framework for Apache Geode'
 
 //ext['spring.version'] = "$springVersion"
 ext['spring-framework.version'] = "$springVersion"

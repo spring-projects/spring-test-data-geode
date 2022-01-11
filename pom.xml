@@ -20,11 +20,10 @@
 		<module>spring-data-geode-test</module>
 	</modules>
 
-	<name>Spring Test Framework for Apache Geode and VMware Tanzu GemFire</name>
+	<name>Spring Test Framework for Apache Geode</name>
 	<description>
 		This project introduces a Spring Data module building on the Spring Framework's TestContext,
-		used to write both Unit and Integration Tests for Spring Data for Apache Geode
-		as well as Spring Data for VMware Tanzu GemFire applications.
+		used to write Unit and Integration Tests for Spring Data for Apache Geode applications.
 	</description>
 	<url>https://github.com/jxblum/spring-data-tests-4-gemfire</url>
 
