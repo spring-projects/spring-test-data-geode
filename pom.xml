@@ -82,7 +82,7 @@
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>${java.version}</source.level>
-		<apache-geode.version>1.14.0</apache-geode.version>
+		<apache-geode.version>1.14.2</apache-geode.version>
 		<assertj.version>3.21.0</assertj.version>
 		<jakarta-annotation-api.version>2.0.0</jakarta-annotation-api.version>
 		<junit.version>4.13.2</junit.version>
