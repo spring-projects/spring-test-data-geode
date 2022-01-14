@@ -13,7 +13,7 @@
 
 	<groupId>org.springframework.data</groupId>
 	<artifactId>spring-test-data-geode-build</artifactId>
-	<version>0.3.0-RAJ-M1</version>
+	<version>0.3.0-RAJ-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -91,7 +91,7 @@
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<pivotal-gemfire.version>9.10.14</pivotal-gemfire.version>
 		<spring.version>5.3.15</spring.version>
-		<spring-boot.version>2.6.2</spring-boot.version>
+		<spring-boot.version>2.7.0-SNAPSHOT</spring-boot.version>
 		<spring-data-bom.version>2021.2.0-M1</spring-data-bom.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
