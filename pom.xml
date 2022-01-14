@@ -90,7 +90,7 @@
 		<mockito.version>4.2.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
 		<pivotal-gemfire.version>9.10.14</pivotal-gemfire.version>
-		<spring.version>5.3.14</spring.version>
+		<spring.version>5.3.15</spring.version>
 		<spring-boot.version>2.5.8</spring-boot.version>
 		<spring-data-bom.version>2021.0.7</spring-data-bom.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
