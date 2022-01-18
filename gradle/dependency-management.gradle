@@ -1,8 +1,8 @@
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
-//		mavenBom "org.springframework:spring-framework-bom:$springVersion"
-//		mavenBom "org.springframework.data:spring-data-bom:$springDataBomVersion"
+		mavenBom "org.springframework:spring-framework-bom:$springVersion"
+		mavenBom "org.springframework.data:spring-data-bom:$springDataBomVersion"
 	}
 	dependencies {
 		dependency "antlr:antlr:$antlrVersion"
