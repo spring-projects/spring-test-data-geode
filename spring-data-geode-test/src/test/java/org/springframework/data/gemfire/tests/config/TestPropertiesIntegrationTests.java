@@ -70,6 +70,23 @@ public class TestPropertiesIntegrationTests {
 	}
 
 	@Test
+	public void destroySingleTestPropertiesInstance() {
+
+		TestProperties testProperties = TestProperties.getInstance()
+			.set("port", "12345");
+
+		assertThat(testProperties).isNotNull();
+		assertThat(testProperties.get("port")).isEqualTo("12345");
+
+		TestProperties.destroy();
+
+		TestProperties newTestProperties = TestProperties.getInstance();
+
+		assertThat(newTestProperties).isNotSameAs(testProperties);
+		assertThat(newTestProperties).isEmpty();
+	}
+
+	@Test
 	public void getTestPropertiesResourceIsCorrect() {
 
 		Resource testPropertiesResource = TestProperties.getInstance().getTestPropertiesResource();

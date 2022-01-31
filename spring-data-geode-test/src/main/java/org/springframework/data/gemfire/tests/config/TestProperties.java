@@ -70,6 +70,15 @@ public class TestProperties implements Iterable<String> {
 		return testPropertiesReference;
 	}
 
+	/**
+	 * Destroys the managed {@literal Singleton} {@link TestProperties} instance.
+	 */
+	public static void destroy() {
+		testPropertiesReference.clearSystemProperties();
+		testPropertiesReference.clear();
+		testPropertiesReference = null;
+	}
+
 	private final Properties testProperties;
 
 	/**
