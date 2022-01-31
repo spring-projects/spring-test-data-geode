@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import org.apache.geode.DataSerializer;
 import org.apache.geode.cache.CacheClosedException;
@@ -69,6 +70,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
+import org.springframework.data.gemfire.tests.config.TestProperties;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.FileUtils;
@@ -269,6 +271,16 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	/**
+	 * Clears all test {@link System#getProperties()} after a test class (suite) execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.config.TestProperties
+	 */
+	@AfterClass
+	public static void clearTestSystemProperties() {
+		TestProperties.getInstance().clearSystemProperties();
+	}
+
+	/**
 	 * Closes the use of all Spring {@literal BeanFactoryLocators} after test (class/suite) execution.
 	 */
 	@AfterClass
@@ -382,6 +394,19 @@ public abstract class IntegrationTestsSupport {
 
 		CollectionUtils.nullSafeMap(FunctionService.getRegisteredFunctions())
 			.forEach((functionId, function) -> FunctionService.unregisterFunction(functionId));
+	}
+
+	/**
+	 * Loads any {@literal test.properties} before test execution.
+	 *
+	 * Additionally, any {@link System} defined test properties (i.e. properties prefixed with {@literal system.})
+	 * are set in the {@link System#getProperties()}.
+	 *
+	 * @see org.springframework.data.gemfire.tests.config.TestProperties
+	 */
+	@BeforeClass
+	public static void loadTestProperties() {
+		TestProperties.getInstance().configureSystemProperties();
 	}
 
 	/**
