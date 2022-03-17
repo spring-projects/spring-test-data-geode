@@ -1,3 +1,10 @@
+def p = [:]
+
+node {
+	checkout scm
+	p = readProperties interpolate: true, file: 'ci/pipeline.properties'
+}
+
 pipeline {
 
 	agent any
@@ -22,8 +29,8 @@ pipeline {
 			}
 			steps {
 				script {
-					docker.withRegistry('', 'hub.docker.com-springbuildmaster') {
-						docker.image('openjdk:17-bullseye').inside('-u root -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp') {
+					docker.withRegistry(p['docker.registry'], p['docker.credentials']) {
+						docker.image(p['docker.container.image.java.main']).inside(p['docker.container.inside.env.full']) {
 
 							sh "echo 'Setup build environment...'"
 							sh "ci/setup.sh"

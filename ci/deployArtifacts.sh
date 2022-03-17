@@ -9,8 +9,8 @@ echo "Deploying artifacts on host [$HOSTNAME]"
 # Syntax: `chown -R userId:groupId .`
 chown -R 1001:1001 .
 
-GRADLE_OPTS="-Duser.name=jenkins -Djava.io.tmpdir=/tmp -Dgradle.user.home=/tmp/geode/test/artifacts-gradle-cache" \
-  ./gradlew deployArtifacts finalizeDeployArtifacts --no-build-cache --no-configuration-cache --no-daemon --stacktrace \
+GRADLE_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home -Djava.io.tmpdir=/tmp" \
+  ./gradlew publishArtifacts releasePublishedArtifacts --no-build-cache --no-configuration-cache --no-daemon --stacktrace \
     -PartifactoryUsername=$ARTIFACTORY_USERNAME \
     -PartifactoryPassword=$ARTIFACTORY_PASSWORD \
     -PossrhUsername=$OSSRH_USERNAME \
