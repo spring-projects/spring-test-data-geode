@@ -20,6 +20,7 @@ dependencyManagement {
 		dependency "org.junit.vintage:junit-vintage-engine:$junitJupiterVersion"
 		dependency "org.mockito:mockito-core:$mockitoVersion"
 		dependency "org.projectlombok:lombok:$lombokVersion"
+		dependency "org.springframework.boot:spring-boot-starter:$springBootVersion"
 		dependency "org.springframework.shell:spring-shell:$springShellVersion"
 		dependency "org.apache.geode:geode-core:$apacheGeodeVersion"
 		dependency "org.apache.geode:geode-cq:$apacheGeodeVersion"
