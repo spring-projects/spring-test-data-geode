@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2022-present the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.spring.gradle.convention
 
@@ -20,7 +20,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginManager
-import org.gradle.plugins.ide.eclipse.EclipseWtpPlugin
+import org.gradle.plugins.ide.eclipse.EclipsePlugin
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.springframework.gradle.CopyPropertiesPlugin
 import org.springframework.gradle.propdeps.PropDepsEclipsePlugin
@@ -28,7 +28,11 @@ import org.springframework.gradle.propdeps.PropDepsIdeaPlugin
 import org.springframework.gradle.propdeps.PropDepsPlugin
 
 /**
- * Base Gradle API Plugin for all Spring Java project Gradle Plugins.
+ * Abstract base Gradle {@link Plugin} for all Spring Java &amp; Groovy Gradle Plugins used by SBDG.
+ *
+ * This abstract base Gradle {@link Plugin} primarily serves to apply a common set of Gradle {@link Plugin Plugins),
+ * such as the {@link JavaPlugin} and {@link GroovyPlugin} for the various SBDG project Spring modules as well as other
+ * Spring Gradle {@link Plugin Plugins} to manage builds, IDE integration, releases and so on.
  *
  * @author Rob Winch
  * @author John Blum
@@ -40,31 +44,68 @@ abstract class AbstractSpringJavaPlugin implements Plugin<Project> {
 	@Override
 	final void apply(Project project) {
 
-		PluginManager pluginManager = project.getPluginManager()
+		applyPlugins(project)
+		setJarManifestAttributes(project)
 
-		pluginManager.apply(JavaPlugin.class)
-		pluginManager.apply(ManagementConfigurationPlugin.class)
-
-		if (project.file("src/main/groovy").exists()
-				|| project.file("src/test/groovy").exists()
-				|| project.file("src/integration-test/groovy").exists()) {
-
-			pluginManager.apply(GroovyPlugin.class)
+		project.test {
+			useJUnitPlatform()
 		}
 
-		pluginManager.apply("io.spring.convention.repository")
-		pluginManager.apply(EclipseWtpPlugin)
+		applyAdditionalPlugins(project)
+	}
+
+	private void applyPlugins(Project project) {
+
+		PluginManager pluginManager = project.getPluginManager()
+
+		applyJavaPlugin(pluginManager)
+		applyGroovyPlugin(project)
+		applyIdePlugins(pluginManager)
+		applySpringPlugins(pluginManager)
+	}
+
+	@SuppressWarnings("all")
+	private void applyGroovyPlugin(Project project) {
+
+		if (project.file("src/main/groovy").exists()
+			|| project.file("src/test/groovy").exists()
+			|| project.file("src/integration-test/groovy").exists()) {
+
+			project.getPluginManager().apply(GroovyPlugin.class)
+		}
+	}
+
+	@SuppressWarnings("all")
+	private void applyIdePlugins(PluginManager pluginManager) {
+
+		pluginManager.apply(EclipsePlugin)
 		pluginManager.apply(IdeaPlugin)
+	}
+
+	@SuppressWarnings("all")
+	private void applyJavaPlugin(PluginManager pluginManager) {
+		pluginManager.apply(JavaPlugin.class)
+	}
+
+	@SuppressWarnings("all")
+	private void applySpringPlugins(PluginManager pluginManager) {
+
+		pluginManager.apply(ManagementConfigurationPlugin)
+		pluginManager.apply(RepositoryConventionPlugin)
 		pluginManager.apply(PropDepsPlugin)
 		pluginManager.apply(PropDepsEclipsePlugin)
 		pluginManager.apply(PropDepsIdeaPlugin)
-		pluginManager.apply("io.spring.convention.tests-configuration")
-		pluginManager.apply("io.spring.convention.integration-test")
-        pluginManager.apply("io.spring.convention.springdependencymangement")
-		pluginManager.apply("io.spring.convention.dependency-set")
-		pluginManager.apply("io.spring.convention.javadoc-options")
-		pluginManager.apply("io.spring.convention.checkstyle")
+		pluginManager.apply(SpringDependencyManagementConventionsPlugin)
+		pluginManager.apply(DependencySetPlugin)
+		pluginManager.apply(TestsConfigurationPlugin)
+		pluginManager.apply(IntegrationTestPlugin)
+		pluginManager.apply(JacocoPlugin);
+		pluginManager.apply(JavadocOptionsPlugin)
+		pluginManager.apply(CheckstylePlugin)
 		pluginManager.apply(CopyPropertiesPlugin)
+	}
+
+	private void setJarManifestAttributes(Project project) {
 
 		project.jar {
 			manifest.attributes["Created-By"] = "${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
@@ -72,14 +113,8 @@ abstract class AbstractSpringJavaPlugin implements Plugin<Project> {
 			manifest.attributes["Implementation-Version"] = project.version
 			manifest.attributes["Automatic-Module-Name"] = project.name.replace('-', '.')
 		}
-
-        project.test {
-            useJUnitPlatform()
-        }
-
-		additionalPlugins(project);
 	}
 
-	protected abstract void additionalPlugins(Project project);
+	protected abstract void applyAdditionalPlugins(Project project);
 
 }

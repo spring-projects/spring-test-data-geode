@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2022-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,28 @@ package io.spring.gradle.convention
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlatformPlugin
+import org.gradle.api.plugins.PluginManager
 import org.springframework.gradle.CopyPropertiesPlugin
 import org.springframework.gradle.maven.SpringMavenPlugin
 
 /**
+ * Gradle {@link Plugin} used to generate a Maven BOM for the Gradle {@link Project}.
+ *
  * @author Rob Winch
  * @author John Blum
+ * @see org.gradle.api.Plugin
+ * @see org.gradle.api.Project
  */
 class MavenBomPlugin implements Plugin<Project> {
 
+	@Override
 	void apply(Project project) {
-		project.plugins.apply(JavaPlatformPlugin)
-		project.plugins.apply(SpringMavenPlugin)
-		project.plugins.apply(CopyPropertiesPlugin)
+
+		PluginManager pluginManager = project.getPluginManager();
+
+		pluginManager.apply(JavaPlatformPlugin)
+		pluginManager.apply(SpringMavenPlugin)
+		pluginManager.apply(CopyPropertiesPlugin)
+
 	}
 }
