@@ -58,8 +58,6 @@ description = 'Spring Test Framework for Apache Geode'
 ext['spring-framework.version'] = "$springVersion"
 ext['spring-data-bom.version'] = "$springDataBomVersion"
 
-ext.MAVEN_POM_EDITOR_GRADLE = "$rootDir/gradle/maven-pom-editor.gradle"
-
 nohttp {
   source.exclude "**/target/**", "buildSrc/build/**"
 }
