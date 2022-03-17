@@ -1,6 +1,7 @@
 // Define version dependency properties
 ext['jakartaAnnotationApiVersion'] = '2.0.0'
 ext['junitJupiterVersion'] = '5.8.2'
+ext['logbackVersion'] = '1.2.9'
 
 dependencyManagement {
 	imports {
@@ -10,6 +11,7 @@ dependencyManagement {
 	dependencies {
 		dependency "jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationApiVersion"
 		dependency "antlr:antlr:$antlrVersion"
+		dependency "ch.qos.logback:logback-classic:$logbackVersion"
 		dependency "edu.umd.cs.mtc:multithreadedtc:$multithreadedtcVersion"
 		dependency "junit:junit:$junitVersion"
 		dependency "org.assertj:assertj-core:$assertjVersion"
