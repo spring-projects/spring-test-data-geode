@@ -5,6 +5,7 @@ ext['logbackVersion'] = '1.2.9'
 
 dependencyManagement {
 	imports {
+		mavenBom "io.micrometer:micrometer-bom:$micrometerVersion"
 		mavenBom "org.springframework:spring-framework-bom:$springVersion"
 		mavenBom "org.springframework.data:spring-data-bom:$springDataBomVersion"
 	}
