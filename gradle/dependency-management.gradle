@@ -1,5 +1,6 @@
 // Define version dependency properties
 ext['jakartaAnnotationApiVersion'] = '2.0.0'
+ext['junitJupiterVersion'] = '5.8.2'
 
 dependencyManagement {
 	imports {
@@ -12,6 +13,8 @@ dependencyManagement {
 		dependency "edu.umd.cs.mtc:multithreadedtc:$multithreadedtcVersion"
 		dependency "junit:junit:$junitVersion"
 		dependency "org.assertj:assertj-core:$assertjVersion"
+		dependency "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+		dependency "org.junit.vintage:junit-vintage-engine:$junitJupiterVersion"
 		dependency "org.mockito:mockito-core:$mockitoVersion"
 		dependency "org.projectlombok:lombok:$lombokVersion"
 		dependency "org.springframework.shell:spring-shell:$springShellVersion"
