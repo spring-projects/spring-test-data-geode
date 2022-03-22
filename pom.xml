@@ -59,18 +59,16 @@
 		<developer>
 			<id>jblum</id>
 			<name>John Blum</name>
-			<email>jblum at pivotal dot io</email>
-			<organization>Pivotal Software, Inc.</organization>
+			<email>jblum at vmware dot com</email>
+			<organization>VMware, Inc.</organization>
 			<organizationUrl>https://www.spring.io</organizationUrl>
 			<roles>
 				<role>Spring Data Team</role>
-				<role>Spring Data Cassandra Project Lead (Committer)</role>
-				<role>Spring Data GemFire Project Lead (Committer)</role>
-				<role>Spring Data Geode Project Lead (Committer)</role>
-				<role>Spring Session Data GemFire Project Lead (Committer)</role>
-				<role>Spring Session Data Geode Project Lead (Committer)</role>
-				<role>Spring Boot Data GemFire Project Lead (Committer)</role>
-				<role>Spring Boot Data Geode Project Lead (Committer)</role>
+				<role>Spring Data for Apache Cassandra Project Lead (Committer)</role>
+				<role>Spring Data for Apache Geode Project Lead (Committer)</role>
+				<role>Spring Test for Apache Geode Project Lead (Committer)</role>
+				<role>Spring Session for Apache Geode Project Lead (Committer)</role>
+				<role>Spring Boot for Apache Geode Project Lead (Committer)</role>
 				<role>Apache Geode Committer</role>
 			</roles>
 		</developer>
