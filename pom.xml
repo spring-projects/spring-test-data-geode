@@ -90,7 +90,7 @@
 		<pivotal-gemfire.version>9.10.15</pivotal-gemfire.version>
 		<spring.version>5.3.19</spring.version>
 		<spring-boot.version>2.5.12</spring-boot.version>
-		<spring-data-bom.version>2021.0.10</spring-data-bom.version>
+		<spring-data-bom.version>2021.0.11</spring-data-bom.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
