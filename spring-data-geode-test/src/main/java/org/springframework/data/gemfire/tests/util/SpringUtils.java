@@ -29,11 +29,11 @@ import org.springframework.lang.Nullable;
  * @see java.util.function.Function
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ConfigurableApplicationContext
- * @see org.springframework.data.gemfire.util.SpringUtils
+ * @see org.springframework.data.gemfire.util.SpringExtensions
  * @since 1.0.0
  */
 @SuppressWarnings("unused")
-public abstract class SpringUtils extends org.springframework.data.gemfire.util.SpringUtils {
+public abstract class SpringUtils extends org.springframework.data.gemfire.util.SpringExtensions {
 
 	public static final Function<ConfigurableApplicationContext, Boolean> APPLICATION_CONTEXT_CLOSING_FUNCTION =
 		applicationContext -> {

@@ -45,8 +45,8 @@ import org.springframework.data.gemfire.config.annotation.EnablePdx;
 import org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration;
 import org.springframework.data.gemfire.tests.process.JavaProcessRunner;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
+import org.springframework.data.gemfire.tests.util.SpringUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
-import org.springframework.data.gemfire.util.SpringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -241,13 +241,13 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	}
 
 	@EnablePdx
-	@ClientCacheApplication(logLevel = GEMFIRE_LOG_LEVEL)
+	@ClientCacheApplication
 	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration {
 
 	}
 
 	@EnablePdx
-	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport", logLevel = GEMFIRE_LOG_LEVEL)
+	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport")
 	public static class BaseGemFireServerConfiguration extends ClientServerIntegrationTestsConfiguration {
 
 		public static void main(String[] args) {
