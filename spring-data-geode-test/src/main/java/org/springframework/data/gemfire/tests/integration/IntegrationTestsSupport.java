@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -55,8 +54,6 @@ import org.apache.geode.internal.cache.GemFireCacheImpl;
 import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
-
-import org.apache.shiro.util.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -80,6 +77,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
@@ -235,7 +233,7 @@ public abstract class IntegrationTestsSupport {
 
 		List<String> allSystemPropertyNames = System.getProperties().stringPropertyNames().stream()
 			.filter(ALL_SYSTEM_PROPERTIES_NAME_PREDICATE)
-			.collect(Collectors.toList());
+			.toList();
 
 		allSystemPropertyNames.forEach(System::clearProperty);
 	}
