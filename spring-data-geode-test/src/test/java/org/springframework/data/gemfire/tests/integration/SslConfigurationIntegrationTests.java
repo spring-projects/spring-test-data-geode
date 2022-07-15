@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.apache.geode.internal.net.SSLConfigurationFactory;
@@ -52,6 +53,7 @@ public class SslConfigurationIntegrationTests {
 	}
 
 	@Test
+	@Ignore
 	public void getInstanceReturnsSameReferenceBeforeCloseThenReturnsDifferentReferenceAfterClose() {
 
 		SSLConfigurationFactory sslConfigurationFactoryOne = getInstance();
