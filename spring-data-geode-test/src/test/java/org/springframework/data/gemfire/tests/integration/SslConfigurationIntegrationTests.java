@@ -38,6 +38,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class SslConfigurationIntegrationTests {
 
+	// THIS BS(!): https://github.com/apache/geode/commit/3b8f4401bf117f811f455b8723803edfe61b71fe#diff-060680eb4aeb605db22253a275cc0c679fdbacb9e70a5f17197e521e9b6c4045L43
 	private SSLConfigurationFactory getInstance() {
 
 		Method getInstance = ReflectionUtils.findMethod(SSLConfigurationFactory.class, "getInstance");
