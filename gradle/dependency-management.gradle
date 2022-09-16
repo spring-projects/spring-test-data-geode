@@ -1,6 +1,6 @@
 // Define version dependency properties
 ext['jakartaAnnotationApiVersion'] = '2.0.0'
-ext['junitJupiterVersion'] = '5.8.2'
+ext['junitJupiterVersion'] = '5.9.0'
 ext['logbackVersion'] = '1.2.11'
 
 dependencyManagement {
