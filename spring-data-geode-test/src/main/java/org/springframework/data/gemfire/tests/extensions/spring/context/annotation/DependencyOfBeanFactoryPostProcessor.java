@@ -18,18 +18,17 @@ package org.springframework.data.gemfire.tests.extensions.spring.context.annotat
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
-import org.apache.shiro.util.StringUtils;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.gemfire.tests.util.SpringUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
-import org.springframework.data.gemfire.util.SpringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Spring {@link BeanFactoryPostProcessor} implementation used to post process {@link BeanDefinition BeanDefinitions}
