@@ -26,8 +26,8 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.gemfire.tests.util.SpringUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
-import org.springframework.data.gemfire.util.SpringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 

@@ -45,8 +45,8 @@ import org.springframework.data.gemfire.config.annotation.EnablePdx;
 import org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration;
 import org.springframework.data.gemfire.tests.process.JavaProcessRunner;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
+import org.springframework.data.gemfire.tests.util.SpringUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
-import org.springframework.data.gemfire.util.SpringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
