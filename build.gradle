@@ -2,7 +2,9 @@ import io.spring.gradle.convention.Utils
 
 buildscript {
   dependencies {
-    classpath 'io.spring.gradle:spring-build-conventions:0.0.38'
+    classpath('io.spring.gradle:spring-build-conventions:0.0.38') {
+      exclude group: "io.spring.gradle", module: "docbook-reference-plugin"
+    }
     classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
   }
   repositories {
@@ -45,12 +47,12 @@ allprojects {
 
 description = 'Spring Test Framework for Apache Geode'
 
-// Define dependency version overrides
+// Define project dependency version overrides
 //ext['spring.version'] = "$springVersion"
 ext['spring-framework.version'] = "$springVersion"
 ext['spring-data-bom.version'] = "$springDataBomVersion"
 
-// Define Gradle build in terms of snapshot, milestone or release build.
+// Define Gradle build release type (e.g. snapshot, milestone, release candidate or GA release)
 ext.milestoneBuild = Utils.isMilestone(project)
 ext.releaseBuild = Utils.isRelease(project)
 ext.snapshotBuild = Utils.isSnapshot(project)
