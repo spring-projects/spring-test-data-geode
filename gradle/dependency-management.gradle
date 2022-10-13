@@ -1,5 +1,6 @@
 // Define version dependency properties
 ext['jakartaAnnotationApiVersion'] = '2.0.0'
+ext['log4jBomVersion'] = '2.19.0'
 ext['logbackVersion'] = '1.2.11'
 ext['assertjVersion'] = "3.23.1"
 ext['findbugsVersion'] = "3.0.2"
@@ -14,6 +15,7 @@ dependencyManagement {
 		mavenBom "org.springframework:spring-framework-bom:$springVersion"
 		mavenBom "org.springframework.data:spring-data-bom:$springDataBomVersion"
 		mavenBom "io.micrometer:micrometer-bom:$micrometerVersion"
+		mavenBom "org.apache.logging.log4j:log4j-bom:$log4jBomVersion"
 	}
 	dependencies {
 		dependency "jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationApiVersion"
