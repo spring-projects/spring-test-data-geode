@@ -36,9 +36,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * A Spring {@link BeanPostProcessor} implementation that applies mocks and spies to
- * Spring Data GemFire / Spring Data Geode (SDG) and Apache Geode / VMware GemFire
- * {@link Object objects}.
+ * Spring {@link BeanPostProcessor} implementation that applies mocks and spies to Spring Data Geode (SDG)
+ * and Apache Geode.
  *
  * @author John Blum
  * @see java.util.Properties
