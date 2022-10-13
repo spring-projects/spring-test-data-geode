@@ -91,9 +91,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 			});
 	}
 
-	/**
-	 * @inheritDoc
-	 */
+	@Override
 	protected @NonNull Class<? extends Annotation> getAnnotationType() {
 		return EnableGemFireMockObjects.class;
 	}
@@ -128,10 +126,7 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 
 					getRegion(bean)
 						.ifPresent(region -> {
-							if (bean instanceof Advised) {
-
-								Advised advisedBean = (Advised) bean;
-
+							if (bean instanceof Advised advisedBean) {
 								advisedBean.addAdvice(0, new CountMethodInterceptor(region));
 							}
 						});
