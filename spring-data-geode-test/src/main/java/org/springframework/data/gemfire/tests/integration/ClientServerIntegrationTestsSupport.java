@@ -36,7 +36,6 @@ import org.apache.geode.cache.server.CacheServer;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.gemfire.tests.process.ProcessWrapper;
-import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.SocketUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.lang.NonNull;
@@ -172,7 +171,7 @@ public abstract class ClientServerIntegrationTestsSupport extends IntegrationTes
 				it.stop(duration);
 
 				if (it.isNotRunning() && isDeleteDirectoryOnExit()) {
-					FileSystemUtils.deleteRecursive(it.getWorkingDirectory());
+					removeRecursiveDirectory(it.getWorkingDirectory());
 				}
 
 				return it.isRunning();

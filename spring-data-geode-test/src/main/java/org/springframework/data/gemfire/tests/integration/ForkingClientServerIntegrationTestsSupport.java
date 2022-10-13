@@ -55,8 +55,15 @@ import org.springframework.lang.Nullable;
  * and bootstrap Apache Geode or VMware GemFire Server {@link Cache} and {@link ClientCache} applications.
  *
  * @author John Blum
+ * @see java.io.File
+ * @see java.net.InetAddress
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
+ * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.annotation.Bean
+ * @see org.springframework.context.annotation.Configuration
+ * @see org.springframework.context.event.ContextRefreshedEvent
+ * @see org.springframework.context.event.EventListener
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheApplication
  * @see org.springframework.data.gemfire.config.annotation.EnablePdx
@@ -69,6 +76,8 @@ import org.springframework.lang.Nullable;
  */
 @SuppressWarnings("unused")
 public abstract class ForkingClientServerIntegrationTestsSupport extends ClientServerIntegrationTestsSupport {
+
+	protected static final String REMOVE_TEST_DIRECTORY_PROPERTY = "spring.data.gemfire.test.directory.remove";
 
 	private static ProcessWrapper gemfireServer;
 
@@ -222,7 +231,15 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 	@AfterClass
 	public static void stopGemFireServer() {
+
 		getGemFireServerProcess().ifPresent(ForkingClientServerIntegrationTestsSupport::stop);
+
+		if (Boolean.parseBoolean(System.getProperty(REMOVE_TEST_DIRECTORY_PROPERTY, Boolean.TRUE.toString()))) {
+			getGemFireServerProcess()
+				.map(ProcessWrapper::getWorkingDirectory)
+				.ifPresent(IntegrationTestsSupport::removeRecursiveDirectory);
+		}
+
 		setGemFireServerProcess(null);
 	}
 
@@ -241,10 +258,8 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 	}
 
 	@EnablePdx
-	@ClientCacheApplication(logLevel = GEMFIRE_LOG_LEVEL)
-	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration {
-
-	}
+	@ClientCacheApplication
+	public static class BaseGemFireClientConfiguration extends ClientServerIntegrationTestsConfiguration { }
 
 	@EnablePdx
 	@CacheServerApplication(name = "ForkingClientServerIntegrationTestsSupport", logLevel = GEMFIRE_LOG_LEVEL)
