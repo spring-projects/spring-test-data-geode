@@ -85,7 +85,7 @@
 		<jakarta-annotation-api.version>2.0.0</jakarta-annotation-api.version>
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.19.0</log4j.version>
-		<logback.version>1.2.11</logback.version>
+		<logback.version>1.4.4</logback.version>
 		<lombok.version>1.18.24</lombok.version>
 		<micrometer.version>1.10.0-RC1</micrometer.version>
 		<mockito.version>4.8.0</mockito.version>
