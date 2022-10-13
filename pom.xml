@@ -94,6 +94,7 @@
 		<spring.version>6.0.0-RC1</spring.version>
 		<spring-boot.version>3.0.0-M5</spring-boot.version>
 		<spring-data-bom.version>2022.0.0-RC1</spring-data-bom.version>
+		<spring-data-geode.version>3.0.0-SNAPSHOT</spring-data-geode.version>
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 	</properties>
 
@@ -238,6 +239,7 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-geode</artifactId>
+			<version>${spring-data-geode.version}</version>
 		</dependency>
 		<!-- Spring Shell and Logging (Log4j and Logback) dependencies only required for Testing -->
 		<dependency>
