@@ -559,6 +559,10 @@ public abstract class IntegrationTestsSupport {
 		return directory;
 	}
 
+	protected static boolean removeRecursiveDirectory(@NonNull File directory) {
+		return directory != null && directory.isDirectory() && FileSystemUtils.deleteRecursive(directory);
+	}
+
 	protected static boolean isDeleteDirectoryOnExit() {
 		return !System.getProperties().containsKey(DIRECTORY_DELETE_ON_EXIT_PROPERTY)
 			|| Boolean.getBoolean(DIRECTORY_DELETE_ON_EXIT_PROPERTY);
