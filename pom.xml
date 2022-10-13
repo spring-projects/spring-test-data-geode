@@ -207,6 +207,11 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-geode</artifactId>
+				<version>${spring-data-geode.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -239,7 +244,6 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-geode</artifactId>
-			<version>${spring-data-geode.version}</version>
 		</dependency>
 		<!-- Spring Shell and Logging (Log4j and Logback) dependencies only required for Testing -->
 		<dependency>
