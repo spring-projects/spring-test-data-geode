@@ -15,6 +15,8 @@
  */
 package org.springframework.data.gemfire.tests.mock.context;
 
+import com.sun.istack.NotNull;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.gemfire.tests.mock.beans.factory.config.GemFireMockObjectsBeanPostProcessor;
@@ -38,7 +40,7 @@ public class GemFireMockObjectsApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	@Override
-	public void initialize(ConfigurableApplicationContext applicationContext) {
+	public void initialize(@NotNull ConfigurableApplicationContext applicationContext) {
 		applicationContext.getBeanFactory().addBeanPostProcessor(GemFireMockObjectsBeanPostProcessor.newInstance());
 	}
 }
