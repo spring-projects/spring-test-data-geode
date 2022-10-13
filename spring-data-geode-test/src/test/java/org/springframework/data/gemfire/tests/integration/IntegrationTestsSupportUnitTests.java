@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.junit.Test;
 
@@ -40,9 +41,9 @@ public class IntegrationTestsSupportUnitTests {
 		String directoryName = IntegrationTestsSupport.asDirectoryName(OuterType.InnerType.class);
 
 		assertThat(directoryName).isNotBlank();
-		assertThat(directoryName).startsWith(String.format("%s.%s.%s-%d-%d-%d-%d-%d-%d%s",
+		assertThat(directoryName).startsWith(String.format("%s.%s.%s-%s%s",
 			IntegrationTestsSupportUnitTests.class.getSimpleName(), OuterType.class.getSimpleName(), OuterType.InnerType.class.getSimpleName(),
-			now.getYear(), now.getMonthValue(), now.getDayOfMonth(), now.getHour(), now.getMinute(), now.getSecond(),
+			DateTimeFormatter.ofPattern(IntegrationTestsSupport.DATE_TIME_PATTERN).format(now),
 			File.separator));
 
 	}
