@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -114,7 +115,7 @@ public abstract class IntegrationTestsSupport {
 	protected static final long DEFAULT_WAIT_DURATION = TimeUnit.SECONDS.toMillis(30);
 	protected static final long DEFAULT_WAIT_INTERVAL = 500L; // milliseconds
 
-	protected static final String DATE_TIME_PATTERN = "yyyy-MM-dd-hh-mm-ss";
+	protected static final String DATE_TIME_PATTERN = "yyyy-MM-dd-HH-mm-ss";
 	protected static final String DIRECTORY_DELETE_ON_EXIT_PROPERTY = "spring.data.gemfire.test.directory.delete-on-exit";
 	protected static final String DIRECTORY_NAME_FORMAT = "%1$s-%2$s";
 	protected static final String GEMFIRE_LOG_FILE = "gemfire-server.log";
@@ -534,8 +535,25 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	protected static @NonNull String asDirectoryName(@NonNull Class<?> type) {
-		return String.format(DIRECTORY_NAME_FORMAT, asApplicationName(type),
+
+		String baseDirectoryName = String.format(DIRECTORY_NAME_FORMAT, asQualifiedDirectoryName(type),
 			LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+
+		return baseDirectoryName.concat(File.separator).concat(UUID.randomUUID().toString());
+	}
+
+	private static @NonNull String asQualifiedDirectoryName(@NonNull Class<?> type) {
+
+		String qualifiedDirectoryName = asApplicationName(type);
+
+		Class<?> declaringType = type.getDeclaringClass();
+
+		while (declaringType != null) {
+			qualifiedDirectoryName = asApplicationName(declaringType).concat(".").concat(qualifiedDirectoryName);
+			declaringType = declaringType.getDeclaringClass();
+		}
+
+		return qualifiedDirectoryName;
 	}
 
 	protected static @NonNull File createDirectory(@NonNull String pathname) {
