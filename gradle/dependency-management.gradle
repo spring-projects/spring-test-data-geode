@@ -5,7 +5,7 @@ ext['logbackVersion'] = '1.4.4'
 ext['assertjVersion'] = "3.23.1"
 ext['findbugsVersion'] = "3.0.2"
 ext['junitVersion'] = "4.13.2"
-ext['junitJupiterVersion'] = '5.9.0'
+ext['junitBomVersion'] = '5.9.1'
 ext['lombokVersion'] = "1.18.24"
 ext['mockitoVersion'] = "4.8.0"
 ext['multithreadedtcVersion'] = "1.01"
@@ -16,6 +16,7 @@ dependencyManagement {
 		mavenBom "org.springframework.data:spring-data-bom:$springDataBomVersion"
 		mavenBom "io.micrometer:micrometer-bom:$micrometerVersion"
 		mavenBom "org.apache.logging.log4j:log4j-bom:$log4jBomVersion"
+		mavenBom "org.junit:junit-bom:$junitBomVersion"
 	}
 	dependencies {
 		dependency "jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationApiVersion"
@@ -24,8 +25,6 @@ dependencyManagement {
 		dependency "edu.umd.cs.mtc:multithreadedtc:$multithreadedtcVersion"
 		dependency "junit:junit:$junitVersion"
 		dependency "org.assertj:assertj-core:$assertjVersion"
-		dependency "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-		dependency "org.junit.vintage:junit-vintage-engine:$junitJupiterVersion"
 		dependency "org.mockito:mockito-core:$mockitoVersion"
 		dependency "org.projectlombok:lombok:$lombokVersion"
 		dependency "org.springframework.boot:spring-boot-starter:$springBootVersion"
