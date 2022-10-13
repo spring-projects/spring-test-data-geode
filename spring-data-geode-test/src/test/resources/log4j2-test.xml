@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="error">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
@@ -10,6 +11,7 @@
 	</Appenders>
 	<Loggers>
 		<Logger name="org.apache.geode" level="error"/>
+		<Logger name="org.jgroups" level="error"/>
 		<Logger name="org.springframework" level="error"/>
 		<Logger name="org.springframework.data.gemfire.listener.adapter.ContinuousQueryListenerAdapter" level="off" additivity="false"/>
 		<Logger name="org.springframework.data.gemfire.support.SpringContextBootstrappingInitializer" level="off" additivity="false"/>
