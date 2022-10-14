@@ -126,7 +126,10 @@ public class GemFireMockObjectsConfiguration extends AbstractAnnotationConfigSup
 
 					getRegion(bean)
 						.ifPresent(region -> {
-							if (bean instanceof Advised advisedBean) {
+							if (bean instanceof Advised) {
+
+								Advised advisedBean = (Advised) bean;
+
 								advisedBean.addAdvice(0, new CountMethodInterceptor(region));
 							}
 						});
