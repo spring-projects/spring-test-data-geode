@@ -133,7 +133,7 @@ public abstract class ProcessExecutor {
 
 		ProcessWrapper processWrapper = new ProcessWrapper(process, ProcessConfiguration.create(processBuilder));
 
-		processWrapper.register((input) -> System.err.printf("[FORK] - %s%n", input));
+		processWrapper.register(input -> System.err.printf("[FORK] - %s%n", input));
 		processWrapper.registerShutdownHook();
 
 		return processWrapper;

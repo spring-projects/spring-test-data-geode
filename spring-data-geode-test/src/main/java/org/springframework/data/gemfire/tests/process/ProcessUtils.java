@@ -36,11 +36,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * The {@link ProcessUtils} class is a utility class for working with Operating System (OS) {@link Process processes}.
+ * Abstract utility class for processing Operating System (OS) {@link Process processes}.
  *
  * @author John Blum
- * @see File
- * @see Process
+ * @see java.io.File
+ * @see java.lang.Process
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
@@ -50,7 +50,6 @@ public abstract class ProcessUtils {
 
 	protected static final String TERM_TOKEN = "<TERM/>";
 
-	/* (non-Javadoc) */
 	public static int currentPid() {
 
 		RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
