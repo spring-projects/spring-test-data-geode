@@ -17,7 +17,6 @@ package org.springframework.data.gemfire.tests.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -41,10 +40,9 @@ public class IntegrationTestsSupportUnitTests {
 		String directoryName = IntegrationTestsSupport.asDirectoryName(OuterType.InnerType.class);
 
 		assertThat(directoryName).isNotBlank();
-		assertThat(directoryName).startsWith(String.format("%s.%s.%s-%s%s",
+		assertThat(directoryName).matches(String.format("%s\\.%s\\.%s-%s-",
 			IntegrationTestsSupportUnitTests.class.getSimpleName(), OuterType.class.getSimpleName(), OuterType.InnerType.class.getSimpleName(),
-			DateTimeFormatter.ofPattern(IntegrationTestsSupport.DATE_TIME_PATTERN).format(now),
-			File.separator));
+			DateTimeFormatter.ofPattern(IntegrationTestsSupport.DATE_TIME_PATTERN).format(now)).concat("[\\w-]+"));
 
 	}
 
