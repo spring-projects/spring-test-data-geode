@@ -40,8 +40,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.sun.istack.NotNull;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 
@@ -83,24 +81,25 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * The {@link IntegrationTestsSupport} class is an abstract base class supporting integration tests
- * with either Apache Geode or VMware GemFire in a Spring context.
+ * Abstract base class supporting integration tests with either Apache Geode or VMware Tanzu GemFire
+ * in a Spring context.
  *
  * @author John Blum
  * @see java.io.File
- * @see java.time.LocalDateTime
- * @see java.util.concurrent.TimeUnit
- * @see java.util.function.Function
- * @see java.util.function.Predicate
  * @see org.apache.geode.DataSerializer
  * @see org.apache.geode.cache.GemFireCache
+ * @see org.apache.geode.cache.client.ClientCache
+ * @see org.apache.geode.cache.execute.FunctionService
  * @see org.apache.geode.distributed.Locator
+ * @see org.apache.geode.internal.cache.CacheLifecycleListener
+ * @see org.apache.geode.internal.cache.GemFireCacheImpl
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationEventPublisher
  * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.ConfigurableApplicationContext
  * @see org.springframework.core.env.ConfigurableEnvironment
+ * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see org.springframework.core.env.StandardEnvironment
  * @see org.springframework.data.gemfire.support.GemfireBeanFactoryLocator
@@ -531,12 +530,12 @@ public abstract class IntegrationTestsSupport {
 		return qualifiedDirectoryName;
 	}
 
-	private static @NotNull String asTimestampedDirectoryName(@NonNull Class<?> type) {
+	private static @NonNull String asTimestampedDirectoryName(@NonNull Class<?> type) {
 		return String.format(DIRECTORY_NAME_FORMAT, asQualifiedDirectoryName(type),
 			LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
 	}
 
-	private static @NotNull String asUniqueDirectoryName(@NonNull Class<?> type) {
+	private static @NonNull String asUniqueDirectoryName(@NonNull Class<?> type) {
 		return String.format(DIRECTORY_NAME_FORMAT, asTimestampedDirectoryName(type), UUID.randomUUID());
 	}
 
