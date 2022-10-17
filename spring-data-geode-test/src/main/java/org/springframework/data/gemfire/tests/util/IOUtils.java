@@ -13,7 +13,6 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-
 package org.springframework.data.gemfire.tests.util;
 
 import java.io.ByteArrayInputStream;
@@ -26,8 +25,11 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 /**
- * The {@link IOUtils} class is an abstract utility class for working with IO operations.
+ * Abstract utility class used to process IO operations.
  *
  * @author John Blum
  * @see java.io.Closeable
@@ -39,7 +41,7 @@ public abstract class IOUtils {
 
 	protected static final Logger log = Logger.getLogger(IOUtils.class.getName());
 
-	public static boolean close(Closeable closeable) {
+	public static boolean close(@Nullable Closeable closeable) {
 
 		if (closeable != null) {
 			try {
@@ -67,7 +69,7 @@ public abstract class IOUtils {
 	 * threw an {@link IOException}.
 	 * @see IOException
 	 */
-	public static boolean doSafeIo(IoExceptionThrowingOperation operation) {
+	public static boolean doSafeIo(@NonNull IoExceptionThrowingOperation operation) {
 
 		try {
 			operation.doIo();
@@ -87,7 +89,6 @@ public abstract class IOUtils {
 
 		try {
 			objectInputStream = new ObjectInputStream(byteArrayInputStream);
-
 			return (T) objectInputStream.readObject();
 		}
 		finally {
@@ -105,7 +106,6 @@ public abstract class IOUtils {
 			objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
 			objectOutputStream.writeObject(obj);
 			objectOutputStream.flush();
-
 			return byteArrayOutputStream.toByteArray();
 		}
 		finally {

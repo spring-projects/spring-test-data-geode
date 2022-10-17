@@ -30,8 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * The {@link FileSystemUtils} class is a utility class encapsulating functionality to process
- * file system directories and files collectively.
+ * Abstract utility class encapsulating functionality to process file system directories and files collectively.
  *
  * @author John Blum
  * @see java.io.File
@@ -51,11 +50,11 @@ public abstract class FileSystemUtils extends FileUtils {
 
 	public static final File[] NO_FILES = new File[0];
 
-	public static boolean deleteRecursive(File path) {
+	public static boolean deleteRecursive(@Nullable File path) {
 		return deleteRecursive(path, AllFilesFilter.INSTANCE);
 	}
 
-	public static boolean deleteRecursive(File path, FileFilter fileFilter) {
+	public static boolean deleteRecursive(@Nullable File path, @Nullable FileFilter fileFilter) {
 
 		boolean success = true;
 
@@ -72,7 +71,7 @@ public abstract class FileSystemUtils extends FileUtils {
 		return path != null && path.exists();
 	}
 
-	// returns sub-directory just below working directory
+	// returns subdirectory just below working directory
 	public static @Nullable File getRootRelativeToWorkingDirectoryOrPath(@Nullable File path) {
 
 		File localPath = path;
@@ -83,12 +82,10 @@ public abstract class FileSystemUtils extends FileUtils {
 			}
 		}
 
-		return localPath != null
-			? localPath
-			: path;
+		return localPath != null ? localPath : path;
 	}
 
-	public static boolean isEmpty(File path) {
+	public static boolean isEmpty(@Nullable File path) {
 
 		return isDirectory(path)
 			? ArrayUtils.isEmpty(path.listFiles())
@@ -120,13 +117,9 @@ public abstract class FileSystemUtils extends FileUtils {
 
 	public static @NonNull File[] safeListFiles(@Nullable File directory, @Nullable FileFilter fileFilter) {
 
-		FileFilter resolvedFileFilter = fileFilter != null
-			? fileFilter
-			: AllFilesFilter.INSTANCE;
+		FileFilter resolvedFileFilter = fileFilter != null ? fileFilter : AllFilesFilter.INSTANCE;
 
-		File[] files = isDirectory(directory)
-			? directory.listFiles(resolvedFileFilter)
-			: null;
+		File[] files = isDirectory(directory) ? directory.listFiles(resolvedFileFilter) : null;
 
 		return files != null
 			? files

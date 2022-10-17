@@ -40,6 +40,7 @@ import org.springframework.data.gemfire.tests.util.IOUtils;
 import org.springframework.data.gemfire.tests.util.ThreadUtils;
 import org.springframework.data.gemfire.tests.util.ThrowableUtils;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -59,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @see java.util.concurrent.Future
  * @see org.springframework.data.gemfire.tests.process.ProcessConfiguration
  * @see org.springframework.data.gemfire.tests.process.ProcessInputStreamListener
+ * @see org.springframework.data.gemfire.tests.process.ProcessUtils
  * @since 0.0.1
  */
 @SuppressWarnings("unused")
@@ -71,6 +73,8 @@ public class ProcessWrapper {
 	protected static final long DEFAULT_WAIT_TIME_MILLISECONDS = TimeUnit.SECONDS.toMillis(15);
 
 	protected static final String DEFAULT_HOST = "localhost";
+
+	protected static final String PROCESS_DESTROY_FORCIBLY_PROPERTY = "spring.data.gemfire.test.process.destroy-forcibly";
 
 	private final List<ProcessInputStreamListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -220,12 +224,12 @@ public class ProcessWrapper {
 		}
 	}
 
-	public ProcessWrapper listeningOn(int port) {
+	public @NonNull ProcessWrapper listeningOn(int port) {
 		this.port = Math.max(port, DEFAULT_PORT);
 		return this;
 	}
 
-	public String readLogFile() throws IOException {
+	public @NonNull String readLogFile() throws IOException {
 
 		File[] logFiles = FileSystemUtils.listFiles(getWorkingDirectory(),
 			path -> (path != null && (path.isDirectory() || path.getAbsolutePath().endsWith(".log"))));
@@ -239,20 +243,20 @@ public class ProcessWrapper {
 		}
 	}
 
-	public String readLogFile(File log) throws IOException {
+	public @NonNull String readLogFile(@NonNull File log) throws IOException {
 		return FileUtils.read(log);
 	}
 
-	public boolean register(ProcessInputStreamListener listener) {
+	public boolean register(@Nullable ProcessInputStreamListener listener) {
 		return listener != null && listeners.add(listener);
 	}
 
-	public ProcessWrapper registerShutdownHook() {
+	public @NonNull ProcessWrapper registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 		return this;
 	}
 
-	public ProcessWrapper runningOn(String host) {
+	public @NonNull ProcessWrapper runningOn(@Nullable String host) {
 		this.host = StringUtils.hasText(host) ? host : DEFAULT_HOST;
 		return this;
 	}
@@ -331,6 +335,7 @@ public class ProcessWrapper {
 						interrupted = true;
 					}
 				}
+
 			}
 			catch (TimeoutException cause) {
 				exitValue = -1;
@@ -361,12 +366,16 @@ public class ProcessWrapper {
 
 		if (isRunning()) {
 			stop();
-			if (isRunning()) {
+			if (isRunning() && isShutdownForciblyEnabled()) {
 				this.process.destroyForcibly();
 			}
 		}
 
 		return safeExitValue();
+	}
+
+	private boolean isShutdownForciblyEnabled() {
+		return Boolean.getBoolean(PROCESS_DESTROY_FORCIBLY_PROPERTY);
 	}
 
 	public boolean unregister(ProcessInputStreamListener listener) {
