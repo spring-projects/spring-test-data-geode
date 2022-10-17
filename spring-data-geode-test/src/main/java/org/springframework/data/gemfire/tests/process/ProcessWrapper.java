@@ -180,7 +180,7 @@ public class ProcessWrapper {
 		try {
 			return getPid();
 		}
-		catch (PidNotFoundException ignore) {
+		catch (Throwable ignore) {
 			return -1;
 		}
 	}
