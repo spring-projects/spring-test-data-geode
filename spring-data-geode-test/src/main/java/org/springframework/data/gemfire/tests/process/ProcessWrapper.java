@@ -39,6 +39,7 @@ import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.tests.util.IOUtils;
 import org.springframework.data.gemfire.tests.util.ThreadUtils;
 import org.springframework.data.gemfire.tests.util.ThrowableUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -83,7 +84,7 @@ public class ProcessWrapper {
 
 	private String host = DEFAULT_HOST;
 
-	public ProcessWrapper(Process process, ProcessConfiguration processConfiguration) {
+	public ProcessWrapper(@NonNull Process process, @NonNull ProcessConfiguration processConfiguration) {
 
 		Assert.notNull(process, "Process is required");
 
@@ -134,7 +135,7 @@ public class ProcessWrapper {
 		};
 	}
 
-	private Thread newThread(String name, Runnable task) {
+	private @NonNull Thread newThread(@NonNull String name, @NonNull Runnable task) {
 
 		Assert.hasText(name, "Thread name is required");
 		Assert.notNull(task, "Thread task is required");
@@ -279,6 +280,7 @@ public class ProcessWrapper {
 		}
 	}
 
+	@Deprecated
 	public void signalStop() {
 
 		try {
@@ -305,7 +307,8 @@ public class ProcessWrapper {
 			boolean interrupted = false;
 			int exitValue = -1;
 			int pid = safeGetPid();
-			long timeout = (System.currentTimeMillis() + milliseconds);
+			long timeout = System.currentTimeMillis() + milliseconds;
+
 			AtomicBoolean exited = new AtomicBoolean(false);
 
 			ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -330,9 +333,7 @@ public class ProcessWrapper {
 				}
 			}
 			catch (TimeoutException cause) {
-
 				exitValue = -1;
-
 				this.log.warning(String.format("Process [%1$d] did not stop within the allotted timeout of %2$d seconds%n",
 					pid, TimeUnit.MILLISECONDS.toSeconds(milliseconds)));
 			}
@@ -341,7 +342,6 @@ public class ProcessWrapper {
 			}
 			finally {
 				executorService.shutdownNow();
-
 				if (interrupted) {
 					Thread.currentThread().interrupt();
 				}
@@ -356,13 +356,17 @@ public class ProcessWrapper {
 
 	public int shutdown() {
 
+		int pid = safeGetPid();
+		this.log.info(String.format("Stopping process [%d]...%n", pid));
+
 		if (isRunning()) {
-			this.log.info(String.format("Stopping process [%d]...%n", safeGetPid()));
-			signalStop();
-			waitFor();
+			stop();
+			if (isRunning()) {
+				this.process.destroyForcibly();
+			}
 		}
 
-		return stop();
+		return safeExitValue();
 	}
 
 	public boolean unregister(ProcessInputStreamListener listener) {
