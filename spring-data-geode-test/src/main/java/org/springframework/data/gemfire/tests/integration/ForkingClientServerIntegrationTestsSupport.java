@@ -51,12 +51,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * The {@link ForkingClientServerIntegrationTestsSupport} class is an abstract base class used to configure
- * and bootstrap Apache Geode or VMware GemFire Server {@link Cache} and {@link ClientCache} applications.
+ * Abstract base class used to bootstrap Apache Geode {@link Cache} and/or {@link ClientCache} applications
+ * as independent (forked), {@link Process child processes}.
  *
  * @author John Blum
  * @see java.io.File
  * @see java.net.InetAddress
+ * @see java.util.concurrent.Executors
+ * @see java.util.concurrent.ThreadFactory
  * @see org.apache.geode.cache.Cache
  * @see org.apache.geode.cache.client.ClientCache
  * @see org.springframework.context.ApplicationContext
@@ -66,11 +68,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.context.event.EventListener
  * @see org.springframework.data.gemfire.config.annotation.CacheServerApplication
  * @see org.springframework.data.gemfire.config.annotation.ClientCacheApplication
- * @see org.springframework.data.gemfire.config.annotation.EnablePdx
  * @see org.springframework.data.gemfire.tests.integration.ClientServerIntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.integration.config.ClientServerIntegrationTestsConfiguration
  * @see org.springframework.data.gemfire.tests.process.JavaProcessRunner
- * @see org.springframework.data.gemfire.tests.process.ProcessRunner
  * @see org.springframework.data.gemfire.tests.process.ProcessWrapper
  * @since 1.0.0
  */
@@ -234,13 +234,18 @@ public abstract class ForkingClientServerIntegrationTestsSupport extends ClientS
 
 		getGemFireServerProcess().ifPresent(ForkingClientServerIntegrationTestsSupport::stop);
 
-		if (Boolean.parseBoolean(System.getProperty(REMOVE_TEST_DIRECTORY_PROPERTY, Boolean.TRUE.toString()))) {
+		if (isTestDirectoryRemovalEnabled()) {
 			getGemFireServerProcess()
 				.map(ProcessWrapper::getWorkingDirectory)
 				.ifPresent(IntegrationTestsSupport::removeRecursiveDirectory);
 		}
 
 		setGemFireServerProcess(null);
+	}
+
+	private static boolean isTestDirectoryRemovalEnabled() {
+		return !System.getProperties().containsKey(REMOVE_TEST_DIRECTORY_PROPERTY)
+			|| Boolean.getBoolean(REMOVE_TEST_DIRECTORY_PROPERTY);
 	}
 
 	@AfterClass
