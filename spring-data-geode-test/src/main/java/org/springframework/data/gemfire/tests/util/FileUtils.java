@@ -22,17 +22,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * The {@link FileUtils} class is an abstract utility class for processing file system files
- * by working with {@link File} objects.
+ * Abstract utility class for processing file system files by using {@link File} objects.
  *
  * @author John Blum
  * @see java.io.File
- * @see java.io.FileReader
- * @see java.io.FileWriter
  * @see org.springframework.data.gemfire.tests.util.IOUtils
  * @since 0.0.1
  */
@@ -50,11 +48,11 @@ public abstract class FileUtils extends IOUtils {
 		return path != null && path.isFile();
 	}
 
-	public static File newFile(String pathname) {
+	public static @NonNull File newFile(String pathname) {
 		return new File(pathname);
 	}
 
-	public static File newFile(File parent, String pathname) {
+	public static @NonNull File newFile(File parent, String pathname) {
 		return new File(parent, pathname);
 	}
 
@@ -62,13 +60,11 @@ public abstract class FileUtils extends IOUtils {
 		return path != null ? path.length() : 0L;
 	}
 
-	public static String read(File file) throws IOException {
+	public static @NonNull String read(@NonNull File file) throws IOException {
 
 		Assert.isTrue(isFile(file), String.format("The File [%s] to read the contents from is not a valid file", file));
 
-		BufferedReader fileReader = new BufferedReader(new FileReader(file));
-
-		try {
+		try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
 
 			StringBuilder buffer = new StringBuilder();
 
@@ -79,12 +75,9 @@ public abstract class FileUtils extends IOUtils {
 
 			return buffer.toString().trim();
 		}
-		finally {
-			close(fileReader);
-		}
 	}
 
-	public static void write(File file, String contents) throws IOException {
+	public static void write(@NonNull File file, @NonNull String contents) throws IOException {
 
 		Assert.notNull(file, "File is required");
 
