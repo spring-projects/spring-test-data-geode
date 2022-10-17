@@ -22,8 +22,8 @@ import java.util.List;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 
 /**
- * The {@link ProcessRunner} interface is a {@link FunctionalInterface} encapsulating the contract, logic and strategy
- * for running (executing) an Operating System (OS) [JVM] {@link Process}.
+ * A {@link FunctionalInterface} encapsulating the contract, logic and strategy for running (executing)
+ * an Operating System (OS) [JVM] {@link Process}.
  *
  * @author John Blum
  * @see java.io.File

@@ -42,8 +42,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * The {@link ClientServerIntegrationTestsSupport} class is a abstract base class encapsulating common functionality
- * to support the implementation of GemFire client/server tests.
+ * Abstract base class encapsulating common functionality used to support the implementation of Apache Geode
+ * client/server based integration tests.
  *
  * @author John Blum
  * @see java.io.File
@@ -51,10 +51,9 @@ import org.springframework.lang.Nullable;
  * @see java.net.InetSocketAddress
  * @see java.net.ServerSocket
  * @see java.net.Socket
- * @see java.time.LocalDateTime
+ * @see java.util.Scanner
  * @see java.util.concurrent.TimeUnit
  * @see org.apache.geode.cache.server.CacheServer
- * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @see org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.process.ProcessExecutor

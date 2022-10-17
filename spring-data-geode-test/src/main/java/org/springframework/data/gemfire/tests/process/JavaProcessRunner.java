@@ -16,8 +16,8 @@
 package org.springframework.data.gemfire.tests.process;
 
 /**
- * The {@link JavaProcessRunner} interface is a {@link FunctionalInterface} and extension of the {@link ProcessRunner}
- * interface to encapsulate the runtime parameters for running (executing) a Java/JVM {@link Process}.
+ * A {@link FunctionalInterface} and extension of the {@link ProcessRunner} interface used to encapsulate
+ * the runtime parameters for running (executing) a Java/JVM {@link Process}.
  *
  * @author John Blum
  * @see org.springframework.data.gemfire.tests.process.ProcessRunner
