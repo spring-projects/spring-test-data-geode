@@ -17,9 +17,6 @@ package org.springframework.data.gemfire.tests.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.junit.Test;
 
 /**
@@ -35,15 +32,16 @@ public class IntegrationTestsSupportUnitTests {
 	@Test
 	public void asDirectoryNameIsCorrect() {
 
-		LocalDateTime now = LocalDateTime.now();
-
 		String directoryName = IntegrationTestsSupport.asDirectoryName(OuterType.InnerType.class);
 
-		assertThat(directoryName).isNotBlank();
-		assertThat(directoryName).matches(String.format("%s\\.%s\\.%s-%s-",
-			IntegrationTestsSupportUnitTests.class.getSimpleName(), OuterType.class.getSimpleName(), OuterType.InnerType.class.getSimpleName(),
-			DateTimeFormatter.ofPattern(IntegrationTestsSupport.DATE_TIME_PATTERN).format(now)).concat("[\\w-]+"));
+		Object[] args = {
+			IntegrationTestsSupportUnitTests.class.getSimpleName(),
+			OuterType.class.getSimpleName(),
+			OuterType.InnerType.class.getSimpleName()
+		};
 
+		assertThat(directoryName).isNotBlank();
+		assertThat(directoryName).matches(String.format("%s\\.%s\\.%s", args).concat("[\\w-]+"));
 	}
 
 	interface OuterType {
