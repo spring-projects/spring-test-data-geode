@@ -40,6 +40,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.sun.istack.NotNull;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 
@@ -512,11 +514,7 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	protected static @NonNull String asDirectoryName(@NonNull Class<?> type) {
-
-		String baseDirectoryName = String.format(DIRECTORY_NAME_FORMAT, asQualifiedDirectoryName(type),
-			LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
-
-		return baseDirectoryName.concat(File.separator).concat(UUID.randomUUID().toString());
+		return asUniqueDirectoryName(type);
 	}
 
 	private static @NonNull String asQualifiedDirectoryName(@NonNull Class<?> type) {
@@ -531,6 +529,15 @@ public abstract class IntegrationTestsSupport {
 		}
 
 		return qualifiedDirectoryName;
+	}
+
+	private static @NotNull String asTimestampedDirectoryName(@NonNull Class<?> type) {
+		return String.format(DIRECTORY_NAME_FORMAT, asQualifiedDirectoryName(type),
+			LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+	}
+
+	private static @NotNull String asUniqueDirectoryName(@NonNull Class<?> type) {
+		return String.format(DIRECTORY_NAME_FORMAT, asTimestampedDirectoryName(type), UUID.randomUUID());
 	}
 
 	protected static @NonNull File createDirectory(@NonNull String pathname) {
