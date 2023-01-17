@@ -1,11 +1,43 @@
 image:https://api.travis-ci.org/spring-projects/spring-test-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-test-data-geode"]
 
 [[about]]
-== Spring Test Framework for Apache Geode & VMware Tanzu GemFire
+== Spring Test Framework for Apache Geode
 
 The STDG project is a _Spring Data_ module, building on the core _Spring Framework's_ `TestContext`, used to write
-_Unit_ and _Integration Tests_ when building _Spring Data_ for https://geode.apache.org/[Apache Geode]
-& https://pivotal.io/pivotal-gemfire[VMware GemFire] (SDG) applications.
+_Unit_ and _Integration Tests_ when building _Spring_ for https://geode.apache.org/[Apache Geode]
+& https://tanzu.vmware.com/gemfire[VMware GemFire] applications.
+
+[[notice]]
+== NOTICE
+
+[[notice-2023-january]]
+*2023-January-17*:
+
+At the end of 2022, VMware https://tanzu.vmware.com/content/blog/spring-for-vmware-gemfire-is-now-available[announced]
+the general availability of the Spring for VMware GemFire portfolio of projects.
+
+While these Spring based projects for VMware GemFire are open source and a succession to the Spring for Apache Geode
+projects, they are not a replacement. VMware GemFire forked from the Apache Geode project and is not open source.
+Additionally, newer Apache Geode and VMware GemFire clients are not backwards compatible with older Apache Geode
+and VMware GemFire servers. Currently, there is no replacement for STDG and directions to transition.
+
+Alternatively, the Spring portfolio provides first-class https://docs.spring.io/spring-boot/docs/current/reference/html/io.html#io.caching.provider[integration]
+with other comparable caching providers. Also, see https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache-store-configuration[here]
+and https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache-plug[here], along with
+https://docs.spring.io/spring-framework/docs/current/reference/html/testing.html#testing[documentation on testing].
+
+Finally, keep in mind, the Spring for Apache Geode projects will still be maintained until OSS and commercial support
+ends. Maintenance will only include CVE and critical fixes. No new features or major enhancements will be made.
+The Spring Test for Apache Geode support timelines can be viewed https://spring.io/projects/spring-data-geode#support[here].
+
+[[notice-2022-october]]
+*2022-October-24*:
+
+See the October 24th https://github.com/spring-projects/spring-data-geode#notice[NOTICE]
+on the _Spring Data for Apache Geode_ GitHub project page for complete details.
+
+[[overview]]
+== Overview
 
 This project was born from https://spring.io/projects/spring-data-gemfire[_Spring Data for VMware GemFire's_]
 (https://github.com/spring-projects/spring-data-gemfire[@GitHub])
