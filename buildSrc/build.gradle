@@ -12,6 +12,17 @@ group 'io.spring.gradle'
 
 sourceCompatibility = 1.8
 
+sourceSets {
+	main {
+		java {
+			srcDirs = []
+		}
+		groovy {
+			srcDirs += [ "src/main/java" ]
+		}
+	}
+}
+
 repositories {
 	mavenCentral()
 	gradlePluginPortal()
