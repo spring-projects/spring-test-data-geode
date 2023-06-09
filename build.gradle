@@ -2,9 +2,6 @@ import io.spring.gradle.convention.Utils
 
 buildscript {
 	dependencies {
-		classpath('io.spring.gradle:spring-build-conventions:0.0.38') {
-			exclude group: "io.spring.gradle", module: "docbook-reference-plugin"
-		}
 		classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
 	}
 	repositories {
