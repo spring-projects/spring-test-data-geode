@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,30 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.spring.gradle.propdeps
 
-import org.gradle.api.*
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer
 import org.gradle.api.artifacts.maven.MavenPom
 import org.gradle.api.artifacts.maven.PomFilterContainer
 import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.tasks.*
-
+import org.gradle.api.tasks.Upload
 
 /**
- * Plugin to allow optional and provided dependency configurations to work with the
- * standard gradle 'maven' plugin
+ * Plugin to allow optional and provided dependency configurations to work with
+ * the standard gradle 'maven' plugin
  *
  * @author Phillip Webb
+ * @author John Blum
  */
 class PropDepsMavenPlugin implements Plugin<Project> {
 
-	public void apply(Project project) {
+	void apply(Project project) {
+
 		project.plugins.apply(PropDepsPlugin)
 		project.plugins.apply(MavenPlugin)
 
 		Conf2ScopeMappingContainer scopeMappings = project.conf2ScopeMappings
+
 		scopeMappings.addMapping(MavenPlugin.COMPILE_PRIORITY + 1,
 			project.configurations.getByName("provided"), Conf2ScopeMappingContainer.PROVIDED)
 
@@ -62,5 +64,4 @@ class PropDepsMavenPlugin implements Plugin<Project> {
 			}
 		}
 	}
-
 }
