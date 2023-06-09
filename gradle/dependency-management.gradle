@@ -2,7 +2,7 @@
 ext['jakartaAnnotationApiVersion'] = '2.0.0'
 ext['log4jBomVersion'] = '2.19.0'
 ext['logbackVersion'] = '1.4.5'
-ext['assertjVersion'] = "3.23.1"
+ext['assertjVersion'] = "3.24.2"
 ext['findbugsVersion'] = "3.0.2"
 ext['junitVersion'] = "4.13.2"
 ext['junitBomVersion'] = '5.9.1'
