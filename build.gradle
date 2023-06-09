@@ -1,11 +1,6 @@
 import io.spring.gradle.convention.Utils
 
 buildscript {
-	ext {
-		snapshotBuild = Utils.isSnapshot(project)
-		milestoneBuild = Utils.isMilestone(project)
-		releaseBuild = Utils.isRelease(project)
-	}
 	dependencies {
 		classpath('io.spring.gradle:spring-build-conventions:0.0.38') {
 			exclude group: "io.spring.gradle", module: "docbook-reference-plugin"
@@ -57,6 +52,11 @@ description = 'Spring Test Framework for Apache Geode'
 //ext['spring.version'] = "$springVersion"
 ext['spring-framework.version'] = "$springVersion"
 ext['spring-data-bom.version'] = "$springDataBomVersion"
+
+// Define Gradle build release type (e.g. snapshot, milestone, release candidate or GA release)
+ext.milestoneBuild = Utils.isMilestone(project)
+ext.releaseBuild = Utils.isRelease(project)
+ext.snapshotBuild = Utils.isSnapshot(project)
 
 // Define Gradle buildscript plugin to modify the generated Maven POM.
 ext.MAVEN_POM_EDITOR_GRADLE = "$rootDir/gradle/maven-pom-editor.gradle"
