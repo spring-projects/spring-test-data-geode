@@ -658,6 +658,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * @see org.apache.geode.cache.GemFireCache
 	 * @see java.util.Optional
 	 */
+	@SuppressWarnings("unchecked")
 	private static <T extends GemFireCache> Optional<T> resolveAnyGemFireCache() {
 		return Optional.ofNullable((T) cacheReference.get());
 	}
