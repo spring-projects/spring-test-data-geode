@@ -290,6 +290,15 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	/**
+	 * Alias for {@link #closeAnyApacheGeodeCache()}.
+	 *
+	 * @see #closeAnyApacheGeodeCache()
+	 */
+	public static void closeAnyGemFireCache() {
+		closeAnyApacheGeodeCache();
+	}
+
+	/**
 	 * Closes any Apache Geode {@link Locator} after test (class/suite) execution.
 	 *
 	 * @see org.apache.geode.distributed.Locator
