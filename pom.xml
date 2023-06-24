@@ -246,6 +246,13 @@
 			<optional>true</optional>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+			<optional>true</optional>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
