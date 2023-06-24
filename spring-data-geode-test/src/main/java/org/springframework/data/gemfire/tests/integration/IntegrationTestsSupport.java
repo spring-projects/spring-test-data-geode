@@ -56,8 +56,6 @@ import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.net.SSLConfigurationFactory;
 import org.apache.geode.internal.net.SocketCreatorFactory;
 
-import org.apache.shiro.util.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -71,6 +69,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.support.GemfireBeanFactoryLocator;
 import org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport;
+import org.springframework.data.gemfire.tests.util.ComposableFileFilter;
 import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.FileUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
@@ -79,6 +78,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import org.apache.shiro.util.StringUtils;
 
 /**
  * Abstract base class supporting integration tests with either Apache Geode or VMware Tanzu GemFire
@@ -243,7 +244,7 @@ public abstract class IntegrationTestsSupport {
 	/**
 	 * Clears (removes) all non-standard Spring {@link PropertySource PropertySources} from the Spring
 	 * {@link Environment} after test (class/suite) execution.
-	 *
+	 * <p>
 	 * Only {@link System#getProperties() System Properties} and {@literal Environment Variables} are standard.
 	 *
 	 * @see org.springframework.core.env.Environment
@@ -284,7 +285,7 @@ public abstract class IntegrationTestsSupport {
 	 * @see org.apache.geode.cache.GemFireCache
 	 */
 	@AfterClass
-	public static void closeAnyGemFireCache() {
+	public static void closeAnyApacheGeodeCache() {
 		closeGemFireCacheWaitOnCacheClosedEvent();
 	}
 
@@ -294,7 +295,7 @@ public abstract class IntegrationTestsSupport {
 	 * @see org.apache.geode.distributed.Locator
 	 */
 	@AfterClass
-	public static void closeAnyGemFireLocator() {
+	public static void closeAnyApacheGeodeLocator() {
 		stopGemFireLocatorWaitOnStopEvent();
 	}
 
@@ -335,18 +336,69 @@ public abstract class IntegrationTestsSupport {
 	}
 
 	/**
-	 * Deletes any Apache Geode process ID ({@literal PID}) {@link File Files} after test (class/suite) execution.
-	 *
-	 * @see java.io.File
+	 * Deletes all and any Apache Geode {@link File files} remaining in the {@literal Filesystem}
+	 * after all Apache Geode processes have been terminated.
 	 */
 	@AfterClass
-	public static void deleteAllGemFireProcessIdFiles() {
+	public static void deleteAllApacheGeodeFilesystemFiles() {
 
-		FileFilter fileFilter = file -> file != null
-			&& file.getName().startsWith("vf.gf")
-			&& file.getName().endsWith(".pid");
+		FileFilter fileFilter = allApacheGeodeProcessIdFilesFilter()
+			.orThen(allApacheGeodeLocatorFilesFilter())
+			.orThen(allApacheGeodeConfigDiskDirectoriesFilter())
+			.orThen(allApacheGeodeBackupFilesFilter())
+			.orThen(allApacheGeodeLogFilesFilter());
 
 		FileSystemUtils.deleteRecursive(FileSystemUtils.WORKING_DIRECTORY, fileFilter);
+	}
+
+	/**
+	 * Return a {@link FileFilter} identifying all Apache Geode {@literal BACKUP*} {@link File Files}
+	 * in the {@literal Filesystem} after test execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.util.ComposableFileFilter
+	 */
+	protected static @NonNull ComposableFileFilter allApacheGeodeBackupFilesFilter() {
+		return file -> file != null && file.getAbsolutePath().contains("BACKUP");
+	}
+
+	/**
+	 * Return a {@link FileFilter} identifying all Apache Geode {@literal ConfigDiskDir} {@link File Directories}
+	 * in the {@literal Filesystem} after test execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.util.ComposableFileFilter
+	 */
+	protected static @NonNull ComposableFileFilter allApacheGeodeConfigDiskDirectoriesFilter() {
+		return file -> file != null && file.getAbsolutePath().contains("ConfigDiskDir");
+	}
+
+	/**
+	 * Return a {@link FileFilter} identifying all Apache Geode Locator {@link File Files}
+	 * in the {@literal Filesystem} after test execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.util.ComposableFileFilter
+	 */
+	protected static @NonNull ComposableFileFilter allApacheGeodeLocatorFilesFilter() {
+		return file -> file != null && file.getName().startsWith("locator");
+	}
+
+	/**
+	 * Return a {@link FileFilter} identifying all Apache Geode {@literal Log} {@link File Files}
+	 * in the {@literal Filesystem} after test execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.util.ComposableFileFilter
+	 */
+	protected static @NonNull ComposableFileFilter allApacheGeodeLogFilesFilter() {
+		return file -> file != null && file.getName().endsWith(".log");
+	}
+
+	/**
+	 * Return a {@link FileFilter} identifying all Apache Geode process ID ({@literal PID}) {@link File Files}
+	 * in the {@literal Filesystem} after test execution.
+	 *
+	 * @see org.springframework.data.gemfire.tests.util.ComposableFileFilter
+	 */
+	protected static @NonNull ComposableFileFilter allApacheGeodeProcessIdFilesFilter() {
+		return file -> file != null && file.getName().startsWith("vf.gf") && file.getName().endsWith(".pid");
 	}
 
 	/**
