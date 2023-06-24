@@ -31,16 +31,16 @@ pipeline {
 						sh "echo 'Setup build environment...'"
 						sh "ci/setup.sh"
 
-						// Cleanup any prior build system resources
+						// Cleanup any prior, temporary build system artifacts
 						try {
 							sh "ci/cleanupArtifacts.sh"
 							sh "ci/cleanupGemFiles.sh"
 						}
 						catch (ignore) { }
 
-						// Run the SBDG project Gradle build using JDK 8 inside Docker
+						// Run the STDG project Gradle build using JDK 8 inside Docker
 						try {
-							sh "echo 'Building SSDG...'"
+							sh "echo 'Building STDG...'"
 							sh "ci/check.sh"
 						}
 						catch (e) {
