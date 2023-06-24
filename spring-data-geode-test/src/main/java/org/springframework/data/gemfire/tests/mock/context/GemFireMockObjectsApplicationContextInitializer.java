@@ -23,7 +23,7 @@ import org.springframework.lang.NonNull;
 /**
  * A Spring {@link ApplicationContextInitializer} implementation used to initialize the Spring
  * {@link ConfigurableApplicationContext} with GemFire/Geode {@link Object Mock Objects}.
- *
+ * <p>
  * {@link Object Mock Objects} will be created for caches, {@literal Regions}, {@literal Indexes}, {@literal DiskStores}
  * OQL query objects, and so on.
  *

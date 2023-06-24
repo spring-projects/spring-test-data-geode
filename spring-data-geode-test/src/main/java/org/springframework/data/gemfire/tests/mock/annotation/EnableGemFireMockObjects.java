@@ -62,7 +62,7 @@ public @interface EnableGemFireMockObjects {
 
 	/**
 	 * Configures whether the mock {@link GemFireCache} created for Unit Testing is a Singleton.
-	 *
+	 * <p>
 	 * Defaults to {@literal false}.
 	 *
 	 * @return a boolean value indicating whether the mock {@link GemFireCache} created for Unit Testing

@@ -31,7 +31,7 @@ import org.springframework.lang.NonNull;
 /**
  * The {@link SpringApplicationContextIntegrationTestsSupport} class is an extension of {@link IntegrationTestsSupport}
  * for writing Integration Tests involving a Spring {@link ApplicationContext}.
- *
+ * <p>
  * This class contains functionality common to all Integration Tests involving a Spring {@link ApplicationContext}
  * and can be extended to create, acquire a reference and close the {@link ApplicationContext}
  * on test class completion, properly.

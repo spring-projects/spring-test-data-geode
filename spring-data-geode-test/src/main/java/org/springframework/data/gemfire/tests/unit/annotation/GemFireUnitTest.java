@@ -31,7 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 /**
  * The {@link GemFireUnitTest} annotation marks a test class as an Apache Geode Unit Test
  * with GemFire Mock Objects enabled.
- *
+ * <p>
  * Additionally, this annotation enables Spring's {@link SpringRunner} JUnit Runner implementation
  * using JUnit's {@link RunWith} annotation.
  *
