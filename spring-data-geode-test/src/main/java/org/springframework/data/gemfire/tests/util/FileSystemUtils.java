@@ -121,9 +121,7 @@ public abstract class FileSystemUtils extends FileUtils {
 
 		File[] files = isDirectory(directory) ? directory.listFiles(resolvedFileFilter) : null;
 
-		return files != null
-			? files
-			: NO_FILES;
+		return files != null ? files : NO_FILES;
 	}
 
 	public static class AllFilesFilter implements FileFilter {
