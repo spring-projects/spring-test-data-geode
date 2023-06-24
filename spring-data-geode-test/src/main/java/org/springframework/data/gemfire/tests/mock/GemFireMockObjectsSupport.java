@@ -161,8 +161,6 @@ import org.apache.geode.distributed.internal.DistributionConfig;
 import org.apache.geode.internal.cache.PoolManagerImpl;
 import org.apache.geode.pdx.PdxSerializer;
 
-import org.apache.lucene.analysis.Analyzer;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.gemfire.GemfireUtils;
 import org.springframework.data.gemfire.IndexType;
@@ -180,6 +178,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import org.apache.lucene.analysis.Analyzer;
 
 /**
  * The {@link GemFireMockObjectsSupport} class is an abstract base class encapsulating factory methods for creating
@@ -658,6 +658,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 	 * @see org.apache.geode.cache.GemFireCache
 	 * @see java.util.Optional
 	 */
+	@SuppressWarnings("unchecked")
 	private static <T extends GemFireCache> Optional<T> resolveAnyGemFireCache() {
 		return Optional.ofNullable((T) cacheReference.get());
 	}
