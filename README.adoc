@@ -1,4 +1,4 @@
-:version: 0.3.5-RAJ
+:version: 0.3.6-RAJ
 image:https://api.travis-ci.org/spring-projects/spring-test-data-geode.svg?branch=master["Build Status", link="https://travis-ci.org/spring-projects/spring-test-data-geode"]
 
 [[about]]
