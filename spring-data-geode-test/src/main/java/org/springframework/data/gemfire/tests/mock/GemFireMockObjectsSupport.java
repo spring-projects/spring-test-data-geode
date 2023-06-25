@@ -172,6 +172,7 @@ import org.springframework.data.gemfire.tests.util.FileSystemUtils;
 import org.springframework.data.gemfire.tests.util.ObjectUtils;
 import org.springframework.data.gemfire.util.ArrayUtils;
 import org.springframework.data.gemfire.util.CollectionUtils;
+import org.springframework.data.gemfire.util.JavaVersion;
 import org.springframework.data.util.ReflectionUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -2458,7 +2459,7 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			return mockLuceneIndexFactory;
 		});
 
-		when(mockLuceneIndexFactory.setFields(ArgumentMatchers.<String[]>any())).thenAnswer(invocation -> {
+		Answer<LuceneIndexFactory> answer = invocation -> {
 
 			Object[] fieldsArgument = invocation.getArguments();
 
@@ -2472,7 +2473,14 @@ public abstract class GemFireMockObjectsSupport extends MockObjectsSupport {
 			Collections.addAll(fields, fieldNames);
 
 			return mockLuceneIndexFactory;
-		});
+		};
+
+		if (JavaVersion.current().isNewerThanOrEqualTo(JavaVersion.ELEVEN)) {
+			doAnswer(answer).when(mockLuceneIndexFactory).setFields(any(String[].class));
+		}
+		else {
+			doAnswer(answer).when(mockLuceneIndexFactory).setFields(ArgumentMatchers.<String[]>any());
+		}
 
 		when(mockLuceneIndexFactory.setFields(anyMap())).thenAnswer(invocation -> {
 

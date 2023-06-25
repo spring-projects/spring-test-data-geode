@@ -43,9 +43,9 @@ import org.apache.geode.cache.lucene.LuceneService;
 import org.apache.geode.cache.query.Index;
 import org.apache.geode.cache.server.ClientSubscriptionConfig;
 
-import org.apache.lucene.analysis.Analyzer;
-
 import org.springframework.data.gemfire.IndexType;
+
+import org.apache.lucene.analysis.Analyzer;
 
 /**
  * Unit Tests for {@link GemFireMockObjectsSupport}.
@@ -53,15 +53,6 @@ import org.springframework.data.gemfire.IndexType;
  * @author John Blum
  * @see org.junit.Test
  * @see org.mockito.Mockito
- * @see org.apache.geode.cache.AttributesMutator
- * @see org.apache.geode.cache.Cache
- * @see org.apache.geode.cache.Region
- * @see org.apache.geode.cache.RegionAttributes
- * @see org.apache.geode.cache.RegionService
- * @see org.apache.geode.cache.asyncqueue.AsyncEventListener
- * @see org.apache.geode.cache.asyncqueue.AsyncEventQueue
- * @see org.apache.geode.cache.asyncqueue.AsyncEventQueueFactory
- * @see org.apache.geode.cache.server.ClientSubscriptionConfig
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
  * @since 1.0.0
  */

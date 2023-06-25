@@ -31,16 +31,13 @@ import org.springframework.data.gemfire.tests.integration.IntegrationTestsSuppor
 import org.springframework.data.gemfire.tests.support.AbstractSecurityManager;
 
 /**
- * Integration tests for {@link GemFireMockObjectsSupport}.
+ * Integration Tests for {@link GemFireMockObjectsSupport}.
  *
  * @author John Blum
  * @see java.util.Properties
  * @see org.junit.Test
- * @see org.apache.geode.cache.Cache
- * @see org.apache.geode.cache.CacheFactory
  * @see org.springframework.data.gemfire.tests.integration.IntegrationTestsSupport
  * @see org.springframework.data.gemfire.tests.mock.GemFireMockObjectsSupport
- * @see org.springframework.data.gemfire.tests.support.AbstractSecurityManager
  * @since 1.0.0
  */
 public class GemFireMockObjectsSupportIntegrationTests extends IntegrationTestsSupport {
