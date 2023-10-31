@@ -90,7 +90,7 @@
 		<micrometer.version>1.10.12</micrometer.version>
 		<mockito.version>4.11.0</mockito.version>
 		<multithreadedtc.version>1.01</multithreadedtc.version>
-		<pivotal-gemfire.version>9.15.5</pivotal-gemfire.version>
+		<pivotal-gemfire.version>9.15.9</pivotal-gemfire.version>
 		<spring.version>6.0.9</spring.version>
 		<spring-boot.version>3.0.7</spring-boot.version>
 		<spring-data-bom.version>2022.0.6</spring-data-bom.version>
